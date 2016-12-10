@@ -34,4 +34,4 @@ mod 'puppet/hiera','2.3.0'
 
 # These modules are dependencies for hiera.
 #mod 'puppetlabs/inifile','1.6.0' # Already listed above.
-mod 'puppetlabs-puppetserver_gem','0.2.0' # Required for eyaml.
+mod 'puppetlabs/puppetserver_gem','0.2.0' # Required for eyaml.
