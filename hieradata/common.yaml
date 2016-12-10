@@ -1,0 +1,4 @@
+---
+hiera::hierarchy:
+    - 'nodes/%{::trusted.certname}'
+    - 'common'
