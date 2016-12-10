@@ -26,5 +26,5 @@ mod 'puppetlabs/vcsrepo','1.4.0'
 mod 'puppetlabs/git','0.5.0'
 mod 'gentoo/portage','2.3.0'
 
-# Enabled the EPEL repository on RHEL/CentOS.
+# Enables the EPEL repository on RHEL/CentOS.
 mod 'stahnma/epel','1.2.2'
