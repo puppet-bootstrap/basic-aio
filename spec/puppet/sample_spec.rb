@@ -12,6 +12,52 @@ describe interface('eth1') do
     it { should have_ipv4_address('192.168.32.5') }
 end
 
+# General OS setup
+describe selinux do
+    it { should be_enforcing }
+end
+
+# Initial Boostrap configuration
+# Items in this section are configured during application of bootstrap.pp
+describe file('/etc/puppetlabs/puppet/hiera.yaml') do
+    it { should be_file }
+    # Verify that the backends include yaml
+    its(:content_as_yaml) { should include(:backends => include('yaml') ) }
+    # Verify that 'nodes/%{::trusted.certname}' is in the hierarchy
+    its(:content_as_yaml) { should include(:hierarchy => include('nodes/%{::trusted.certname}') ) }
+    # Verify that common is in the hierarchy
+    its(:content_as_yaml) { should include(:hierarchy => include('common') ) }
+end
+describe file('/etc/hiera.yaml') do
+    it { should be_symlink }
+end
+
+describe file('/etc/puppetlabs/r10k/r10k.yaml') do
+    it { should be_file }
+    its(:content_as_yaml) { should include(:sources => include('puppet' => include('remote' => 'https://github.com/puppet-bootstrap/basic-aio.git') ) ) }
+end
+
+describe file('/etc/puppetlabs/code/environments/production') do
+    it { should be_directory }
+end
+
+describe file('/etc/puppetlabs/code/environments/production/modules/r10k') do
+    it { should be_directory }
+end
+
+describe file('/etc/puppetlabs/code/environments/production/modules/hiera') do
+    it { should be_directory }
+end
+
+# Vagrant Provisioning configuration
+# Items in this section should have been configured by the vagrant provisioning scripts
+
+describe file('/etc/puppetlabs/puppet/autosign.conf') do
+    it { should be_file }
+    # It looks like the match is always a regex
+    its(:content) { should match '\*\.vagrant' }
+end
+
 # Verify the puppet server configuration
 describe package('puppetserver'), :if => os[:family] == 'redhat' do
     it { should be_installed }
@@ -36,46 +82,11 @@ describe service('puppet') do
     it { should be_running }
 end
 
-# General OS setup
-describe selinux do
-    it { should be_enforcing }
-end
-
 # Yum configuration
 describe yumrepo('puppetlabs-pc1') do
     it { should exist }
     it { should be_enabled }
 end
 
-# Boostrap configuration
-# Items in this section are configured during application of bootstrap.pp
-describe file('/etc/puppetlabs/puppet/hiera.yaml') do
-    it { should be_file }
-end
-
-describe package('httpd'), :if => os[:family] == 'redhat' do
-  it { should_not be_installed }
-end
-
-describe package('apache2'), :if => os[:family] == 'ubuntu' do
-  it { should_not be_installed }
-end
-
-describe service('httpd'), :if => os[:family] == 'redhat' do
-  it { should_not be_enabled }
-  it { should_not be_running }
-end
-
-describe service('apache2'), :if => os[:family] == 'ubuntu' do
-  it { should_not be_enabled }
-  it { should_not be_running }
-end
-
-describe service('org.apache.httpd'), :if => os[:family] == 'darwin' do
-  it { should_not be_enabled }
-  it { should_not be_running }
-end
-
-describe port(80) do
-  it { should_not be_listening }
-end
+# Puppet Boostrap configuration
+# Items in this section should have been configured during the initial puppet agent run
