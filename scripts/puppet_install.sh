@@ -20,6 +20,7 @@ r10k deploy environment -pv
 echo '*.vagrant' > /etc/puppetlabs/puppet/autosign.conf
 
 # Start the puppet master so further changes are under puppet control
+/bin/systemctl enable puppetserver
 /bin/systemctl start puppetserver
 
 
