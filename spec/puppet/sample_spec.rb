@@ -34,7 +34,7 @@ end
 
 describe file('/etc/puppetlabs/r10k/r10k.yaml') do
     it { should be_file }
-    its(:content_as_yaml) { should include(:sources => include('puppet' => include('remote' => 'https://github.com/puppet-bootstrap/basic-aio.git') ) ) }
+    its(:content_as_yaml) { should include(:sources => include('puppet' => include('remote' => 'https://github.com/silug/basic-aio.git') ) ) }
 end
 
 describe file('/etc/puppetlabs/code/environments/production') do
