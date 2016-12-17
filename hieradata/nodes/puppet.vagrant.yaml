@@ -3,5 +3,5 @@ classes:
     - r10k
     - hiera
       
-r10k::remote: 'https://github.com/puppet-bootstrap/basic-aio.git'
+r10k::remote: 'https://github.com/silug/basic-aio.git'
 
