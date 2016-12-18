@@ -35,3 +35,16 @@ mod 'puppet/hiera','2.3.0'
 # These modules are dependencies for hiera.
 #mod 'puppetlabs/inifile','1.6.0' # Already listed above.
 mod 'puppetlabs/puppetserver_gem','0.2.0' # Required for eyaml.
+
+# mcollective with NATS as message queue
+mod 'ripienaar/mcollective','0.0.21'
+#mod 'puppetlabs/inifile','1.6.0' # Already listed above.
+mod 'ripienaar/mcollective_agent_puppet','1.11.1'
+mod 'ripienaar/mcollective_agent_package','4.4.0-2'
+mod 'ripienaar/mcollective_agent_service','3.1.3'
+mod 'ripienaar/mcollective_agent_filemgr','1.1.0'
+mod 'ripienaar/mcollective_util_actionpolicy','2.1.0'
+mod 'ripienaar/mcollective_choria','0.0.11'
+mod 'ripienaar/nats','0.0.4'
+mod 'camptocamp/systemd','0.4.0'
+
