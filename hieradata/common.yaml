@@ -2,3 +2,13 @@
 hiera::hierarchy:
     - 'nodes/%{literal("%")}{::trusted.certname}'
     - 'common'
+
+classes:
+  - mcollective
+
+mcollective::site_policies:
+  - action: "allow"
+    callers: "choria=vagrant.mcollective"
+    actions: "*"
+    facts: "*"
+    classes: "*"
