@@ -5,3 +5,10 @@ hiera::hierarchy:
 
 classes:
   - mcollective
+
+mcollective::site_policies:
+  - action: "allow"
+    callers: "choria=vagrant.mcollective"
+    actions: "*"
+    facts: "*"
+    classes: "*"
