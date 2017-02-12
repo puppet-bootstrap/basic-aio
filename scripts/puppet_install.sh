@@ -18,6 +18,7 @@ r10k deploy environment -pv
 
 # Enable autosigning nodes in the .vagrant domain
 echo '*.vagrant' > /etc/puppetlabs/puppet/autosign.conf
+echo 'vagrant.mcollective' >> /etc/puppetlabs/puppet/autosign.conf
 
 # Start the puppet master so further changes are under puppet control
 /bin/systemctl enable puppetserver
@@ -30,3 +31,5 @@ sleep 30
 # Vagrant sees a non-zero return code as a failure. If puppet returns 2,
 # return a zero so vagrant doesn't report an error
 puppet agent -t || [ $? -eq 2 ] && /bin/true
+
+su -- vagrant -c 'mco choria request_cert'
