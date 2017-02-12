@@ -6,5 +6,5 @@ classes:
 
 mcollective::client: true
       
-r10k::remote: 'https://github.com/silug/basic-aio.git'
+r10k::remote: 'https://github.com/puppet-bootstrap/basic-aio.git'
 
