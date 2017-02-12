@@ -1,6 +1,6 @@
 node 'puppet.vagrant' {
   class { 'r10k':
-    remote => 'https://github.com/silug/basic-aio.git'
+    remote => 'https://github.com/puppet-bootstrap/basic-aio.git'
   }
 
   class {'hiera':
