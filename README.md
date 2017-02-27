@@ -1,2 +1,9 @@
 # basic-aio
-Bootstrap a basic Puppet environment using AIO packages
+## Bootstrap a basic Puppet environment using AIO packages
+
+The master branch of this repo contains a Vagrantfile that will build a Puppet
+server using the Puppet PC1 all-in-one packages with the following configured
+out of the box:
+* [r10k](https://forge.puppet.com/puppet/r10k) (with this repo as its control repo)
+* [hiera](https://forge.puppet.com/puppet/hiera)
+* [Choria mcollective](http://choria.io/)
