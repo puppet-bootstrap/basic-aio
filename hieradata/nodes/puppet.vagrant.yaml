@@ -3,6 +3,8 @@ classes:
     - r10k
     - hiera
     - nats
+    - puppetdb
+    - puppetdb::master::config
 
 mcollective::client: true
       
