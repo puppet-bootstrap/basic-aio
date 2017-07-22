@@ -1,6 +1,8 @@
 #!/bin/bash
 
-rpm -ihv http://yum.puppetlabs.com/puppetlabs-release-pc1-el-7.noarch.rpm
+release_url=http://yum.puppetlabs.com/puppet5/puppet5-release-el-7.noarch.rpm
+
+yum -y install $release_url --nogpgcheck
 
 yum -y install puppetserver puppet-agent
 
