@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 release_url=http://yum.puppetlabs.com/puppet5/puppet5-release-el-7.noarch.rpm
 
 yum -y install $release_url --nogpgcheck
@@ -12,7 +14,7 @@ echo "192.168.32.5  puppet.vagrant  puppet" >> /etc/hosts
 # Source the profile to get the path
 . /etc/profile.d/puppet-agent.sh
 puppet module install puppet/r10k
-puppet module install puppet/hiera
+puppet module install puppet/hiera --ignore-dependencies
 puppet apply /vagrant/bootstrap.pp
 
 # Deploy the control repo with the newly installed r10k
