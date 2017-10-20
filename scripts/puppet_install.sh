@@ -2,13 +2,7 @@
 
 set -e
 
-release_url=http://yum.puppetlabs.com/puppet5/puppet5-release-el-7.noarch.rpm
-
-yum -y install $release_url --nogpgcheck
-
-yum -y install puppetserver puppet-agent
-
-echo "192.168.32.5  puppet.vagrant  puppet" >> /etc/hosts
+yum -y install puppetserver
 
 # Bootstrap the puppet module configuration
 # Source the profile to get the path
@@ -25,9 +19,7 @@ echo '*.vagrant' > /etc/puppetlabs/puppet/autosign.conf
 echo 'vagrant.mcollective' >> /etc/puppetlabs/puppet/autosign.conf
 
 # Start the puppet master so further changes are under puppet control
-/bin/systemctl enable puppetserver
-/bin/systemctl start puppetserver
-
+puppet resource service puppetserver ensure=running enable=true
 
 sleep 30
 
