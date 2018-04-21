@@ -1,8 +1,4 @@
 ---
-hiera::hierarchy:
-    - 'nodes/%{literal("%")}{::trusted.certname}'
-    - 'common'
-
 classes:
   - mcollective
 

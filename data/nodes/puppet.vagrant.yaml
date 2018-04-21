@@ -1,7 +1,6 @@
 ---
 classes:
     - r10k
-    - hiera
     - nats
     - puppetdb
     - puppetdb::master::config
