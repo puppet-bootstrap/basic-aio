@@ -74,7 +74,7 @@ describe service('puppet') do
 end
 
 # Yum configuration
-describe yumrepo('puppetlabs-pc1') do
+describe yumrepo('puppet5') do
     it { should exist }
     it { should be_enabled }
 end
