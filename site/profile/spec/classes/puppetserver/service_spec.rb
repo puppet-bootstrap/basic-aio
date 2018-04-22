@@ -9,6 +9,8 @@ describe 'profile::puppetserver::service' do
 
       it { is_expected.to contain_class('profile::puppetserver::service') }
 
+      it { is_expected.to contain_class('puppetdb::master::config') }
+
       it {
         is_expected.to contain_service('puppetserver').with(
           'ensure' => 'running',

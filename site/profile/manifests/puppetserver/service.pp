@@ -6,11 +6,6 @@
 #
 # @example
 #   include profile::puppetserver::service
-class profile::puppetserver::service (
-  Variant[String, Array[String]] $service,
-){
-  service { $service:
-    ensure => running,
-    enable => true,
-  }
+class profile::puppetserver::service {
+  contain '::puppetdb::master::config'
 }

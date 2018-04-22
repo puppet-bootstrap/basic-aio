@@ -3,4 +3,3 @@ profile::base::packages: []
 
 profile::puppetserver::install::package: puppetserver
 profile::puppetserver::config::autosign: []
-profile::puppetserver::service::service: puppetserver
