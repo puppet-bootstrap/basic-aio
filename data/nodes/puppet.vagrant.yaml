@@ -1,7 +1,8 @@
 ---
 classes:
     - r10k
-    - nats
+    - choria
+    - choria::broker
     - puppetdb
     - puppetdb::master::config
 
@@ -9,3 +10,5 @@ mcollective::client: true
       
 r10k::remote: 'https://github.com/puppet-bootstrap/basic-aio.git'
 
+choria::manage_package_repo: true
+choria::broker::network_broker: true
