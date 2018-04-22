@@ -10,9 +10,6 @@ yum -y install puppetserver
 puppet module install puppet/r10k
 puppet apply /vagrant/bootstrap.pp
 
-# Deploy the control repo with the newly installed r10k
-r10k deploy environment -pv
-
 # Enable autosigning nodes in the .vagrant domain
 echo '*.vagrant' > /etc/puppetlabs/puppet/autosign.conf
 echo 'vagrant.mcollective' >> /etc/puppetlabs/puppet/autosign.conf
