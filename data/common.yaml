@@ -12,5 +12,5 @@ mcollective::site_policies:
 r10k::remote: 'https://github.com/puppet-bootstrap/basic-aio.git'
 
 profile::puppetserver::config::autosign:
-  - "*.%{::facts.networking::domain}"
+  - "*.%{::facts.networking.domain}"
   - vagrant.mcollective
