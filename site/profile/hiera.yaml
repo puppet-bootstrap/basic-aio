@@ -1,0 +1,7 @@
+---
+version: 5
+hierarchy:
+  - name: "OS Family"
+    path: "osfamily/%{::facts.os.family}.yaml"
+  - name: "Defaults"
+    path: "common.yaml"

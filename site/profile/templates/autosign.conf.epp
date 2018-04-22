@@ -1,0 +1,3 @@
+<% $profile::puppetserver::config::autosign.each |String $s| { -%>
+<%=  $s %>
+<% } -%>

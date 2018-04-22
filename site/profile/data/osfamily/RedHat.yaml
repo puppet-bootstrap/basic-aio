@@ -1,0 +1,3 @@
+---
+profile::base::packages:
+  - vim-enhanced

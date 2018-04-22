@@ -1,0 +1,34 @@
+{
+  "name": "bootstrap-role",
+  "version": "0.1.0",
+  "author": "puppet-bootstrap",
+  "summary": "",
+  "license": "Apache-2.0",
+  "source": "",
+  "dependencies": [
+
+  ],
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "CentOS",
+      "operatingsystemrelease": [
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "RedHat",
+      "operatingsystemrelease": [
+        "7"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "name": "puppet",
+      "version_requirement": ">= 4.9.0 < 6.0.0"
+    }
+  ],
+  "pdk-version": "1.4.1",
+  "template-url": "file:///opt/puppetlabs/pdk/share/cache/pdk-templates.git",
+  "template-ref": "1.4.1-0-g52adbbb"
+}

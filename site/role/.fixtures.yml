@@ -1,0 +1,32 @@
+# This file can be used to install module depdencies for unit testing
+# See https://github.com/puppetlabs/puppetlabs_spec_helper#using-fixtures for details
+---
+fixtures:
+  forge_modules:
+    stdlib: 'puppetlabs/stdlib'
+    puppetdb: 'puppetlabs/puppetdb'
+    inifile: 'puppetlabs/inifile'
+    postgresql: 'puppetlabs/postgresql'
+    apt: 'puppetlabs/apt'
+    concat: 'puppetlabs/concat'
+    firewall: 'puppetlabs/firewall'
+    r10k: 'puppet/r10k'
+    ruby: 'puppetlabs/ruby'
+    gcc: 'puppetlabs/gcc'
+    make: 'puppet/make'
+    vcsrepo: 'puppetlabs/vcsrepo'
+    git: 'puppetlabs/git'
+    portage: 'gentoo/portage'
+    epel: 'stahnma/epel'
+    puppetserver_gem: 'puppetlabs/puppetserver_gem'
+    mcollective: 'choria/mcollective'
+    mcollective_agent_puppet: 'choria/mcollective_agent_puppet'
+    mcollective_agent_package: 'choria/mcollective_agent_package'
+    mcollective_agent_service: 'choria/mcollective_agent_service'
+    mcollective_agent_filemgr: 'choria/mcollective_agent_filemgr'
+    mcollective_util_actionpolicy: 'choria/mcollective_util_actionpolicy'
+    mcollective_choria: 'choria/mcollective_choria'
+    choria: 'choria/choria'
+    systemd: 'camptocamp/systemd'
+  symlinks:
+    profile: "#{source_dir}/../profile"

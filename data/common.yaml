@@ -1,6 +1,6 @@
 ---
 classes:
-  - mcollective
+  - role::agent
 
 mcollective::site_policies:
   - action: "allow"
@@ -8,3 +8,9 @@ mcollective::site_policies:
     actions: "*"
     facts: "*"
     classes: "*"
+
+r10k::remote: 'https://github.com/puppet-bootstrap/basic-aio.git'
+
+profile::puppetserver::config::autosign:
+  - "*.%{::facts.networking::domain}"
+  - vagrant.mcollective
