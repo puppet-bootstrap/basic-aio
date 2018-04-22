@@ -45,8 +45,8 @@ end
 
 describe file('/etc/puppetlabs/puppet/autosign.conf') do
     it { should be_file }
-    # It looks like the match is always a regex
-    its(:content) { should match '\*\.vagrant' }
+    its(:content) { should match %r{^\*\.vagrant$} }
+    its(:content) { should match %r{^vagrant\.mcollective$} }
 end
 
 # Verify the puppet server configuration
