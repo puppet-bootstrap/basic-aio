@@ -3,3 +3,7 @@ profile::base::packages: []
 
 profile::puppetserver::install::package: puppetserver
 profile::puppetserver::config::autosign: []
+
+profile::agent::service: puppet
+profile::agent::service_ensure: running
+profile::agent::service_enable: true
