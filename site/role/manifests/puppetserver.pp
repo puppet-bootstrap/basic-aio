@@ -10,6 +10,7 @@ class role::puppetserver {
   include '::r10k'
   include '::puppetdb'
   include '::puppetdb::master::config'
+  include '::profile::puppetserver'
 
   class { '::choria':
     manage_package_repo => true,
