@@ -8,7 +8,6 @@ yum -y install puppetserver
 # Source the profile to get the path
 . /etc/profile.d/puppet-agent.sh
 puppet module install puppet/r10k
-puppet module install puppet/hiera --ignore-dependencies
 puppet apply /vagrant/bootstrap.pp
 
 # Deploy the control repo with the newly installed r10k

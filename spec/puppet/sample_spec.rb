@@ -19,17 +19,12 @@ end
 
 # Initial Boostrap configuration
 # Items in this section are configured during application of bootstrap.pp
-describe file('/etc/puppetlabs/puppet/hiera.yaml') do
+describe file('/etc/puppetlabs/code/environments/production/hiera.yaml') do
     it { should be_file }
-    # Verify that the backends include yaml
-    its(:content_as_yaml) { should include(:backends => include('yaml') ) }
     # Verify that 'nodes/%{::trusted.certname}' is in the hierarchy
-    its(:content_as_yaml) { should include(:hierarchy => include('nodes/%{::trusted.certname}') ) }
+    its(:content_as_yaml) { should include(:hierarchy => include(:path => include('nodes/%{::trusted.certname}.yaml'))) }
     # Verify that common is in the hierarchy
-    its(:content_as_yaml) { should include(:hierarchy => include('common') ) }
-end
-describe file('/etc/hiera.yaml') do
-    it { should be_symlink }
+    its(:content_as_yaml) { should include(:hierarchy => include(:path => include('common.yaml'))) }
 end
 
 describe file('/etc/puppetlabs/r10k/r10k.yaml') do
@@ -42,10 +37,6 @@ describe file('/etc/puppetlabs/code/environments/production') do
 end
 
 describe file('/etc/puppetlabs/code/environments/production/modules/r10k') do
-    it { should be_directory }
-end
-
-describe file('/etc/puppetlabs/code/environments/production/modules/hiera') do
     it { should be_directory }
 end
 
@@ -91,7 +82,6 @@ end
 # Puppet Boostrap configuration
 # Items in this section should have been configured during the initial puppet agent run
 describe command('/opt/puppetlabs/bin/puppet module list') do
-    its(:stdout) { should match 'puppet-hiera' }
     its(:stdout) { should match 'puppet-r10k'  }
     its(:stdout) { should match 'stahnma-epel' }
     its(:stdout) { should match 'puppetlabs-stdlib' }
