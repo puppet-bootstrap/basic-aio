@@ -4,11 +4,11 @@ This project uses [serverspec](serverspec.org) for testing. All test should pass
 
 # Setup
 
-## Fedora 25
+## Fedora 25+
 
 ### Initial Setup
 
-On a Fedora 25 system, beyond vagrant, only the bundler package needs to be installed.
+On a Fedora 25 (or higher) system, beyond vagrant, only the bundler package needs to be installed.
 
 ```
 $ sudo dnf install -y rubygem-bundler
@@ -31,7 +31,7 @@ $ bundle install
 Once the bundle has been installed and the puppet server is running in Vagrant, run the tests
 
 ```
-$ rake spec
+$ bundle exec rake spec
 
 < snip>
 
