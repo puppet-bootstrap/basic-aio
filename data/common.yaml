@@ -9,7 +9,7 @@ mcollective::site_policies:
     facts: "*"
     classes: "*"
 
-r10k::remote: 'https://github.com/puppet-bootstrap/basic-aio.git'
+r10k::remote: 'file:///vagrant/'
 
 profile::puppetserver::config::autosign:
   - "*.%{::facts.networking.domain}"
