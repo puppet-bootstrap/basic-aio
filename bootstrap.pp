@@ -1,6 +1,6 @@
 node 'puppet.vagrant' {
   class { 'r10k':
-    remote => 'https://github.com/puppet-bootstrap/basic-aio.git'
+    remote => 'file:///vagrant/'
   }
 
   exec { 'r10k deploy environment -pv':
