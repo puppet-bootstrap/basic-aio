@@ -9,5 +9,4 @@
 class role::agent {
   include '::profile::base'
   include '::profile::agent'
-  include '::mcollective'
 }

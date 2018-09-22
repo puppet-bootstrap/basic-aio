@@ -1,5 +1,3 @@
 ---
 classes:
   - role::puppetserver
-
-mcollective::client: true

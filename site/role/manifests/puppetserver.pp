@@ -11,12 +11,4 @@ class role::puppetserver {
   include '::puppetdb'
   include '::puppetdb::master::config'
   include '::profile::puppetserver'
-
-  class { '::choria':
-    manage_package_repo => true,
-  }
-
-  class { '::choria::broker':
-    network_broker => true,
-  }
 }
