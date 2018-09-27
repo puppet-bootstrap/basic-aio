@@ -1,3 +1,4 @@
+.git/
 .*.sw[op]
 .metadata
 .yardoc
@@ -19,10 +20,10 @@
 /tmp/
 /vendor/
 /convert_report.txt
+/update_report.txt
 .DS_Store
 /CHANGELOG.md
 /README.md
 /appveyor.yml
 /.gitlab-ci.yml
 /.travis.yml
-/update_report.txt
