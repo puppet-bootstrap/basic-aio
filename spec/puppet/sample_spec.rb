@@ -90,7 +90,7 @@ describe service('puppet') do
 end
 
 # Yum configuration
-describe yumrepo('puppet5') do
+describe yumrepo('puppet6') do
     it { should exist }
     it { should be_enabled }
 end
