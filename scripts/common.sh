@@ -9,7 +9,7 @@ if [ -f /etc/sysconfig/network-scripts/ifcfg-eth1 ] ; then
     /sbin/ifup eth1
 fi
 
-release_url=http://yum.puppetlabs.com/puppet5/puppet5-release-el-7.noarch.rpm
+release_url=http://yum.puppet.com/puppet6/puppet6-release-el-7.noarch.rpm
 
 yum -y install $release_url --nogpgcheck
 
