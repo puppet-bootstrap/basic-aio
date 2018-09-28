@@ -18,4 +18,12 @@ yum -y install puppet-agent
 # Source the profile to get the path
 . /etc/profile.d/puppet-agent.sh
 
-puppet apply -e 'host { $facts["fqdn"]: ip => $facts["networking"]["interfaces"]["eth1"]["ip"], host_aliases => $facts["hostname"] }'
+# We don't have working DNS, so fake it with hosts entries.
+declare -A hosts
+hosts=(
+    [puppet.vagrant]='192.168.32.5'
+    [agent.vagrant]='192.168.32.6'
+)
+for host in "${!hosts[@]}" ; do
+    puppet resource host "$host" ip="${hosts[$host]}" host_aliases="${host%%.*}"
+done
