@@ -28,6 +28,7 @@ Vagrant.configure("2") do |config|
 
     puppetmaster.vm.provision :shell, :path => 'scripts/common.sh'
     puppetmaster.vm.provision :shell, :path => 'scripts/puppet_install.sh'
+    puppetmaster.vm.provision :shell, :inline => puppetagent
   end
 
   config.vm.define :agent do |agent|

@@ -4,6 +4,7 @@
 fixtures:
   forge_modules:
     stdlib: 'puppetlabs/stdlib'
+    puppetserver: 'puppet/puppetserver'
     puppetdb: 'puppetlabs/puppetdb'
     inifile: 'puppetlabs/inifile'
     postgresql: 'puppetlabs/postgresql'
@@ -19,6 +20,8 @@ fixtures:
     portage: 'gentoo/portage'
     epel: 'stahnma/epel'
     puppetserver_gem: 'puppetlabs/puppetserver_gem'
-    systemd: 'camptocamp/systemd'
+    translate: 'puppetlabs/translate'
+    augeasproviders_core: 'herculesteam/augeasproviders_core'
+    augeas: 'camptocamp/augeas'
   symlinks:
     profile: "#{source_dir}/../profile"
