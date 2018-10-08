@@ -3,6 +3,9 @@ forge "https://forge.puppetlabs.com/"
 # stdlib is required by many other modules.
 mod 'puppetlabs/stdlib','5.1.0'
 
+# Manages the puppetserver package and service.
+mod 'puppet/puppetserver','3.0.1'
+
 # puppetdb is needed in order to use exported resources.
 mod 'puppetlabs/puppetdb','7.1.0'
 
@@ -31,3 +34,5 @@ mod 'stahnma/epel','1.3.1'
 
 mod 'puppetlabs/puppetserver_gem','1.0.0' # Required for eyaml.
 mod 'puppetlabs-translate', '1.2.0' # Required by puppetlabs-apt
+mod 'herculesteam-augeasproviders_core', '2.1.5' # Required by puppet-puppetserver
+mod 'camptocamp-augeas', '1.7.0' # Required by puppet-puppetserver
