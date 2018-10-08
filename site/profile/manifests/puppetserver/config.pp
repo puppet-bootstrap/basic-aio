@@ -1,8 +1,8 @@
 # profile::puppetserver::config
 #
-# A description of what this class does
+# Configures the puppet server
 #
-# @summary A short summary of the purpose of this class
+# @summary Configures the puppet server
 #
 # @example
 #   include profile::puppetserver::config

@@ -1,8 +1,8 @@
 # role::puppetserver
 #
-# A description of what this class does
+# Puppet server class
 #
-# @summary A short summary of the purpose of this class
+# @summary Puppet server class
 #
 # @example
 #   include role::puppetserver

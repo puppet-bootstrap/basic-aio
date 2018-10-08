@@ -1,12 +1,12 @@
 # role::agent
 #
-# A description of what this class does
+# Agent class
 #
-# @summary A short summary of the purpose of this class
+# @summary Agent class
 #
 # @example
 #   include role::agent
 class role::agent {
-  include '::profile::base'
-  include '::profile::agent'
+  include 'profile::base'
+  include 'profile::agent'
 }
