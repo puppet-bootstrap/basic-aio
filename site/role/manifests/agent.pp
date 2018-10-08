@@ -1,8 +1,8 @@
 # role::agent
 #
-# A description of what this class does
+# Agent class
 #
-# @summary A short summary of the purpose of this class
+# @summary Agent class
 #
 # @example
 #   include role::agent

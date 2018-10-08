@@ -1,8 +1,8 @@
 # profile::agent
 #
-# A description of what this class does
+# Configures the `puppet` service
 #
-# @summary A short summary of the purpose of this class
+# @summary Configures the `puppet` service
 #
 # @example
 #   include profile::agent
