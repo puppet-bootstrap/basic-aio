@@ -29,6 +29,8 @@ Vagrant.configure("2") do |config|
     puppetmaster.vm.provision :shell, :path => 'scripts/common.sh'
     puppetmaster.vm.provision :shell, :path => 'scripts/puppet_install.sh'
     puppetmaster.vm.provision :shell, :inline => puppetagent
+    puppetmaster.vm.provision :shell,
+      :inline => "su -- vagrant -c 'mco choria request_cert'"
   end
 
   config.vm.define :agent do |agent|

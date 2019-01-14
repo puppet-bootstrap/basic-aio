@@ -3,3 +3,5 @@ classes:
   - role::puppetserver
 
 puppetdb::manage_firewall: false
+
+mcollective::client: true

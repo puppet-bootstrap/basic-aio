@@ -2,6 +2,13 @@
 classes:
   - role::agent
 
+mcollective::site_policies:
+  - action: "allow"
+    callers: "choria=vagrant.mcollective"
+    actions: "*"
+    facts: "*"
+    classes: "*"
+
 r10k::remote: 'file:///vagrant/'
 
 profile::puppetserver::config::autosign:
