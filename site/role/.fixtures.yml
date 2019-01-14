@@ -23,5 +23,14 @@ fixtures:
     translate: 'puppetlabs/translate'
     augeasproviders_core: 'herculesteam/augeasproviders_core'
     augeas: 'camptocamp/augeas'
+    mcollective: 'choria/mcollective'
+    mcollective_agent_puppet: 'choria/mcollective_agent_puppet'
+    mcollective_agent_package: 'choria/mcollective_agent_package'
+    mcollective_agent_service: 'choria/mcollective_agent_service'
+    mcollective_agent_filemgr: 'choria/mcollective_agent_filemgr'
+    mcollective_util_actionpolicy: 'choria/mcollective_util_actionpolicy'
+    mcollective_choria: 'choria/mcollective_choria'
+    choria: 'choria/choria'
+    systemd: 'camptocamp/systemd'
   symlinks:
     profile: "#{source_dir}/../profile"

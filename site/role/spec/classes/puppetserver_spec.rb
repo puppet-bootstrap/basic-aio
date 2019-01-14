@@ -17,6 +17,8 @@ describe 'role::puppetserver' do
       it { is_expected.to contain_class('r10k') }
       it { is_expected.to contain_class('puppetdb') }
       it { is_expected.to contain_class('puppetdb::master::config') }
+      it { is_expected.to contain_class('choria').with('manage_package_repo' => true) }
+      it { is_expected.to contain_class('choria::broker').with('network_broker' => true) }
     end
   end
 end

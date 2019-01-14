@@ -11,6 +11,7 @@ describe 'role::agent' do
 
       it { is_expected.to contain_class('profile::base') }
       it { is_expected.to contain_class('profile::agent') }
+      it { is_expected.to contain_class('mcollective') }
     end
   end
 end

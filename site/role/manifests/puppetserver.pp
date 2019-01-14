@@ -14,4 +14,12 @@ class role::puppetserver {
   class { 'puppetdb::master::config':
     create_puppet_service_resource => false,
   }
+
+  class { 'choria':
+    manage_package_repo => true,
+  }
+
+  class { 'choria::broker':
+    network_broker => true,
+  }
 }
