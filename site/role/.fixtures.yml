@@ -32,5 +32,7 @@ fixtures:
     mcollective_choria: 'choria/mcollective_choria'
     choria: 'choria/choria'
     systemd: 'camptocamp/systemd'
+    cron: 'puppetlabs/cron_core'
+    yumrepo: 'puppetlabs/yumrepo_core'
   symlinks:
     profile: "#{source_dir}/../profile"
