@@ -22,6 +22,7 @@ Vagrant.configure("2") do |config|
     puppetmaster.vm.provider :libvirt do |libvirt|
       libvirt.memory = "3072"
       libvirt.cpus = 2
+      libvirt.qemu_use_session = false
     end
     puppetmaster.vm.hostname = 'puppet.vagrant'
     puppetmaster.vm.network :private_network, ip: '192.168.32.5'
@@ -36,6 +37,10 @@ Vagrant.configure("2") do |config|
   config.vm.define :agent do |agent|
     agent.vm.provider :virtualbox do |vb|
       vb.name = 'agent.vagrant'
+    end
+
+    agent.vm.provider :libvirt do |libvirt|
+      libvirt.qemu_use_session = false
     end
 
     agent.vm.hostname = 'agent.vagrant'
