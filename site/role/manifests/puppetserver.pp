@@ -7,6 +7,7 @@
 # @example
 #   include role::puppetserver
 class role::puppetserver {
+  include 'git'
   include 'r10k'
   include 'puppetserver'
   include 'profile::puppetserver::config'
