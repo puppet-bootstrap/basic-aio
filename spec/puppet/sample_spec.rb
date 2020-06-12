@@ -95,6 +95,6 @@ end
 # Items in this section should have been configured during the initial puppet agent run
 describe command('/opt/puppetlabs/bin/puppet module list') do
     its(:stdout) { should match 'puppet-r10k'  }
-    its(:stdout) { should match 'stahnma-epel' }
+    its(:stdout) { should match 'puppet-epel' }
     its(:stdout) { should match 'puppetlabs-stdlib' }
 end
