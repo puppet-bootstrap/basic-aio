@@ -24,22 +24,18 @@ describe file('/etc/puppetlabs/code/environments/production/hiera.yaml') do
     its(:content_as_yaml) { should include('version' => 5) }
 
     its(:content_as_yaml) do
-        pending('FIXME: Matches on nested array/hash elements are not working properly.')
-        should include('hierarchy' => include('name' => 'FQDN'))
-    end
-    its(:content_as_yaml) do
-        pending('FIXME: Matches on nested array/hash elements are not working properly.')
-        # Verify that 'nodes/%{::trusted.certname}' is in the hierarchy
-        should include('hierarchy' => include('path' => 'nodes/%{::trusted.certname}.yaml'))
-    end
-    its(:content_as_yaml) do
-        pending('FIXME: Matches on nested array/hash elements are not working properly.')
-        should include('hierarchy' => include('name' => 'Defaults'))
-    end
-    its(:content_as_yaml) do
-        pending('FIXME: Matches on nested array/hash elements are not working properly.')
-        # Verify that common is in the hierarchy
-        should include('hierarchy' => include('path' => 'common.yaml'))
+        should include(
+            'hierarchy' => [
+                {
+                    'name' => 'FQDN',
+                    'path' => 'nodes/%{::trusted.certname}.yaml',
+                },
+                {
+                    'name' => 'Defaults',
+                    'path' => 'common.yaml',
+                },
+            ]
+        )
     end
 end
 
