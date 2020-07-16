@@ -7,9 +7,6 @@ set -e
 
 # FIXME: This should be moved into Puppet code
 if [ "$( facter os.release.major )" -gt 7 ] ; then
-    # Without this, postgresql will not install.
-    yum -y module disable postgresql
-
     # Without this, puppetserver can't communicate with puppetdb.
     update-crypto-policies --set LEGACY
 fi

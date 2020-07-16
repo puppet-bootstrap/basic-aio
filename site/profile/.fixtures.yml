@@ -10,3 +10,5 @@ fixtures:
     apt: 'puppetlabs/apt'
     concat: 'puppetlabs/concat'
     firewall: 'puppetlabs/firewall'
+    cron: 'puppetlabs/cron_core'
+    yumrepo: 'puppetlabs/yumrepo_core'
