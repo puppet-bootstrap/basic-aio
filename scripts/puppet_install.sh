@@ -15,6 +15,7 @@ if [ "$( facter os.release.major )" -gt 7 ] ; then
 fi
 
 # Bootstrap the puppet module configuration
-puppet module install puppet/r10k
+puppet module install puppet-r10k
+puppet module install puppetlabs-git
 puppet apply /vagrant/bootstrap.pp
 puppet apply -e 'include ["puppetserver", "profile::puppetserver::config"]'
