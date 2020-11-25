@@ -2,15 +2,21 @@
 # vi: set ft=ruby et st=2 sw=2 :
 
 ip_subnet = ENV['IP_SUBNET'] || '192.168.32'
-puppet_release = ENV['PUPPET_RELEASE'] || '6'
+puppet_version = ENV['PUPPET_VERSION'] || ''
+puppet_release = puppet_version.empty? ? (ENV['PUPPET_RELEASE'] || '6') : puppet_version.split('.').first
 el_release = ENV['EL_RELEASE'] || '7'
 box = ENV['BOX'] || "centos/#{el_release}"
 
 puppetagent = <<SCRIPT
+delay=30
+until ( : > /dev/tcp/puppet/8140 ) 2>/dev/null ; do
+  echo "Waiting for puppet server..." >&2
+  sleep $delay
+done
 # If puppet successfully applied changes, it returns 2.
 # Vagrant sees a non-zero return code as a failure. If puppet returns 2,
 # return a zero so vagrant doesn't report an error
-puppet agent -t -w 30 || { [ $? -eq 2 ] && true; };
+puppet agent -t -w $delay || { [ $? -eq 2 ] && true; };
 SCRIPT
 
 Vagrant.configure('2') do |config|
@@ -35,7 +41,7 @@ Vagrant.configure('2') do |config|
 
     puppetmaster.vm.provision 'shell',
       path: 'scripts/common.sh',
-      args: [puppet_release, el_release, ip_subnet]
+      args: [puppet_release, el_release, ip_subnet, puppet_version]
     puppetmaster.vm.provision 'shell', path: 'scripts/puppet_install.sh'
     puppetmaster.vm.provision 'shell', inline: puppetagent
     puppetmaster.vm.provision 'shell',
@@ -56,7 +62,7 @@ Vagrant.configure('2') do |config|
 
     agent.vm.provision 'shell',
       path: 'scripts/common.sh',
-      args: [puppet_release, el_release, ip_subnet]
+      args: [puppet_release, el_release, ip_subnet, puppet_version]
     agent.vm.provision 'shell', inline: puppetagent
   end
 end

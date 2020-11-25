@@ -3,6 +3,7 @@
 puppet_release="$1"
 el_release="$2"
 ip_subnet="$3"
+puppet_version="$4"
 
 if [ -f /etc/sysconfig/network-scripts/ifcfg-eth1 ] ; then
     sed -i \
@@ -17,7 +18,11 @@ release_url="http://yum.puppet.com/puppet${puppet_release}-release-el-${el_relea
 
 yum -y install $release_url --nogpgcheck
 
-yum -y install puppet-agent
+if [ -n "$puppet_version" ] ; then
+    yum -y install puppet-agent-"$puppet_version"
+else
+    yum -y install puppet-agent
+fi
 
 # Source the profile to get the path
 . /etc/profile.d/puppet-agent.sh

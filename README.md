@@ -20,6 +20,7 @@ The following environment variables are used to configure the Vagrant environmen
 | Environment variable | Default value          | Description                            |
 | -------------------- | -------------          | -----------                            |
 | `IP_SUBNET`          | `192.168.32`           | The internal IP subnet used by Vagrant |
+| `PUPPET_VERSION`     | none (use the latest)  | The Puppet agent version               |
 | `PUPPET_RELEASE`     | `6`                    | The Puppet major release version       |
 | `EL_RELEASE`         | `7`                    | The EL release of the base box         |
 | `BOX`                | `centos/${EL_RELEASE}` | The base box name                      |
