@@ -8,10 +8,11 @@ out of the box:
 * [Choria mcollective](http://choria.io/)
 * [PuppetDB](https://puppet.com/docs/puppetdb/)
 
-To get started with just an agent, take a look at
-[sandbox](https://github.com/puppet-bootstrap/sandbox).  For a simple control
-repo example, see
-[minimal-control](https://github.com/puppet-bootstrap/minimal-control).
+## Prerequisites
+
+In order to use this project, you'll need
+[Vagrant](https://vagrantup.com/) and
+[Bolt](https://puppet.com/docs/bolt/latest/bolt.html) installed.
 
 ### Configuring basic-aio
 
@@ -24,3 +25,10 @@ The following environment variables are used to configure the Vagrant environmen
 | `PUPPET_RELEASE`     | `6`                    | The Puppet major release version       |
 | `EL_RELEASE`         | `7`                    | The EL release of the base box         |
 | `BOX`                | `centos/${EL_RELEASE}` | The base box name                      |
+
+## See also
+
+To get started with just an agent, take a look at
+[sandbox](https://github.com/puppet-bootstrap/sandbox).  For a simple control
+repo example, see
+[minimal-control](https://github.com/puppet-bootstrap/minimal-control).

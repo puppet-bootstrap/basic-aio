@@ -9,8 +9,12 @@ mcollective::site_policies:
     facts: "*"
     classes: "*"
 
-r10k::remote: 'file:///vagrant/'
+r10k::remote: "%{facts.role__puppetserver__r10k_remote}"
 
 profile::puppetserver::config::autosign:
   - "*.%{::facts.networking.domain}"
   - vagrant.mcollective
+
+puppetdb::master::config::create_puppet_service_resource: false
+choria::manage_package_repo: true
+choria::broker::network_broker: true

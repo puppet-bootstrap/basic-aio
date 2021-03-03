@@ -1,23 +1,12 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby et st=2 sw=2 :
+ENV['VAGRANT_EXPERIMENTAL'] = 'typed_triggers'
 
 ip_subnet = ENV['IP_SUBNET'] || '192.168.32'
 puppet_version = ENV['PUPPET_VERSION'] || ''
 puppet_release = puppet_version.empty? ? (ENV['PUPPET_RELEASE'] || '6') : puppet_version.split('.').first
 el_release = ENV['EL_RELEASE'] || '7'
 box = ENV['BOX'] || "centos/#{el_release}"
-
-puppetagent = <<SCRIPT
-delay=30
-until ( : > /dev/tcp/puppet/8140 ) 2>/dev/null ; do
-  echo "Waiting for puppet server..." >&2
-  sleep $delay
-done
-# If puppet successfully applied changes, it returns 2.
-# Vagrant sees a non-zero return code as a failure. If puppet returns 2,
-# return a zero so vagrant doesn't report an error
-puppet agent -t -w $delay || { [ $? -eq 2 ] && true; };
-SCRIPT
 
 Vagrant.configure('2') do |config|
   config.vm.box = box
@@ -27,7 +16,6 @@ Vagrant.configure('2') do |config|
       vb.memory = '3072'
       vb.cpus = 2
       vb.name = 'puppet.vagrant'
-      # vb.customize ['modifyvm', :id, '--name', 'puppet.vagrant']
     end
 
     puppetmaster.vm.provider 'libvirt' do |libvirt|
@@ -38,14 +26,6 @@ Vagrant.configure('2') do |config|
 
     puppetmaster.vm.hostname = 'puppet.vagrant'
     puppetmaster.vm.network 'private_network', ip: "#{ip_subnet}.5"
-
-    puppetmaster.vm.provision 'shell',
-      path: 'scripts/common.sh',
-      args: [puppet_release, el_release, ip_subnet, puppet_version]
-    puppetmaster.vm.provision 'shell', path: 'scripts/puppet_install.sh'
-    puppetmaster.vm.provision 'shell', inline: puppetagent
-    puppetmaster.vm.provision 'shell',
-      inline: "su -- vagrant -c 'mco choria request_cert'"
   end
 
   config.vm.define 'agent' do |agent|
@@ -59,10 +39,21 @@ Vagrant.configure('2') do |config|
 
     agent.vm.hostname = 'agent.vagrant'
     agent.vm.network 'private_network', ip: "#{ip_subnet}.6"
+  end
 
-    agent.vm.provision 'shell',
-      path: 'scripts/common.sh',
-      args: [puppet_release, el_release, ip_subnet, puppet_version]
-    agent.vm.provision 'shell', inline: puppetagent
+  config.trigger.before [:up, :provision, :reload], type: :command do |trigger|
+    trigger.info = 'Initializing bolt'
+    trigger.run = { inline: 'bolt module install' }
+  end
+
+  config.trigger.after [:up, :provision, :reload], type: :command do |trigger|
+    trigger.info = 'Running bolt plan'
+    trigger.run = {
+      inline: [
+        'bolt plan run role -t all --run-as root',
+        "puppet_release=#{puppet_release}",
+        "puppet_version=#{puppet_version}",
+      ].join(' ')
+    }
   end
 end
