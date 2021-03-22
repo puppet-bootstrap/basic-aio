@@ -10,8 +10,7 @@ class role::puppetserver {
   include 'git'
   include 'r10k'
 
-  include 'puppetserver'
-  include 'profile::puppetserver::config'
+  include 'profile::puppetserver'
 
   include 'profile::puppetdb'
 
