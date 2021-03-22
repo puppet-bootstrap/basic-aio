@@ -7,7 +7,6 @@ fixtures:
     puppetdb: 'puppetlabs/puppetdb'
     inifile: 'puppetlabs/inifile'
     postgresql: 'puppetlabs/postgresql'
-    apt: 'puppetlabs/apt'
     concat: 'puppetlabs/concat'
     firewall: 'puppetlabs/firewall'
     cron_core: 'puppetlabs/cron_core'

@@ -3,8 +3,11 @@ name: basic_aio
 modulepath:
 - "../site"
 modules:
-- dylanratcliffe/bolt_vagrant
-- puppet/r10k
-- puppetlabs/git
-- puppetlabs/stdlib
-- puppet/puppetserver
+- name: dylanratcliffe/bolt_vagrant
+  version_requirement: 1.1.0
+- name: puppet/r10k
+  version_requirement: 9.0.0
+- name: puppetlabs/git
+  version_requirement: 0.5.0
+- name: puppetlabs/stdlib
+  version_requirement: 6.6.0

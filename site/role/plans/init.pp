@@ -78,8 +78,7 @@ plan role (
 
   # On the puppet server target, install and start the puppetserver.
   apply($puppet_target, '_description' => 'Install and start server components') {
-    include puppetserver
-    include profile::puppetserver::config
+    include profile::puppetserver
   }
 
   # Run the puppet agent to finish.

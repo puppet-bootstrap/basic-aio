@@ -4,11 +4,9 @@
 fixtures:
   forge_modules:
     stdlib: 'puppetlabs/stdlib'
-    puppetserver: 'puppet/puppetserver'
     puppetdb: 'puppetlabs/puppetdb'
     inifile: 'puppetlabs/inifile'
     postgresql: 'puppetlabs/postgresql'
-    apt: 'puppetlabs/apt'
     concat: 'puppetlabs/concat'
     firewall: 'puppetlabs/firewall'
     r10k: 'puppet/r10k'
@@ -20,9 +18,6 @@ fixtures:
     portage: 'gentoo/portage'
     epel: 'stahnma/epel'
     puppetserver_gem: 'puppetlabs/puppetserver_gem'
-    translate: 'puppetlabs/translate'
-    augeasproviders_core: 'herculesteam/augeasproviders_core'
-    augeas: 'camptocamp/augeas'
     mcollective: 'choria/mcollective'
     mcollective_agent_puppet: 'choria/mcollective_agent_puppet'
     mcollective_agent_package: 'choria/mcollective_agent_package'
