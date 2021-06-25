@@ -14,7 +14,7 @@ class profile::puppetdb {
     }
 
     Package['postgresql-dnfmodule']
-    -> Class['puppetdb']
+    -> Class['postgresql::server']
   }
 
   Class['puppetdb']

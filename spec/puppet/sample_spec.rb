@@ -1,5 +1,8 @@
 require 'spec_helper'
 
+puppet_version = ENV['PUPPET_VERSION'] || ''
+puppet_release = puppet_version.empty? ? (ENV['PUPPET_RELEASE'] || '6') : puppet_version.split('.').first
+
 # Verify the physical setup of the server
 describe interface('eth0') do
     it { should exist }
@@ -86,7 +89,7 @@ describe service('puppet') do
 end
 
 # Yum configuration
-describe yumrepo('puppet6') do
+describe yumrepo("puppet#{puppet_release}") do
     it { should exist }
     it { should be_enabled }
 end

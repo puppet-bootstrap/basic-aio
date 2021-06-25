@@ -95,7 +95,7 @@ plan role (
   if $choria_user {
     # Request a choria cert.
     run_command(
-      'mco choria request_cert',
+      'choria enroll',
       $puppet_target,
       'Request a choria cert',
       '_run_as' => $choria_user,
