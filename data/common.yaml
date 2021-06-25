@@ -18,3 +18,5 @@ profile::puppetserver::config::autosign:
 puppetdb::master::config::create_puppet_service_resource: false
 choria::manage_package_repo: true
 choria::broker::network_broker: true
+
+puppetdb::postgres_version: '13'

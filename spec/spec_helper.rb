@@ -17,7 +17,18 @@ end
 
 host = ENV['TARGET_HOST']
 
-`vagrant up #{host}`
+begin
+  state = `vagrant status #{host} --machine-readable`.lines.map do |line|
+    s = line.chomp.split(',')
+    next if s[2] != 'state'
+    [s[1], [s[2..-1]].to_h]
+  end.delete_if { |i| i.nil? }.to_h
+  if (host.nil? ? state.any { |k,v| v['state'] != 'running' } : (state[host]['state'] != 'running'))
+    system("vagrant up #{host}")
+  end
+rescue => e
+  warn "Failed to ensure running state: #{e.message}"
+end
 
 config = Tempfile.new('', Dir.tmpdir)
 config.write(`vagrant ssh-config #{host}`)
