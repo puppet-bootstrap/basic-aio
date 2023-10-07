@@ -2,30 +2,51 @@
 # vi: set ft=ruby et st=2 sw=2 :
 ENV['VAGRANT_EXPERIMENTAL'] = 'typed_triggers'
 
-ip_subnet = ENV['IP_SUBNET'] || '192.168.32'
-puppet_version = ENV['PUPPET_VERSION'] || ''
-puppet_release = puppet_version.empty? ? (ENV['PUPPET_RELEASE'] || '6') : puppet_version.split('.').first
-el_release = ENV['EL_RELEASE'] || '7'
-box = ENV['BOX'] || "centos/#{el_release}"
+ip_subnet = ENV.fetch('IP_SUBNET', '192.168.32')
+puppet_version = ENV.fetch('PUPPET_VERSION', '')
+puppet_release = puppet_version.empty? ? ENV.fetch('PUPPET_RELEASE', '7') : puppet_version.split('.').first
+el_release = ENV.fetch('EL_RELEASE', '9')
+el_os_name = ENV.fetch('EL_OS_NAME', 'centos')
+def select_box(el_os_name, el_release)
+  return @box if @box
+
+  @box = ENV['BOX']
+
+  return @box unless @box.nil?
+
+  @box = case el_os_name
+         when 'centos'
+           if el_release.to_i > 7
+             "generic/#{el_os_name}#{el_release}s"
+           else
+             "generic/#{el_os_name}#{el_release}"
+           end
+         else
+           "#{el_os_name}/#{el_release}"
+         end
+end
+box = select_box(el_os_name, el_release)
 
 Vagrant.configure('2') do |config|
   config.vm.box = box
+  config.ssh.forward_agent = true
 
-  config.vm.define 'puppet' do |puppetmaster|
-    puppetmaster.vm.provider 'virtualbox' do |vb|
+  config.vm.define 'puppet' do |puppetserver|
+    puppetserver.vm.provider 'virtualbox' do |vb|
       vb.memory = '3072'
       vb.cpus = 2
       vb.name = 'puppet.vagrant'
     end
 
-    puppetmaster.vm.provider 'libvirt' do |libvirt|
+    puppetserver.vm.provider 'libvirt' do |libvirt|
       libvirt.memory = '3072'
       libvirt.cpus = 2
       libvirt.qemu_use_session = false
     end
 
-    puppetmaster.vm.hostname = 'puppet.vagrant'
-    puppetmaster.vm.network 'private_network', ip: "#{ip_subnet}.5"
+    puppetserver.vm.hostname = 'puppet.vagrant'
+    puppetserver.vm.network 'private_network', ip: "#{ip_subnet}.5"
+    puppetserver.vm.synced_folder '.', '/vagrant'
   end
 
   config.vm.define 'agent' do |agent|
@@ -53,7 +74,13 @@ Vagrant.configure('2') do |config|
         'bolt plan run role -t all --run-as root',
         "puppet_release=#{puppet_release}",
         "puppet_version=#{puppet_version}",
-      ].join(' ')
+        '--stream',
+        '--native-ssh',
+      ].concat(ENV['DEBUG'].nil? ? [] : [
+        '--verbose',
+        '--trace',
+        '--log-level debug',
+      ]).join(' ')
     }
   end
 end

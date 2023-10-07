@@ -4,10 +4,12 @@
 # The following directive installs modules to the managed moduledir.
 moduledir '.modules'
 
-mod 'puppetlabs/stdlib', '7.1.0'
+mod 'puppet/firewalld', '4.5.1'
+mod 'puppetlabs/stdlib', '8.6.0'
 mod 'puppetlabs/git', '0.5.0'
-mod 'puppet/r10k', '10.0.0'
+mod 'puppet/r10k', '11.0.1'
 mod 'dylanratcliffe/bolt_vagrant', '1.1.0'
-mod 'puppetlabs/ruby', '1.0.1'
-mod 'puppetlabs/inifile', '5.1.0'
-mod 'puppetlabs/vcsrepo', '5.0.0'
+mod 'puppetlabs/inifile', '6.1.0'
+mod 'puppetlabs/vcsrepo', '6.1.0'
+mod 'choria/mcollective', '0.14.4'
+mod 'puppet/systemd', '5.2.0'

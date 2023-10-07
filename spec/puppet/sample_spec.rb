@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-puppet_version = ENV['PUPPET_VERSION'] || ''
-puppet_release = puppet_version.empty? ? (ENV['PUPPET_RELEASE'] || '6') : puppet_version.split('.').first
+puppet_version = ENV.fetch('PUPPET_VERSION', '')
+puppet_release = puppet_version.empty? ? ENV.fetch('PUPPET_RELEASE', '7') : puppet_version.split('.').first
 
 # Verify the physical setup of the server
 describe interface('eth0') do
