@@ -22,9 +22,11 @@ The following environment variables are used to configure the Vagrant environmen
 | -------------------- | -------------          | -----------                            |
 | `IP_SUBNET`          | `192.168.32`           | The internal IP subnet used by Vagrant |
 | `PUPPET_VERSION`     | none (use the latest)  | The Puppet agent version               |
-| `PUPPET_RELEASE`     | `6`                    | The Puppet major release version       |
-| `EL_RELEASE`         | `7`                    | The EL release of the base box         |
-| `BOX`                | `centos/${EL_RELEASE}` | The base box name                      |
+| `PUPPET_RELEASE`     | `7`                    | The Puppet major release version       |
+| `EL_RELEASE`         | `9`                    | The EL release of the base box         |
+| `EL_OS_NAME`         | `centos`               | The base box OS                        |
+| `BOX`                | Depends on EL_OS_NAME  | The base box name                      |
+| `DEBUG`              | not set                | Set to enable debugging output         |
 
 ## See also
 
