@@ -9,14 +9,12 @@ Facter.add(:role__puppetserver__r10k_remote) do
   end
 
   setcode do
-    begin
-      require 'yaml'
+    require 'yaml'
 
-      config = YAML.load_file(r10k_yaml)
+    config = YAML.load_file(r10k_yaml)
 
-      config.dig(:sources, 'puppet', 'remote')
-    rescue
-      nil
-    end
+    config.dig(:sources, 'puppet', 'remote')
+  rescue
+    nil
   end
 end

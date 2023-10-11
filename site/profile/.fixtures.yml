@@ -3,11 +3,15 @@
 ---
 fixtures:
   forge_modules:
-    stdlib: 'puppetlabs/stdlib'
-    puppetdb: 'puppetlabs/puppetdb'
-    inifile: 'puppetlabs/inifile'
-    postgresql: 'puppetlabs/postgresql'
-    concat: 'puppetlabs/concat'
-    firewall: 'puppetlabs/firewall'
-    cron_core: 'puppetlabs/cron_core'
-    yumrepo_core: 'puppetlabs/yumrepo_core'
+    stdlib: puppetlabs-stdlib
+    puppetdb: puppetlabs-puppetdb
+    inifile: puppetlabs-inifile
+    postgresql: puppetlabs-postgresql
+    concat: puppetlabs-concat
+    firewall: puppetlabs-firewall
+    cron_core: puppetlabs-cron_core
+    yumrepo_core: puppetlabs-yumrepo_core
+    firewalld: puppet-firewalld
+    apt: puppetlabs-apt
+    systemd: puppet-systemd
+    augeas_core: puppetlabs-augeas_core

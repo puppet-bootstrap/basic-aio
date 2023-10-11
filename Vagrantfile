@@ -4,7 +4,7 @@ ENV['VAGRANT_EXPERIMENTAL'] = 'typed_triggers'
 
 ip_subnet = ENV.fetch('IP_SUBNET', '192.168.32')
 puppet_version = ENV.fetch('PUPPET_VERSION', '')
-puppet_release = puppet_version.empty? ? ENV.fetch('PUPPET_RELEASE', '7') : puppet_version.split('.').first
+puppet_release = puppet_version.empty? ? ENV.fetch('PUPPET_RELEASE', '8') : puppet_version.split('.').first
 el_release = ENV.fetch('EL_RELEASE', '9')
 el_os_name = ENV.fetch('EL_OS_NAME', 'centos')
 def select_box(el_os_name, el_release)
