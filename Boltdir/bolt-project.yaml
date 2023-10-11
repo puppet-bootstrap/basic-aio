@@ -13,3 +13,5 @@ modules:
   version_requirement: 8.6.0
 - name: puppet/firewalld
   version_requirement: 4.5.1
+- name: puppetlabs/puppet_agent
+  version_requirement: 4.15.0

@@ -1,7 +1,3 @@
-# role::agent
-#
-# Agent class
-#
 # @summary Agent class
 #
 # @example

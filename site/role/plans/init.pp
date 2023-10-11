@@ -1,4 +1,5 @@
 # @summary Build a Puppet server and attach agents
+#
 # @param puppet_release The major version of Puppet to use
 # @param puppet_version The version of puppet-agent to install
 # @param targets The targets to run on
@@ -39,7 +40,7 @@ plan role (
   # Use the collected facts to build a hash of `host` resources.
   $hosts = get_targets($targets).reduce({}) |$memo, $target| {
     $this_host = {
-      $target.facts['fqdn'] => {
+      $target.facts['networking']['fqdn'] => {
         'ip' => $target.facts['networking']['interfaces'].reduce('') |$m, $v| {
           if $v[0] =~ /^e/ and $v[1]['ip'] {
             $v[1]['ip']
@@ -48,7 +49,7 @@ plan role (
           }
         },
         'host_aliases' => [
-          $target.facts['hostname'],
+          $target.facts['networking']['hostname'],
         ],
       },
     }

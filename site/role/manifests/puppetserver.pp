@@ -1,7 +1,3 @@
-# role::puppetserver
-#
-# Puppet server class
-#
 # @summary Puppet server class
 #
 # @example
