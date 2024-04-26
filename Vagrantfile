@@ -1,5 +1,5 @@
 # -*- mode: ruby -*-
-# vi: set ft=ruby et st=2 sw=2 :
+# vi: set ft=ruby et ts=2 sw=2 :
 ENV['VAGRANT_EXPERIMENTAL'] = 'typed_triggers'
 
 ip_subnet = ENV.fetch('IP_SUBNET', '192.168.32')
@@ -27,6 +27,16 @@ def select_box(el_os_name, el_release)
 end
 box = select_box(el_os_name, el_release)
 
+def bolt_debug_options
+  return [] if ENV['DEBUG'].nil?
+
+  [
+    '--verbose',
+    '--trace',
+    '--log-level debug',
+  ]
+end
+
 Vagrant.configure('2') do |config|
   config.vm.box = box
   config.ssh.forward_agent = true
@@ -46,7 +56,7 @@ Vagrant.configure('2') do |config|
 
     puppetserver.vm.hostname = 'puppet.vagrant'
     puppetserver.vm.network 'private_network', ip: "#{ip_subnet}.5"
-    puppetserver.vm.synced_folder '.', '/vagrant'
+    puppetserver.vm.synced_folder '.', '/vagrant', type: 'rsync'
   end
 
   config.vm.define 'agent' do |agent|
@@ -60,6 +70,7 @@ Vagrant.configure('2') do |config|
 
     agent.vm.hostname = 'agent.vagrant'
     agent.vm.network 'private_network', ip: "#{ip_subnet}.6"
+    agent.vm.synced_folder '.', '/vagrant', disabled: true
   end
 
   config.trigger.before [:up, :provision, :reload], type: :command do |trigger|
@@ -76,11 +87,7 @@ Vagrant.configure('2') do |config|
         "puppet_version=#{puppet_version}",
         '--stream',
         '--native-ssh',
-      ].concat(ENV['DEBUG'].nil? ? [] : [
-        '--verbose',
-        '--trace',
-        '--log-level debug',
-      ]).join(' ')
+      ].concat(bolt_debug_options).join(' ')
     }
   end
 end

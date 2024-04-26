@@ -94,12 +94,20 @@ plan role (
 
   if $choria_user {
     # Request a choria cert.
-    run_command(
-      'choria enroll',
+    apply(
       $puppet_target,
-      'Request a choria cert',
+      '_description' => 'Request a choria cert',
       '_run_as' => $choria_user,
-    )
+    ) {
+      exec { 'choria enroll':
+        environment => [
+          "USER=${choria_user}",
+          "HOME=/home/${choria_user}",
+        ],
+        path        => '/opt/puppetlabs/bin:/bin:/usr/bin:/sbin:/usr/sbin',
+        creates     => "/home/${choria_user}/.puppetlabs/etc/puppet/ssl/certs/${choria_user}.mcollective.pem",
+      }
+    }
   }
 
   # Run the puppet agent on the remaining targets.
