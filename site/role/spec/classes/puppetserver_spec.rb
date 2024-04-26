@@ -5,8 +5,9 @@ describe 'role::puppetserver' do
     context "on #{os}" do
       let(:facts) do
         os_facts.merge(
-          'puppet_environmentpath' => '/etc/puppetlabs/code/environments',
-          'puppet_vardir'          => '/opt/puppetlabs/puppet/cache',
+          'puppet_environmentpath'          => '/etc/puppetlabs/code/environments',
+          'puppet_vardir'                   => '/opt/puppetlabs/puppet/cache',
+          'role__puppetserver__r10k_remote' => 'file:///example',
         )
       end
 

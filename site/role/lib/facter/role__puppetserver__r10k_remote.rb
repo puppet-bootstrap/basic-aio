@@ -13,7 +13,10 @@ Facter.add(:role__puppetserver__r10k_remote) do
 
     config = YAML.load_file(r10k_yaml)
 
-    config.dig(:sources, 'puppet', 'remote')
+    remote = config.dig(:sources, 'puppet', 'remote')
+    remote = config.dig('sources', 'puppet', 'remote') if remote.nil?
+
+    remote
   rescue
     nil
   end
