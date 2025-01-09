@@ -6,8 +6,8 @@
 
 ### Classes
 
-* [`role::agent`](#roleagent): Agent class
-* [`role::puppetserver`](#rolepuppetserver): Puppet server class
+* [`role::agent`](#role--agent): Agent class
+* [`role::puppetserver`](#role--puppetserver): Puppet server class
 
 ### Plans
 
@@ -15,7 +15,7 @@
 
 ## Classes
 
-### <a name="roleagent"></a>`role::agent`
+### <a name="role--agent"></a>`role::agent`
 
 Agent class
 
@@ -27,7 +27,7 @@ Agent class
 include role::agent
 ```
 
-### <a name="rolepuppetserver"></a>`role::puppetserver`
+### <a name="role--puppetserver"></a>`role::puppetserver`
 
 Puppet server class
 
@@ -49,28 +49,28 @@ Build a Puppet server and attach agents
 
 The following parameters are available in the `role` plan:
 
-* [`puppet_release`](#puppet_release)
-* [`puppet_version`](#puppet_version)
-* [`targets`](#targets)
-* [`puppet_target`](#puppet_target)
-* [`control_repo`](#control_repo)
-* [`choria_user`](#choria_user)
+* [`puppet_release`](#-role--puppet_release)
+* [`puppet_version`](#-role--puppet_version)
+* [`targets`](#-role--targets)
+* [`puppet_target`](#-role--puppet_target)
+* [`control_repo`](#-role--control_repo)
+* [`choria_user`](#-role--choria_user)
 
-##### <a name="puppet_release"></a>`puppet_release`
+##### <a name="-role--puppet_release"></a>`puppet_release`
 
 Data type: `Integer`
 
 The major version of Puppet to use
 
-##### <a name="puppet_version"></a>`puppet_version`
+##### <a name="-role--puppet_version"></a>`puppet_version`
 
 Data type: `Optional[String]`
 
 The version of puppet-agent to install
 
-Default value: ``undef``
+Default value: `undef`
 
-##### <a name="targets"></a>`targets`
+##### <a name="-role--targets"></a>`targets`
 
 Data type: `TargetSpec`
 
@@ -78,7 +78,7 @@ The targets to run on
 
 Default value: `'all'`
 
-##### <a name="puppet_target"></a>`puppet_target`
+##### <a name="-role--puppet_target"></a>`puppet_target`
 
 Data type: `TargetSpec`
 
@@ -86,18 +86,22 @@ The puppet server target
 
 Default value: `'puppet'`
 
-##### <a name="control_repo"></a>`control_repo`
+##### <a name="-role--control_repo"></a>`control_repo`
 
-Data type: `Variant[
+Data type:
+
+```puppet
+Variant[
     Stdlib::HTTPUrl,
     Pattern[/\Afile:\/\/\/([^\n\/\0]+(\/)?)+\z/]
-  ]`
+  ]
+```
 
 URL of the control repo
 
 Default value: `'file:///vagrant/'`
 
-##### <a name="choria_user"></a>`choria_user`
+##### <a name="-role--choria_user"></a>`choria_user`
 
 Data type: `Optional[String]`
 

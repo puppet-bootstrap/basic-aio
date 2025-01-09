@@ -6,17 +6,17 @@
 
 ### Classes
 
-* [`profile::agent`](#profileagent): Configures the `puppet` service
-* [`profile::base`](#profilebase): Base OS customization
-* [`profile::puppetdb`](#profilepuppetdb): Configure puppetdb
-* [`profile::puppetserver`](#profilepuppetserver): Configure puppetserver
-* [`profile::puppetserver::config`](#profilepuppetserverconfig): Configures the puppet server
-* [`profile::puppetserver::install`](#profilepuppetserverinstall): Install puppetserver package
-* [`profile::puppetserver::service`](#profilepuppetserverservice): Configure puppetserver service
+* [`profile::agent`](#profile--agent): Configures the `puppet` service
+* [`profile::base`](#profile--base): Base OS customization
+* [`profile::puppetdb`](#profile--puppetdb): Configure puppetdb
+* [`profile::puppetserver`](#profile--puppetserver): Configure puppetserver
+* [`profile::puppetserver::config`](#profile--puppetserver--config): Configures the puppet server
+* [`profile::puppetserver::install`](#profile--puppetserver--install): Install puppetserver package
+* [`profile::puppetserver::service`](#profile--puppetserver--service): Configure puppetserver service
 
 ## Classes
 
-### <a name="profileagent"></a>`profile::agent`
+### <a name="profile--agent"></a>`profile::agent`
 
 Configures the `puppet` service
 
@@ -32,29 +32,29 @@ include profile::agent
 
 The following parameters are available in the `profile::agent` class:
 
-* [`service`](#service)
-* [`service_ensure`](#service_ensure)
-* [`service_enable`](#service_enable)
+* [`service`](#-profile--agent--service)
+* [`service_ensure`](#-profile--agent--service_ensure)
+* [`service_enable`](#-profile--agent--service_enable)
 
-##### <a name="service"></a>`service`
+##### <a name="-profile--agent--service"></a>`service`
 
 Data type: `Variant[String, Array[String]]`
 
 Puppet agent service name
 
-##### <a name="service_ensure"></a>`service_ensure`
+##### <a name="-profile--agent--service_ensure"></a>`service_ensure`
 
 Data type: `String`
 
 The `ensure` attribute for the agent service
 
-##### <a name="service_enable"></a>`service_enable`
+##### <a name="-profile--agent--service_enable"></a>`service_enable`
 
 Data type: `Boolean`
 
 The `enable` attribute for the agent service
 
-### <a name="profilebase"></a>`profile::base`
+### <a name="profile--base"></a>`profile::base`
 
 Base OS customization
 
@@ -70,15 +70,15 @@ include profile::base
 
 The following parameters are available in the `profile::base` class:
 
-* [`packages`](#packages)
+* [`packages`](#-profile--base--packages)
 
-##### <a name="packages"></a>`packages`
+##### <a name="-profile--base--packages"></a>`packages`
 
 Data type: `Array`
 
 A list of packages to manage
 
-### <a name="profilepuppetdb"></a>`profile::puppetdb`
+### <a name="profile--puppetdb"></a>`profile::puppetdb`
 
 Configure puppetdb
 
@@ -90,7 +90,7 @@ Configure puppetdb
 include profile::puppetdb
 ```
 
-### <a name="profilepuppetserver"></a>`profile::puppetserver`
+### <a name="profile--puppetserver"></a>`profile::puppetserver`
 
 Configure puppetserver
 
@@ -106,17 +106,17 @@ include profile::puppetserver
 
 The following parameters are available in the `profile::puppetserver` class:
 
-* [`manage_firewall`](#manage_firewall)
+* [`manage_firewall`](#-profile--puppetserver--manage_firewall)
 
-##### <a name="manage_firewall"></a>`manage_firewall`
+##### <a name="-profile--puppetserver--manage_firewall"></a>`manage_firewall`
 
 Data type: `Boolean`
 
 Manage the puppetserver firewall configuration
 
-Default value: ``true``
+Default value: `true`
 
-### <a name="profilepuppetserverconfig"></a>`profile::puppetserver::config`
+### <a name="profile--puppetserver--config"></a>`profile::puppetserver::config`
 
 Configures the puppet server
 
@@ -132,15 +132,15 @@ include profile::puppetserver::config
 
 The following parameters are available in the `profile::puppetserver::config` class:
 
-* [`autosign`](#autosign)
+* [`autosign`](#-profile--puppetserver--config--autosign)
 
-##### <a name="autosign"></a>`autosign`
+##### <a name="-profile--puppetserver--config--autosign"></a>`autosign`
 
 Data type: `Array[String]`
 
 List of certnames or domain name globs
 
-### <a name="profilepuppetserverinstall"></a>`profile::puppetserver::install`
+### <a name="profile--puppetserver--install"></a>`profile::puppetserver::install`
 
 Install puppetserver package
 
@@ -152,7 +152,7 @@ Install puppetserver package
 include profile::puppetserver::install
 ```
 
-### <a name="profilepuppetserverservice"></a>`profile::puppetserver::service`
+### <a name="profile--puppetserver--service"></a>`profile::puppetserver::service`
 
 Configure puppetserver service
 
