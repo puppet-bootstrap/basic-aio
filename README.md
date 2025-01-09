@@ -18,15 +18,17 @@ In order to use this project, you'll need
 
 The following environment variables are used to configure the Vagrant environment:
 
-| Environment variable | Default value          | Description                            |
-| -------------------- | -------------          | -----------                            |
-| `IP_SUBNET`          | `192.168.32`           | The internal IP subnet used by Vagrant |
-| `PUPPET_VERSION`     | none (use the latest)  | The Puppet agent version               |
-| `PUPPET_RELEASE`     | `8`                    | The Puppet major release version       |
-| `EL_RELEASE`         | `9`                    | The EL release of the base box         |
-| `EL_OS_NAME`         | `centos`               | The base box OS                        |
-| `BOX`                | Depends on EL_OS_NAME  | The base box name                      |
-| `DEBUG`              | not set                | Set to enable debugging output         |
+| Environment variable | Default value          | Description                                          |
+| -------------------- | -------------          | -----------                                          |
+| `IP_SUBNET`          | `192.168.32`           | The internal IP subnet used by Vagrant               |
+| `PUPPET_VERSION`     | none (use the latest)  | The Puppet agent version                             |
+| `PUPPET_RELEASE`     | `8`                    | The Puppet major release version                     |
+| `EL_RELEASE`         | `9`                    | The EL release of the base box                       |
+| `EL_OS_NAME`         | `centos`               | The base box OS                                      |
+| `BOX`                | Depends on EL_OS_NAME  | The base box name                                    |
+| `DEBUG`              | not set                | Set to enable debugging output                       |
+| `VERBOSE`            | `true`                 | Set to `false` to disable verbose (streaming) output |
+| `NATIVE_SSH`         | `true`                 | Set to `false` to disable native SSH                 |
 
 ## See also
 

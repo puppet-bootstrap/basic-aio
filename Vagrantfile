@@ -37,19 +37,23 @@ def bolt_debug_options
   ]
 end
 
+require 'yaml'
+stream = YAML.safe_load(ENV.fetch('VERBOSE', 'true'))
+native_ssh = YAML.safe_load(ENV.fetch('NATIVE_SSH', 'true'))
+
 Vagrant.configure('2') do |config|
   config.vm.box = box
   config.ssh.forward_agent = true
 
   config.vm.define 'puppet' do |puppetserver|
     puppetserver.vm.provider 'virtualbox' do |vb|
-      vb.memory = '3072'
+      vb.memory = '4096'
       vb.cpus = 2
       vb.name = 'puppet.vagrant'
     end
 
     puppetserver.vm.provider 'libvirt' do |libvirt|
-      libvirt.memory = '3072'
+      libvirt.memory = '4096'
       libvirt.cpus = 2
       libvirt.qemu_use_session = false
     end
@@ -87,9 +91,10 @@ Vagrant.configure('2') do |config|
         'bolt plan run role -t all --run-as root',
         "puppet_release=#{puppet_release}",
         "puppet_version=#{puppet_version}",
-        '--stream',
-        '--native-ssh',
-      ].concat(bolt_debug_options).join(' ')
+      ].concat(bolt_debug_options)
+       .concat(stream ? ['--stream'] : [])
+       .concat(native_ssh ? ['--native-ssh'] : [])
+       .join(' ')
     }
   end
 end
