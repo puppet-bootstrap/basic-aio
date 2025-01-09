@@ -56,7 +56,9 @@ Vagrant.configure('2') do |config|
 
     puppetserver.vm.hostname = 'puppet.vagrant'
     puppetserver.vm.network 'private_network', ip: "#{ip_subnet}.5"
-    puppetserver.vm.synced_folder '.', '/vagrant', type: 'rsync'
+    puppetserver.vm.synced_folder '.', '/vagrant',
+      type: 'rsync',
+      rsync__exclude: ['spec/fixtures/modules/']
   end
 
   config.vm.define 'agent' do |agent|
