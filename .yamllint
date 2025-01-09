@@ -1,0 +1,11 @@
+---
+extends: default
+rules:
+  line-length:
+    max: 160
+  indentation:
+    indent-sequences: consistent
+ignore: |
+  /site/*/spec/fixtures/modules/
+  /Boltdir/.modules/
+  vendor/

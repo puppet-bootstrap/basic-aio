@@ -1,0 +1,79 @@
+---
+name: 'PR tests'
+
+'on':
+  - pull_request
+
+jobs:
+  vagrant-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: false
+      - run: ruby -wc Vagrantfile
+
+  syntax:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        module:
+          - profile
+          - role
+        puppet:
+          - label: 'Puppet 7'
+            puppet_version: '~> 7'
+            ruby_version: '2.7'
+          - label: 'Puppet 8'
+            puppet_version: '~> 8'
+            ruby_version: '3.2'
+    env:
+      PUPPET_GEM_VERSION: ${{matrix.puppet.puppet_version}}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{matrix.puppet.ruby_version}}
+          bundler-cache: true
+          working-directory: site/${{matrix.module}}
+      - run: bundle exec rake validate lint check rubocop
+        working-directory: site/${{matrix.module}}
+
+  parallel_spec:
+    needs:
+      - syntax
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        module:
+          - profile
+          - role
+        puppet:
+          - label: 'Puppet 7'
+            puppet_version: '~> 7'
+            ruby_version: '2.7'
+          - label: 'Puppet 8'
+            puppet_version: '~> 8'
+            ruby_version: '3.2'
+    env:
+      PUPPET_GEM_VERSION: ${{matrix.puppet.puppet_version}}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{matrix.puppet.ruby_version}}
+          bundler-cache: true
+          working-directory: site/${{matrix.module}}
+      - run: bundle exec rake parallel_spec
+        working-directory: site/${{matrix.module}}
+
+  yamllint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install yamllint
+        run: pip install 'yamllint>=1,<2'
+      - name: Run yamllint
+        run: yamllint .
