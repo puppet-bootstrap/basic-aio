@@ -16,7 +16,7 @@ mod 'puppetlabs-firewall', '8.1.5'
 mod 'puppet-r10k', '14.0.0'
 
 # These modules are all dependencies for r10k.
-mod 'puppetlabs-vcsrepo', '6.1.0' # Required by puppet-r10k
+mod 'puppetlabs-vcsrepo', '7.0.0' # Required by puppet-r10k
 mod 'puppetlabs-git', '0.5.0' # Required by puppet-r10k
 
 # Enables the EPEL repository on RHEL/CentOS.
