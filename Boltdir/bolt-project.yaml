@@ -20,7 +20,7 @@ modules:
   version_requirement: 5.0.0
 # renovate: datasource=puppet-forge
 - name: puppetlabs/puppet_agent
-  version_requirement: 4.21.0
+  version_requirement: 4.23.0
 # renovate: datasource=puppet-forge
 - name: choria/mcollective
   version_requirement: 0.14.6
