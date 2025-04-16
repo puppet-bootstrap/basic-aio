@@ -3,19 +3,27 @@ name: basic_aio
 modulepath:
 - "../site"
 modules:
+# renovate: datasource=puppet-forge
 - name: dylanratcliffe/bolt_vagrant
   version_requirement: 1.1.0
+# renovate: datasource=puppet-forge
 - name: puppet/r10k
   version_requirement: 14.0.0
+# renovate: datasource=puppet-forge
 - name: puppetlabs/git
   version_requirement: 0.5.0
+# renovate: datasource=puppet-forge
 - name: puppetlabs/stdlib
   version_requirement: 9.7.0
+# renovate: datasource=puppet-forge
 - name: puppet/firewalld
   version_requirement: 5.0.0
+# renovate: datasource=puppet-forge
 - name: puppetlabs/puppet_agent
   version_requirement: 4.21.0
+# renovate: datasource=puppet-forge
 - name: choria/mcollective
   version_requirement: 0.14.6
+# renovate: datasource=puppet-forge
 - name: puppet/systemd
   version_requirement: 8.0.0
