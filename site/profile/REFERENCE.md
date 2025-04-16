@@ -8,7 +8,7 @@
 
 * [`profile::agent`](#profile--agent): Configures the `puppet` service
 * [`profile::base`](#profile--base): Base OS customization
-* [`profile::puppetdb`](#profile--puppetdb): Configure puppetdb
+* [`profile::db`](#profile--db): Configure db
 * [`profile::server`](#profile--server): Configure server
 * [`profile::server::config`](#profile--server--config): Configures the puppet server
 * [`profile::server::install`](#profile--server--install): Install server package
@@ -78,16 +78,16 @@ Data type: `Array`
 
 A list of packages to manage
 
-### <a name="profile--puppetdb"></a>`profile::puppetdb`
+### <a name="profile--db"></a>`profile::db`
 
-Configure puppetdb
+Configure db
 
 #### Examples
 
 ##### 
 
 ```puppet
-include profile::puppetdb
+include profile::db
 ```
 
 ### <a name="profile--server"></a>`profile::server`

@@ -18,6 +18,8 @@ profile::server::config::autosign:
 puppetdb::master::config::create_puppet_service_resource: false
 puppetdb::manage_firewall: false
 puppetdb::postgres_version: '17'
+puppetdb::puppetdb_package: 'openvoxdb'
+puppetdb::master::config::terminus_package: 'openvoxdb-termini'
 
 choria::manage_package_repo: true
 choria::broker::network_broker: true

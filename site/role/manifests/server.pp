@@ -8,7 +8,7 @@ class role::server {
 
   include 'profile::server'
 
-  include 'profile::puppetdb'
+  include 'profile::db'
 
   include 'choria'
   include 'choria::broker'
