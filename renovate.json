@@ -2,5 +2,17 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Update bolt-project.yaml",
+      "fileMatch": [
+        "(^|/)bolt-project\\.yaml$"
+      ],
+      "matchStrings": [
+        "#\\s*renovate:\\s*datasource=(?<datasource>\\S+)\\s+-\\s+name:\\s+(?<depName>\\S+)\\s+version_requirement:\\s+(?<currentValue>\\S+)"
+      ]
+    }
   ]
 }
