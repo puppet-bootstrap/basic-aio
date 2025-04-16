@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-puppet_version = ENV.fetch('PUPPET_VERSION', '')
-puppet_release = puppet_version.empty? ? ENV.fetch('PUPPET_RELEASE', '8') : puppet_version.split('.').first
+openvox_version = ENV.fetch('OPENVOX_VERSION', '')
+openvox_release = openvox_version.empty? ? ENV.fetch('OPENVOX_RELEASE', '8') : openvox_version.split('.').first
 
-describe 'puppetserver' do
+describe 'server' do
   # Verify the physical setup of the server
   describe interface('eth0') do
     it { is_expected.to exist }
@@ -71,7 +71,7 @@ describe 'puppetserver' do
   end
 
   # Verify the puppet server configuration
-  describe package('puppetserver'), if: os[:family] == 'redhat' do
+  describe package('openvox-server'), if: os[:family] == 'redhat' do
     it { is_expected.to be_installed }
   end
 
@@ -85,7 +85,7 @@ describe 'puppetserver' do
   end
 
   # Verify puppet agent configuration
-  describe package('puppet-agent') do
+  describe package('openvox-agent') do
     it { is_expected.to be_installed }
   end
 
@@ -95,7 +95,7 @@ describe 'puppetserver' do
   end
 
   # Yum configuration
-  describe yumrepo("puppet#{puppet_release}") do
+  describe yumrepo("openvox#{openvox_release}") do
     it { is_expected.to exist }
     it { is_expected.to be_enabled }
   end

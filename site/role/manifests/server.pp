@@ -1,12 +1,12 @@
 # @summary Puppet server class
 #
 # @example
-#   include role::puppetserver
-class role::puppetserver {
+#   include role::server
+class role::server {
   include 'git'
   include 'r10k'
 
-  include 'profile::puppetserver'
+  include 'profile::server'
 
   include 'profile::puppetdb'
 

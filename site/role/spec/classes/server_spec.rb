@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'role::puppetserver' do
+describe 'role::server' do
   on_supported_os.each do |os, os_facts|
     context "on #{os}" do
       let(:facts) do
@@ -13,7 +13,7 @@ describe 'role::puppetserver' do
 
       it { is_expected.to compile }
 
-      it { is_expected.to contain_class('role::puppetserver') }
+      it { is_expected.to contain_class('role::server') }
 
       it { is_expected.to contain_class('r10k') }
       it { is_expected.to contain_class('puppetdb') }

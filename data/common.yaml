@@ -11,7 +11,7 @@ mcollective::site_policies:
 
 r10k::remote: "%{facts.role__puppetserver__r10k_remote}"
 
-profile::puppetserver::config::autosign:
+profile::server::config::autosign:
   - "*.%{facts.networking.domain}"
   - vagrant.mcollective
 

@@ -3,8 +3,8 @@
 ENV['VAGRANT_EXPERIMENTAL'] = 'typed_triggers'
 
 ip_subnet = ENV.fetch('IP_SUBNET', '192.168.32')
-puppet_version = ENV.fetch('PUPPET_VERSION', '')
-puppet_release = puppet_version.empty? ? ENV.fetch('PUPPET_RELEASE', '8') : puppet_version.split('.').first
+openvox_version = ENV.fetch('OPENVOX_VERSION', '')
+openvox_release = openvox_version.empty? ? ENV.fetch('OPENVOX_RELEASE', '8') : openvox_version.split('.').first
 el_release = ENV.fetch('EL_RELEASE', '9')
 el_os_name = ENV.fetch('EL_OS_NAME', 'centos')
 def select_box(el_os_name, el_release)
@@ -45,22 +45,22 @@ Vagrant.configure('2') do |config|
   config.vm.box = box
   config.ssh.forward_agent = true
 
-  config.vm.define 'puppet' do |puppetserver|
-    puppetserver.vm.provider 'virtualbox' do |vb|
+  config.vm.define 'puppet' do |server|
+    server.vm.provider 'virtualbox' do |vb|
       vb.memory = '4096'
       vb.cpus = 2
       vb.name = 'puppet.vagrant'
     end
 
-    puppetserver.vm.provider 'libvirt' do |libvirt|
+    server.vm.provider 'libvirt' do |libvirt|
       libvirt.memory = '4096'
       libvirt.cpus = 2
       libvirt.qemu_use_session = false
     end
 
-    puppetserver.vm.hostname = 'puppet.vagrant'
-    puppetserver.vm.network 'private_network', ip: "#{ip_subnet}.5"
-    puppetserver.vm.synced_folder '.', '/vagrant',
+    server.vm.hostname = 'puppet.vagrant'
+    server.vm.network 'private_network', ip: "#{ip_subnet}.5"
+    server.vm.synced_folder '.', '/vagrant',
       type: 'rsync',
       rsync__exclude: ['spec/fixtures/modules/']
   end
@@ -89,8 +89,8 @@ Vagrant.configure('2') do |config|
     trigger.run = {
       inline: [
         'bolt plan run role -t all --run-as root',
-        "puppet_release=#{puppet_release}",
-        "puppet_version=#{puppet_version}",
+        "openvox_release=#{openvox_release}",
+        "openvox_version=#{openvox_version}",
       ].concat(bolt_debug_options)
        .concat(stream ? ['--stream'] : [])
        .concat(native_ssh ? ['--native-ssh'] : [])

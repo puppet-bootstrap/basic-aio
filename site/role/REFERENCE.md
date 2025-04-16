@@ -7,11 +7,11 @@
 ### Classes
 
 * [`role::agent`](#role--agent): Agent class
-* [`role::puppetserver`](#role--puppetserver): Puppet server class
+* [`role::server`](#role--server): Puppet server class
 
 ### Plans
 
-* [`role`](#role): Build a Puppet server and attach agents
+* [`role`](#role): Build an OpenVox server and attach agents
 
 ## Classes
 
@@ -27,7 +27,7 @@ Agent class
 include role::agent
 ```
 
-### <a name="role--puppetserver"></a>`role::puppetserver`
+### <a name="role--server"></a>`role::server`
 
 Puppet server class
 
@@ -36,39 +36,66 @@ Puppet server class
 ##### 
 
 ```puppet
-include role::puppetserver
+include role::server
 ```
 
 ## Plans
 
 ### <a name="role"></a>`role`
 
-Build a Puppet server and attach agents
+Build an OpenVox server and attach agents
 
 #### Parameters
 
 The following parameters are available in the `role` plan:
 
-* [`puppet_release`](#-role--puppet_release)
-* [`puppet_version`](#-role--puppet_version)
+* [`openvox_release`](#-role--openvox_release)
+* [`openvox_version`](#-role--openvox_version)
+* [`openvox_collection`](#-role--openvox_collection)
+* [`release_package`](#-role--release_package)
+* [`openvox_agent`](#-role--openvox_agent)
 * [`targets`](#-role--targets)
-* [`puppet_target`](#-role--puppet_target)
+* [`server_target`](#-role--server_target)
 * [`control_repo`](#-role--control_repo)
 * [`choria_user`](#-role--choria_user)
 
-##### <a name="-role--puppet_release"></a>`puppet_release`
+##### <a name="-role--openvox_release"></a>`openvox_release`
 
 Data type: `Integer`
 
-The major version of Puppet to use
+The major version of OpenVox to use
 
-##### <a name="-role--puppet_version"></a>`puppet_version`
+##### <a name="-role--openvox_version"></a>`openvox_version`
 
 Data type: `Optional[String]`
 
-The version of puppet-agent to install
+The version of openvox-agent to install
 
 Default value: `undef`
+
+##### <a name="-role--openvox_collection"></a>`openvox_collection`
+
+Data type: `String[1]`
+
+The collection to use for openvox-agent
+
+Default value: `"openvox${openvox_release}"`
+
+##### <a name="-role--release_package"></a>`release_package`
+
+Data type: `String[1]`
+
+The URL of the openvox-release package
+
+Default value: `"https://yum.voxpupuli.org/${openvox_collection}-release-el-\$( rpm --eval '%{rhel}' ).noarch.rpm"`
+
+##### <a name="-role--openvox_agent"></a>`openvox_agent`
+
+Data type: `String[1]`
+
+The name of the openvox-agent package
+
+Default value: `'openvox-agent'`
 
 ##### <a name="-role--targets"></a>`targets`
 
@@ -78,7 +105,7 @@ The targets to run on
 
 Default value: `'all'`
 
-##### <a name="-role--puppet_target"></a>`puppet_target`
+##### <a name="-role--server_target"></a>`server_target`
 
 Data type: `TargetSpec`
 

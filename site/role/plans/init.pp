@@ -1,37 +1,43 @@
-# @summary Build a Puppet server and attach agents
+# @summary Build an OpenVox server and attach agents
 #
-# @param puppet_release The major version of Puppet to use
-# @param puppet_version The version of puppet-agent to install
+# @param openvox_release The major version of OpenVox to use
+# @param openvox_version The version of openvox-agent to install
+# @param openvox_collection The collection to use for openvox-agent
+# @param release_package The URL of the openvox-release package
+# @param openvox_agent The name of the openvox-agent package
 # @param targets The targets to run on
-# @param puppet_target The puppet server target
+# @param server_target The puppet server target
 # @param control_repo URL of the control repo
 # @param choria_user User name of the demo choria user on the Puppet server
 plan role (
-  Integer          $puppet_release,
-  Optional[String] $puppet_version = undef,
-  TargetSpec       $targets        = 'all',
-  TargetSpec       $puppet_target  = 'puppet',
+  Integer          $openvox_release,
+  Optional[String] $openvox_version    = undef,
+  String[1]        $openvox_collection = "openvox${openvox_release}",
+  String[1]        $release_package    = "https://yum.voxpupuli.org/${openvox_collection}-release-el-\$( rpm --eval '%{rhel}' ).noarch.rpm",
+  String[1]        $openvox_agent      = 'openvox-agent',
+  TargetSpec       $targets            = 'all',
+  TargetSpec       $server_target      = 'puppet',
   Variant[
     Stdlib::HTTPUrl,
     Pattern[/\Afile:\/\/\/([^\n\/\0]+(\/)?)+\z/]
-  ]                $control_repo   = 'file:///vagrant/',
-  Optional[String] $choria_user    = 'vagrant',
+  ]                $control_repo       = 'file:///vagrant/',
+  Optional[String] $choria_user        = 'vagrant',
 ) {
-  # We want to specify the Puppet agent version to install,
-  # so we start by running the puppet_agent::install task.
-  $puppet_collection = "puppet${puppet_release}"
-  $agent_install_message = $puppet_version ? {
-    /^.+$/  => "Installing puppet-agent ${puppet_version}",
-    default => "Installing ${puppet_collection}",
+  # We want to specify the OpenVox agent version to install,
+  # so we start by manually installing the agent package.
+  run_command("dnf -y install ${release_package}", $targets, 'Installing openvox-release package')
+
+  if $openvox_version =~ String[1] {
+    run_command("dnf -y install ${openvox_agent}-${openvox_version}", $targets, "Installing openvox-agent package version ${openvox_version}")
+  } else {
+    run_command("dnf -y install ${openvox_agent}", $targets, 'Installing openvox-agent package')
   }
-  $agent_version = $puppet_version ? {
-    /^.+$/  => { 'version' => $puppet_version },
-    default => {},
+
+  get_targets($targets).each |$target| {
+    # Set the puppet-agent feature to true so that
+    # apply_prep() will not attempt to install the agent.
+    set_feature($target, 'puppet-agent', true)
   }
-  $agent_install_args = {
-    'collection' => $puppet_collection,
-  } + $agent_version
-  run_task('puppet_agent::install', $targets, $agent_install_message, $agent_install_args)
 
   # apply_prep will see that puppet-agent is already
   # installed and collect facts.
@@ -65,28 +71,28 @@ plan role (
     }
   }
 
-  # On the puppet server target, configure r10k.
-  apply($puppet_target, '_description' => 'Configure r10k') {
+  # On the server target, configure r10k.
+  apply($server_target, '_description' => 'Configure r10k') {
     class { 'git': }
     -> class { 'r10k':
       remote => $control_repo,
     }
-    -> exec { 'r10k deploy environment -pv':
-      path    => '/opt/puppetlabs/bin:/bin:/usr/bin:/sbin:/usr/sbin',
-      creates => '/etc/puppetlabs/code/environments/production/Puppetfile',
+    ~> exec { 'r10k deploy environment -pv':
+      path        => '/opt/puppetlabs/bin:/bin:/usr/bin:/sbin:/usr/sbin',
+      refreshonly => true,
     }
   }
 
-  # On the puppet server target, install and start the puppetserver.
-  apply($puppet_target, '_description' => 'Install and start server components') {
-    include profile::puppetserver
+  # On the server target, install and start the server service.
+  apply($server_target, '_description' => 'Install and start server components') {
+    include profile::server
   }
 
-  # Run the puppet agent to finish.
+  # Run the agent to finish.
   run_command(
     'puppet agent -t -w 30 || { [ $? -eq 2 ] && true; };',
-    $puppet_target,
-    'First Puppet agent run',
+    $server_target,
+    'First agent run',
     '_env_vars' => {
       'PATH' => '/opt/puppetlabs/bin:/bin:/usr/bin',
     },
@@ -95,7 +101,7 @@ plan role (
   if $choria_user {
     # Request a choria cert.
     apply(
-      $puppet_target,
+      $server_target,
       '_description' => 'Request a choria cert',
       '_run_as' => $choria_user,
     ) {
@@ -110,11 +116,11 @@ plan role (
     }
   }
 
-  # Run the puppet agent on the remaining targets.
+  # Run the agent on the remaining targets.
   run_command(
     'puppet agent -t -w 30 || { [ $? -eq 2 ] && true; };',
-    get_targets($targets) - get_targets($puppet_target),
-    'First Puppet agent run',
+    get_targets($targets) - get_targets($server_target),
+    'First agent run',
     '_env_vars' => {
       'PATH' => '/opt/puppetlabs/bin:/bin:/usr/bin',
     },
