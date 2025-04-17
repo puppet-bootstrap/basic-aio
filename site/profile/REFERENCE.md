@@ -8,11 +8,11 @@
 
 * [`profile::agent`](#profile--agent): Configures the `puppet` service
 * [`profile::base`](#profile--base): Base OS customization
-* [`profile::puppetdb`](#profile--puppetdb): Configure puppetdb
-* [`profile::puppetserver`](#profile--puppetserver): Configure puppetserver
-* [`profile::puppetserver::config`](#profile--puppetserver--config): Configures the puppet server
-* [`profile::puppetserver::install`](#profile--puppetserver--install): Install puppetserver package
-* [`profile::puppetserver::service`](#profile--puppetserver--service): Configure puppetserver service
+* [`profile::db`](#profile--db): Configure db
+* [`profile::server`](#profile--server): Configure server
+* [`profile::server::config`](#profile--server--config): Configures the puppet server
+* [`profile::server::install`](#profile--server--install): Install server package
+* [`profile::server::service`](#profile--server--service): Configure server service
 
 ## Classes
 
@@ -78,45 +78,45 @@ Data type: `Array`
 
 A list of packages to manage
 
-### <a name="profile--puppetdb"></a>`profile::puppetdb`
+### <a name="profile--db"></a>`profile::db`
 
-Configure puppetdb
+Configure db
 
 #### Examples
 
 ##### 
 
 ```puppet
-include profile::puppetdb
+include profile::db
 ```
 
-### <a name="profile--puppetserver"></a>`profile::puppetserver`
+### <a name="profile--server"></a>`profile::server`
 
-Configure puppetserver
+Configure server
 
 #### Examples
 
 ##### 
 
 ```puppet
-include profile::puppetserver
+include profile::server
 ```
 
 #### Parameters
 
-The following parameters are available in the `profile::puppetserver` class:
+The following parameters are available in the `profile::server` class:
 
-* [`manage_firewall`](#-profile--puppetserver--manage_firewall)
+* [`manage_firewall`](#-profile--server--manage_firewall)
 
-##### <a name="-profile--puppetserver--manage_firewall"></a>`manage_firewall`
+##### <a name="-profile--server--manage_firewall"></a>`manage_firewall`
 
 Data type: `Boolean`
 
-Manage the puppetserver firewall configuration
+Manage the server firewall configuration
 
 Default value: `true`
 
-### <a name="profile--puppetserver--config"></a>`profile::puppetserver::config`
+### <a name="profile--server--config"></a>`profile::server::config`
 
 Configures the puppet server
 
@@ -125,42 +125,97 @@ Configures the puppet server
 ##### 
 
 ```puppet
-include profile::puppetserver::config
+include profile::server::config
 ```
 
 #### Parameters
 
-The following parameters are available in the `profile::puppetserver::config` class:
+The following parameters are available in the `profile::server::config` class:
 
-* [`autosign`](#-profile--puppetserver--config--autosign)
+* [`autosign`](#-profile--server--config--autosign)
 
-##### <a name="-profile--puppetserver--config--autosign"></a>`autosign`
+##### <a name="-profile--server--config--autosign"></a>`autosign`
 
 Data type: `Array[String]`
 
 List of certnames or domain name globs
 
-### <a name="profile--puppetserver--install"></a>`profile::puppetserver::install`
+### <a name="profile--server--install"></a>`profile::server::install`
 
-Install puppetserver package
-
-#### Examples
-
-##### 
-
-```puppet
-include profile::puppetserver::install
-```
-
-### <a name="profile--puppetserver--service"></a>`profile::puppetserver::service`
-
-Configure puppetserver service
+Install server package
 
 #### Examples
 
 ##### 
 
 ```puppet
-include profile::puppetserver::service
+include profile::server::install
 ```
+
+#### Parameters
+
+The following parameters are available in the `profile::server::install` class:
+
+* [`package`](#-profile--server--install--package)
+* [`package_ensure`](#-profile--server--install--package_ensure)
+
+##### <a name="-profile--server--install--package"></a>`package`
+
+Data type: `String[1]`
+
+The name of the package to install
+
+Default value: `'openvox-server'`
+
+##### <a name="-profile--server--install--package_ensure"></a>`package_ensure`
+
+Data type: `String[1]`
+
+The ensure value for the package
+
+Default value: `'installed'`
+
+### <a name="profile--server--service"></a>`profile::server::service`
+
+Configure server service
+
+#### Examples
+
+##### 
+
+```puppet
+include profile::server::service
+```
+
+#### Parameters
+
+The following parameters are available in the `profile::server::service` class:
+
+* [`service_name`](#-profile--server--service--service_name)
+* [`service_ensure`](#-profile--server--service--service_ensure)
+* [`service_enable`](#-profile--server--service--service_enable)
+
+##### <a name="-profile--server--service--service_name"></a>`service_name`
+
+Data type: `String[1]`
+
+The name of the service to manage
+
+Default value: `'puppetserver'`
+
+##### <a name="-profile--server--service--service_ensure"></a>`service_ensure`
+
+Data type: `String[1]`
+
+The ensure value for the service
+
+Default value: `'running'`
+
+##### <a name="-profile--server--service--service_enable"></a>`service_enable`
+
+Data type: `Boolean`
+
+Whether to enable the service at boot
+
+Default value: `true`
 

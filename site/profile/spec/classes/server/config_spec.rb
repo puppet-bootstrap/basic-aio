@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'profile::puppetserver::config' do
+describe 'profile::server::config' do
   on_supported_os.each do |os, os_facts|
     context "on #{os}" do
       let(:facts) { os_facts }
@@ -15,7 +15,7 @@ describe 'profile::puppetserver::config' do
 
       it { is_expected.to compile }
 
-      it { is_expected.to contain_class('profile::puppetserver::config') }
+      it { is_expected.to contain_class('profile::server::config') }
 
       it {
         is_expected.to contain_file('/etc/puppetlabs/puppet/autosign.conf').with(

@@ -1,12 +1,12 @@
 # basic-aio
-## Bootstrap a basic Puppet environment using AIO packages
+## Bootstrap a basic OpenVox environment
 
-The production branch of this repo contains a Vagrantfile that will build a Puppet
-server using the Puppet all-in-one packages with the following configured
-out of the box:
+The production branch of this repo contains a Vagrantfile that will build an OpenVox
+server and agent with the following configured out of the box:
+
 * [r10k](https://forge.puppet.com/puppet/r10k) (with this repo as its control repo)
 * [Choria mcollective](http://choria.io/)
-* [PuppetDB](https://puppet.com/docs/puppetdb/)
+* [openvoxdb](https://puppet.com/docs/puppetdb/)
 
 ## Prerequisites
 
@@ -21,8 +21,8 @@ The following environment variables are used to configure the Vagrant environmen
 | Environment variable | Default value          | Description                                          |
 | -------------------- | -------------          | -----------                                          |
 | `IP_SUBNET`          | `192.168.32`           | The internal IP subnet used by Vagrant               |
-| `PUPPET_VERSION`     | none (use the latest)  | The Puppet agent version                             |
-| `PUPPET_RELEASE`     | `8`                    | The Puppet major release version                     |
+| `OPENVOX_VERSION`    | none (use the latest)  | The OpenVox agent version                            |
+| `OPENVOX_RELEASE`    | `8`                    | The OpenVox major release version                    |
 | `EL_RELEASE`         | `9`                    | The EL release of the base box                       |
 | `EL_OS_NAME`         | `centos`               | The base box OS                                      |
 | `BOX`                | Depends on EL_OS_NAME  | The base box name                                    |

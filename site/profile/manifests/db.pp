@@ -1,8 +1,8 @@
-# @summary Configure puppetdb
+# @summary Configure db
 #
 # @example
-#   include profile::puppetdb
-class profile::puppetdb {
+#   include profile::db
+class profile::db {
   include 'puppetdb'
   include 'puppetdb::master::config'
 

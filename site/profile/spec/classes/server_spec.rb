@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'profile::puppetserver::service' do
+describe 'profile::server' do
   on_supported_os.each do |os, os_facts|
     context "on #{os}" do
       let(:facts) { os_facts }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 require 'facter'
-require 'facter/role__puppetserver__r10k_remote'
+require 'facter/role__server__r10k_remote'
 
 RSpec.shared_examples 'r10k' do
   context 'with r10k.yaml' do
@@ -27,8 +27,8 @@ RSpec.shared_examples 'r10k' do
   end
 end
 
-describe :role__puppetserver__r10k_remote, type: :fact do
-  subject(:fact) { Facter.fact(:role__puppetserver__r10k_remote) }
+describe :role__server__r10k_remote, type: :fact do
+  subject(:fact) { Facter.fact(:role__server__r10k_remote) }
 
   let(:r10k_yaml) { '/etc/puppetlabs/r10k/r10k.yaml' }
 

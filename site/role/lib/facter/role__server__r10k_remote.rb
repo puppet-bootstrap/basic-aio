@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-Facter.add(:role__puppetserver__r10k_remote) do
+Facter.add(:role__server__r10k_remote) do
   r10k_yaml = '/etc/puppetlabs/r10k/r10k.yaml'
 
   confine kernel: 'Linux'
