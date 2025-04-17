@@ -3,6 +3,7 @@
 require 'serverspec'
 require 'net/ssh'
 require 'tempfile'
+require 'bundler'
 
 set :backend, :ssh
 
@@ -20,12 +21,14 @@ end
 host = ENV['TARGET_HOST']
 
 begin
-  state = `vagrant status #{host} --machine-readable`
-          .lines(chomp: true)
-          .map { |line| line.split(',') }
-          .select { |v| v[2] == 'state' }
-          .each_with_object({}) { |v, memo| memo[v[1]] = [v[2..-1]].to_h }
-  if host.nil? || state.any { |_k, v| v['state'] != 'running' } || (state[host]['state'] != 'running')
+  state = Bundler.with_original_env do
+    `vagrant status #{host} --machine-readable`
+      &.lines(chomp: true)
+      &.map { |line| line.split(',') }
+      &.select { |v| v[2] == 'state' }
+      &.each_with_object({}) { |v, memo| memo[v[1]] = [v[2..-1]].to_h }
+  end
+  if host.nil? || state&.any? { |_k, v| v['state'] != 'running' } || (state&.dig(host, 'state') != 'running')
     system("vagrant up #{host}")
   end
 rescue => e
@@ -33,7 +36,9 @@ rescue => e
 end
 
 config = Tempfile.new('', Dir.tmpdir)
-config.write(`vagrant ssh-config #{host}`)
+Bundler.with_original_env do
+  config.write(`vagrant ssh-config #{host}`)
+end
 config.close
 
 options = Net::SSH::Config.for(host, [config.path])
