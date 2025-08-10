@@ -33,7 +33,7 @@ group :development do
   gem "rexml", '>= 3.0.0', '< 3.4.2',            require: false
 end
 group :development, :release_prep do
-  gem "puppet-strings", '~> 4.0',         require: false
+  gem "puppet-strings", '~> 5.0',         require: false
   gem "puppetlabs_spec_helper", '~> 8.0', require: false
   gem "puppet-blacksmith", '~> 8.0',      require: false
 end
