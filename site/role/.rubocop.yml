@@ -1,11 +1,11 @@
 ---
-require:
+plugins:
 - rubocop-performance
 - rubocop-rspec
 AllCops:
   NewCops: enable
   DisplayCopNames: true
-  TargetRubyVersion: '2.6'
+  TargetRubyVersion: '2.7'
   Include:
   - "**/*.rb"
   Exclude:
@@ -115,10 +115,6 @@ Style/StringMethods:
 Bundler/GemFilename:
   Enabled: false
 Bundler/InsecureProtocolSource:
-  Enabled: false
-Capybara/CurrentPathExpectation:
-  Enabled: false
-Capybara/VisibilityMatcher:
   Enabled: false
 Gemspec/DuplicatedAssignment:
   Enabled: false
@@ -294,7 +290,7 @@ Performance/UriDefaultParser:
   Enabled: false
 RSpec/Be:
   Enabled: false
-RSpec/Capybara/FeatureMethods:
+RSpec/Dialect:
   Enabled: false
 RSpec/ContainExactly:
   Enabled: false
@@ -319,12 +315,6 @@ RSpec/ExampleWithoutDescription:
 RSpec/ExpectChange:
   Enabled: false
 RSpec/ExpectInHook:
-  Enabled: false
-RSpec/FactoryBot/AttributeDefinedStatically:
-  Enabled: false
-RSpec/FactoryBot/CreateList:
-  Enabled: false
-RSpec/FactoryBot/FactoryClassName:
   Enabled: false
 RSpec/HooksBeforeExamples:
   Enabled: false
@@ -490,16 +480,6 @@ Style/TrailingMethodEndStatement:
   Enabled: false
 Style/UnpackFirst:
   Enabled: false
-Capybara/MatchStyle:
-  Enabled: false
-Capybara/NegationMatcher:
-  Enabled: false
-Capybara/SpecificActions:
-  Enabled: false
-Capybara/SpecificFinders:
-  Enabled: false
-Capybara/SpecificMatcher:
-  Enabled: false
 Gemspec/DeprecatedAttributeAssignment:
   Enabled: false
 Gemspec/DevelopmentDependencies:
@@ -600,27 +580,11 @@ RSpec/DuplicatedMetadata:
   Enabled: false
 RSpec/ExcessiveDocstringSpacing:
   Enabled: false
-RSpec/FactoryBot/ConsistentParenthesesStyle:
-  Enabled: false
-RSpec/FactoryBot/FactoryNameStyle:
-  Enabled: false
-RSpec/FactoryBot/SyntaxMethods:
-  Enabled: false
 RSpec/IdenticalEqualityAssertion:
   Enabled: false
 RSpec/NoExpectationExample:
   Enabled: false
 RSpec/PendingWithoutReason:
-  Enabled: false
-RSpec/Rails/AvoidSetupHook:
-  Enabled: false
-RSpec/Rails/HaveHttpStatus:
-  Enabled: false
-RSpec/Rails/InferredSpecType:
-  Enabled: false
-RSpec/Rails/MinitestAssertions:
-  Enabled: false
-RSpec/Rails/TravelAround:
   Enabled: false
 RSpec/RedundantAround:
   Enabled: false
