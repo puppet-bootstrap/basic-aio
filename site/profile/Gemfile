@@ -14,7 +14,7 @@ def location_for(place_or_version, fake_version = nil)
 end
 
 group :development do
-  gem "json", '= 2.13.2',                        require: false
+  gem "json", '= 2.15.0',                        require: false
   gem "racc", '~> 1.8.0',                        require: false if Gem::Requirement.create(['>= 2.7.0', '< 3.0.0']).satisfied_by?(Gem::Version.new(RUBY_VERSION.dup))
   gem "deep_merge", '~> 1.2.2',                  require: false
   gem "voxpupuli-puppet-lint-plugins", '~> 5.0', require: false
