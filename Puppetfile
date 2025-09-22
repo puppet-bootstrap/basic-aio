@@ -35,7 +35,7 @@ mod 'choria-mcollective_choria', '0.22.2'
 mod 'choria-choria', '0.31.0'
 
 mod 'puppet-systemd', '8.3.1'
-mod 'puppetlabs-apt', '10.0.1' # Required by puppetlabs-postgresql, choria-choria
+mod 'puppetlabs-apt', '11.1.0' # Required by puppetlabs-postgresql, choria-choria
 
 # Manage firewalld
 mod 'puppet-firewalld', '5.1.0'
