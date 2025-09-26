@@ -35,7 +35,7 @@ end
 group :development, :release_prep do
   gem "openvox-strings", '~> 6.0',        require: false
   gem "puppetlabs_spec_helper", '~> 8.0', require: false
-  gem "puppet-blacksmith", '~> 8.0',      require: false
+  gem "puppet-blacksmith", '~> 9.0',      require: false
 end
 group :system_tests do
   gem "CFPropertyList", '< 3.0.8', require: false, platforms: [:mswin, :mingw, :x64_mingw]
