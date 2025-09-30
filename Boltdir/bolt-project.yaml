@@ -26,4 +26,4 @@ modules:
   version_requirement: 0.14.6
 # renovate: datasource=puppet-forge
 - name: puppet/systemd
-  version_requirement: 8.3.1
+  version_requirement: 9.1.0
