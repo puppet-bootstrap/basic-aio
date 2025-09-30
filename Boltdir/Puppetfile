@@ -4,7 +4,7 @@
 # The following directive installs modules to the managed moduledir.
 moduledir '.modules'
 
-mod 'puppet/systemd', '8.3.1'
+mod 'puppet/systemd', '9.1.0'
 mod 'choria/mcollective', '0.14.6'
 mod 'puppetlabs/puppet_agent', '4.23.0'
 mod 'puppet/firewalld', '5.1.0'
