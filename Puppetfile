@@ -20,7 +20,7 @@ mod 'puppetlabs-vcsrepo', '7.0.0' # Required by puppet-r10k
 mod 'puppetlabs-git', '0.5.0' # Required by puppet-r10k
 
 # Enables the EPEL repository on RHEL/CentOS.
-mod 'puppet-epel', '5.0.0'
+mod 'puppet-epel', '6.0.0'
 
 mod 'puppetlabs-puppetserver_gem', '1.1.1' # Required for eyaml.
 
