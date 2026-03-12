@@ -33,7 +33,7 @@ group :development do
   gem "rexml", '>= 3.0.0', '< 3.4.5',            require: false
 end
 group :development, :release_prep do
-  gem "openvox-strings", '~> 6.0',        require: false
+  gem "openvox-strings", '~> 7.0',        require: false
   gem "puppetlabs_spec_helper", '~> 8.0', require: false
   gem "puppet-blacksmith", '~> 9.0',      require: false
 end
