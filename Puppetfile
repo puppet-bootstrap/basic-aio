@@ -13,7 +13,7 @@ mod 'puppetlabs-concat', '9.1.0'
 mod 'puppetlabs-firewall', '8.3.0'
 
 # r10k gives us dynamic Puppet environments.
-mod 'puppet-r10k', '15.0.0'
+mod 'puppet-r10k', '15.1.0'
 
 # These modules are all dependencies for r10k.
 mod 'puppetlabs-vcsrepo', '7.0.0' # Required by puppet-r10k
