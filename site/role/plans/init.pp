@@ -77,7 +77,7 @@ plan role (
     -> class { 'r10k':
       remote => $control_repo,
     }
-    -> exec { 'r10k deploy environment -pv':
+    -> exec { 'r10k deploy environment -pv': # lint:ignore:exec_idempotency
       path => '/opt/puppetlabs/bin:/bin:/usr/bin:/sbin:/usr/sbin',
       # Always run this command to ensure that the environment is deployed.
     }
