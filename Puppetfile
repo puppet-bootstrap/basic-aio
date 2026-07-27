@@ -1,7 +1,7 @@
 forge "https://forge.puppet.com/"
 
 # stdlib is required by many other modules.
-mod 'puppetlabs-stdlib', '9.7.0'
+mod 'puppetlabs-stdlib', '10.0.1'
 
 # puppetdb is needed in order to use exported resources.
 mod 'puppetlabs-puppetdb', '8.1.0'
