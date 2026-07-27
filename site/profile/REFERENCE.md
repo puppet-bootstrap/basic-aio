@@ -42,17 +42,23 @@ Data type: `Variant[String, Array[String]]`
 
 Puppet agent service name
 
+Default value: `'puppet'`
+
 ##### <a name="-profile--agent--service_ensure"></a>`service_ensure`
 
 Data type: `String`
 
 The `ensure` attribute for the agent service
 
+Default value: `'running'`
+
 ##### <a name="-profile--agent--service_enable"></a>`service_enable`
 
 Data type: `Boolean`
 
 The `enable` attribute for the agent service
+
+Default value: `true`
 
 ### <a name="profile--base"></a>`profile::base`
 
@@ -77,6 +83,8 @@ The following parameters are available in the `profile::base` class:
 Data type: `Array`
 
 A list of packages to manage
+
+Default value: `[]`
 
 ### <a name="profile--db"></a>`profile::db`
 
@@ -139,6 +147,8 @@ The following parameters are available in the `profile::server::config` class:
 Data type: `Array[String]`
 
 List of certnames or domain name globs
+
+Default value: `[]`
 
 ### <a name="profile--server--install"></a>`profile::server::install`
 
