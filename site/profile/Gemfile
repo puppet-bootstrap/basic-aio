@@ -17,29 +17,22 @@ group :development do
   gem "json", '= 2.19.5',                        require: false
   gem "racc", '~> 1.8.0',                        require: false if Gem::Requirement.create(['>= 2.7.0', '< 3.0.0']).satisfied_by?(Gem::Version.new(RUBY_VERSION.dup))
   gem "deep_merge", '~> 1.2.2',                  require: false
-  gem "voxpupuli-puppet-lint-plugins", '~> 5.0', require: false
-  gem "facterdb", '~> 4.0',                     require: false
-  gem "metadata-json-lint", '~> 5.0',            require: false
-  gem "rspec-puppet-facts", '~> 6.0',            require: false
+  gem "voxpupuli-test", '~> 14.0',               require: false
+  gem "voxpupuli-rubocop", '~> 5.0',             require: false
   gem "dependency_checker", '~> 1.0.0',          require: false
-  gem "parallel_tests", '= 5.7.0',              require: false
   gem "pry", '~> 0.10',                          require: false
   gem "simplecov-console", '~> 0.9',             require: false
   gem "puppet-debugger", '~> 1.0',               require: false
-  gem "rubocop", '~> 1.86.0',                    require: false
-  gem "rubocop-performance", '= 1.26.1',         require: false
-  gem "rubocop-rspec", '= 3.9.0',               require: false
   gem "rb-readline", '= 0.5.5',                  require: false, platforms: [:mswin, :mingw, :x64_mingw]
   gem "rexml", '>= 3.0.0', '< 3.4.5',            require: false
 end
 group :development, :release_prep do
   gem "openvox-strings", '~> 7.0',        require: false
-  gem "puppetlabs_spec_helper", '~> 8.0', require: false
   gem "puppet-blacksmith", '~> 9.0',      require: false
 end
-group :system_tests do
-  gem "CFPropertyList", '< 3.0.9', require: false, platforms: [:mswin, :mingw, :x64_mingw]
-  gem "serverspec", '~> 2.41',     require: false
+group :acceptance do
+  gem "voxpupuli-acceptance", '~> 4.0', require: false
+  gem "vagrant-wrapper",                require: false
 end
 
 openvox_version = ENV['OPENVOX_GEM_VERSION']

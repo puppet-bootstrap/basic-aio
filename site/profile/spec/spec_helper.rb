@@ -1,15 +1,8 @@
 # frozen_string_literal: true
 
-RSpec.configure do |c|
-  c.mock_with :rspec
-end
-
-require 'puppetlabs_spec_helper/module_spec_helper'
-require 'rspec-puppet-facts'
+require 'voxpupuli/test/spec_helper'
 
 require 'spec_helper_local' if File.file?(File.join(File.dirname(__FILE__), 'spec_helper_local.rb'))
-
-include RspecPuppetFacts
 
 default_facts = {
   puppetversion: Puppet.version,
@@ -39,6 +32,7 @@ end
 
 RSpec.configure do |c|
   c.default_facts = default_facts
+  c.hiera_config = '../../hiera.yaml'
   c.before :each do
     # set to strictest setting for testing
     # by default Puppet runs at warning level
@@ -46,9 +40,6 @@ RSpec.configure do |c|
     Puppet.settings[:strict_variables] = true
   end
   c.filter_run_excluding(bolt: true) unless ENV['GEM_BOLT']
-  c.after(:suite) do
-    RSpec::Puppet::Coverage.report!(0)
-  end
 
   # Filter backtrace noise
   backtrace_exclusion_patterns = [
