@@ -10,7 +10,7 @@ mod 'puppetlabs-puppetdb', '8.1.0'
 mod 'puppetlabs-inifile', '6.4.1'
 mod 'puppetlabs-postgresql', '10.6.3'
 mod 'puppetlabs-concat', '10.0.1'
-mod 'puppetlabs-firewall', '8.3.0'
+mod 'puppetlabs-firewall', '8.5.0'
 
 # r10k gives us dynamic Puppet environments.
 mod 'puppet-r10k', '15.1.0'
