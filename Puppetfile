@@ -9,7 +9,7 @@ mod 'puppetlabs-puppetdb', '8.1.0'
 # These modules are all dependencies for puppetdb.
 mod 'puppetlabs-inifile', '6.3.1'
 mod 'puppetlabs-postgresql', '10.6.3'
-mod 'puppetlabs-concat', '9.1.0'
+mod 'puppetlabs-concat', '10.0.1'
 mod 'puppetlabs-firewall', '8.3.0'
 
 # r10k gives us dynamic Puppet environments.
