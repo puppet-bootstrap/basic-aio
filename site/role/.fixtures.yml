@@ -31,4 +31,4 @@ fixtures:
     firewalld: puppet-firewalld
     augeas_core: puppetlabs-augeas_core
   symlinks:
-    profile: "#{source_dir}/../profile"
+    profile: "../../../../profile"

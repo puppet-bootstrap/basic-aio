@@ -51,6 +51,9 @@ jobs:
           - label: 'OpenVox 8'
             openvox_version: '~> 8'
             ruby_version: '3.2'
+          - label: 'OpenVox 9 Preview (OpenVox 8 + Ruby 4.0)'
+            openvox_version: '~> 8'
+            ruby_version: '4.0'
     env:
       OPENVOX_GEM_VERSION: ${{matrix.openvox.openvox_version}}
     steps:
