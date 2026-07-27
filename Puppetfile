@@ -31,7 +31,7 @@ mod 'choria-mcollective_agent_package', '5.5.1'
 mod 'choria-mcollective_agent_service', '4.1.0'
 mod 'choria-mcollective_agent_filemgr', '2.1.0'
 mod 'choria-mcollective_util_actionpolicy', '3.3.0'
-mod 'choria-mcollective_choria', '0.22.2'
+mod 'choria-mcollective_choria', '0.23.0'
 mod 'choria-choria', '0.32.1'
 
 mod 'puppet-systemd', '9.4.0'
