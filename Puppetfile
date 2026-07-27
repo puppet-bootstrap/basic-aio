@@ -25,7 +25,7 @@ mod 'puppet-epel', '6.0.0'
 mod 'puppetlabs-puppetserver_gem', '1.1.1' # Required for eyaml.
 
 # mcollective with NATS as message queue
-mod 'choria-mcollective', '0.14.6'
+mod 'choria-mcollective', '0.15.0'
 mod 'choria-mcollective_agent_puppet', '2.5.0'
 mod 'choria-mcollective_agent_package', '5.5.1'
 mod 'choria-mcollective_agent_service', '4.1.0'
