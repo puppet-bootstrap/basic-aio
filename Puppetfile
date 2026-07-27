@@ -32,7 +32,7 @@ mod 'choria-mcollective_agent_service', '4.1.0'
 mod 'choria-mcollective_agent_filemgr', '2.1.0'
 mod 'choria-mcollective_util_actionpolicy', '3.3.0'
 mod 'choria-mcollective_choria', '0.22.2'
-mod 'choria-choria', '0.31.0'
+mod 'choria-choria', '0.32.1'
 
 mod 'puppet-systemd', '9.4.0'
 mod 'puppetlabs-apt', '11.2.0' # Required by puppetlabs-postgresql, choria-choria
