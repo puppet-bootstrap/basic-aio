@@ -6,7 +6,7 @@ moduledir '.modules'
 
 mod 'puppet/systemd', '9.4.0'
 mod 'choria/mcollective', '0.15.0'
-mod 'puppetlabs/puppet_agent', '4.23.0'
+mod 'puppetlabs/puppet_agent', '4.28.0'
 mod 'puppet/firewalld', '5.1.0'
 mod 'puppetlabs/stdlib', '9.7.0'
 mod 'puppetlabs/git', '0.5.0'
