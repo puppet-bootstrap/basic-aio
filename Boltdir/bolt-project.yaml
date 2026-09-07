@@ -14,7 +14,7 @@ modules:
   version_requirement: 0.5.0
 # renovate: datasource=puppet-forge
 - name: puppetlabs/stdlib
-  version_requirement: 10.0.2
+  version_requirement: 10.1.0
 # renovate: datasource=puppet-forge
 - name: puppet/firewalld
   version_requirement: 5.1.0
