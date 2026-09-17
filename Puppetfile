@@ -38,4 +38,4 @@ mod 'puppet-systemd', '10.0.0'
 mod 'puppetlabs-apt', '11.3.2' # Required by puppetlabs-postgresql, choria-choria
 
 # Manage firewalld
-mod 'puppet-firewalld', '5.1.0'
+mod 'puppet-firewalld', '6.0.0'
