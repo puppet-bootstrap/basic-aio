@@ -4,7 +4,7 @@ forge "https://forge.puppet.com/"
 mod 'puppetlabs-stdlib', '10.1.0'
 
 # puppetdb is needed in order to use exported resources.
-mod 'puppetlabs-puppetdb', '8.1.0'
+mod 'puppetlabs-puppetdb', '9.0.0'
 
 # These modules are all dependencies for puppetdb.
 mod 'puppetlabs-inifile', '6.5.0'
