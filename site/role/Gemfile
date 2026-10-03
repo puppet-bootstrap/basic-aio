@@ -17,7 +17,7 @@ group :development do
   gem "json", '= 2.21.2',                        require: false
   gem "racc", '~> 1.8.0',                        require: false if Gem::Requirement.create(['>= 2.7.0', '< 3.0.0']).satisfied_by?(Gem::Version.new(RUBY_VERSION.dup))
   gem "deep_merge", '~> 1.2.2',                  require: false
-  gem "voxpupuli-test", '~> 14.0',               require: false
+  gem "voxpupuli-test", '~> 15.0',               require: false
   gem "voxpupuli-rubocop", '~> 5.0',             require: false
   gem "dependency_checker", '~> 1.0.0',          require: false
   gem "pry", '~> 0.10',                          require: false
