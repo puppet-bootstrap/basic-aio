@@ -22,7 +22,7 @@ Configures the `puppet` service
 
 #### Examples
 
-##### 
+#####
 
 ```puppet
 include profile::agent
@@ -66,7 +66,7 @@ Base OS customization
 
 #### Examples
 
-##### 
+#####
 
 ```puppet
 include profile::base
@@ -92,7 +92,7 @@ Configure db
 
 #### Examples
 
-##### 
+#####
 
 ```puppet
 include profile::db
@@ -104,7 +104,7 @@ Configure server
 
 #### Examples
 
-##### 
+#####
 
 ```puppet
 include profile::server
@@ -130,7 +130,7 @@ Configures the puppet server
 
 #### Examples
 
-##### 
+#####
 
 ```puppet
 include profile::server::config
@@ -156,7 +156,7 @@ Install server package
 
 #### Examples
 
-##### 
+#####
 
 ```puppet
 include profile::server::install
@@ -191,7 +191,7 @@ Configure server service
 
 #### Examples
 
-##### 
+#####
 
 ```puppet
 include profile::server::service
@@ -228,4 +228,3 @@ Data type: `Boolean`
 Whether to enable the service at boot
 
 Default value: `true`
-
