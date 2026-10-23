@@ -22,4 +22,9 @@ puppetdb::puppetdb_package: 'openvoxdb'
 puppetdb::master::config::terminus_package: 'openvoxdb-termini'
 
 choria::manage_package_repo: true
+# Choria before 0.30.3 looks up `ssldir` with `puppet apply --configprint`,
+# which OpenVox 9 removed.  Setting it explicitly skips that lookup.
+choria::server_config:
+  plugin.choria.ssldir: /etc/puppetlabs/puppet/ssl
+choria::broker::ssldir: /etc/puppetlabs/puppet/ssl
 choria::broker::network_broker: true
