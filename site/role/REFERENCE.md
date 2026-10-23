@@ -21,7 +21,7 @@ Agent class
 
 #### Examples
 
-##### 
+#####
 
 ```puppet
 include role::agent
@@ -33,7 +33,7 @@ Puppet server class
 
 #### Examples
 
-##### 
+#####
 
 ```puppet
 include role::server
@@ -135,4 +135,3 @@ Data type: `Optional[String]`
 User name of the demo choria user on the Puppet server
 
 Default value: `'vagrant'`
-
