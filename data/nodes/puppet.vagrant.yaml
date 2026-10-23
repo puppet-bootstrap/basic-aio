@@ -3,3 +3,11 @@ classes:
   - role::server
 
 mcollective::client: true
+
+# Let agents' choria-server connect to the Choria broker.
+firewalld::ports:
+  choria-broker:
+    ensure: present
+    zone: public
+    port: 4222
+    protocol: tcp
