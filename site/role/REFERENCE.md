@@ -56,6 +56,7 @@ The following parameters are available in the `role` plan:
 * [`openvox_agent`](#-role--openvox_agent)
 * [`targets`](#-role--targets)
 * [`server_target`](#-role--server_target)
+* [`openvox_server`](#-role--openvox_server)
 * [`control_repo`](#-role--control_repo)
 * [`choria_user`](#-role--choria_user)
 
@@ -112,6 +113,15 @@ Data type: `TargetSpec`
 The puppet server target
 
 Default value: `'puppet'`
+
+##### <a name="-role--openvox_server"></a>`openvox_server`
+
+Data type: `Optional[String[1]]`
+
+The value of `server` in the agents' `puppet.conf`.  Defaults to the FQDN of
+`server_target`.  (OpenVox 9 no longer defaults `server` to `puppet`.)
+
+Default value: `undef`
 
 ##### <a name="-role--control_repo"></a>`control_repo`
 

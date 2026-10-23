@@ -7,6 +7,9 @@
 # @param openvox_agent The name of the openvox-agent package
 # @param targets The targets to run on
 # @param server_target The puppet server target
+# @param openvox_server
+#   The value of `server` in the agents' `puppet.conf`.  Defaults to the FQDN of
+#   `server_target`.  (OpenVox 9 no longer defaults `server` to `puppet`.)
 # @param control_repo URL of the control repo
 # @param choria_user User name of the demo choria user on the Puppet server
 plan role (
@@ -17,6 +20,7 @@ plan role (
   String[1]        $openvox_agent      = 'openvox-agent',
   TargetSpec       $targets            = 'all',
   TargetSpec       $server_target      = 'puppet',
+  Optional[String[1]] $openvox_server  = undef,
   Variant[
     Stdlib::HTTPUrl,
     Pattern[/\Afile:\/\/\/([^\n\/\0]+(\/)?)+\z/]
@@ -42,6 +46,21 @@ plan role (
   # apply_prep will see that puppet-agent is already
   # installed and collect facts.
   apply_prep($targets)
+
+  # OpenVox 9 no longer falls back to `puppet` when `server` is unset,
+  # so set it explicitly on every target.
+  $server = $openvox_server ? {
+    undef   => get_targets($server_target)[0].facts['networking']['fqdn'],
+    default => $openvox_server,
+  }
+  run_command(
+    "puppet config set server ${server} --section main",
+    $targets,
+    "Setting server to ${server}",
+    '_env_vars' => {
+      'PATH' => '/opt/puppetlabs/bin:/bin:/usr/bin',
+    },
+  )
 
   # Use the collected facts to build a hash of `host` resources.
   $hosts = get_targets($targets).reduce({}) |$memo, $target| {
