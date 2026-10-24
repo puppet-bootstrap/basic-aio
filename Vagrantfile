@@ -4,7 +4,7 @@ ENV['VAGRANT_EXPERIMENTAL'] = 'typed_triggers'
 
 ip_subnet = ENV.fetch('IP_SUBNET', '192.168.32')
 openvox_version = ENV.fetch('OPENVOX_VERSION', '')
-openvox_release = openvox_version.empty? ? ENV.fetch('OPENVOX_RELEASE', '8') : openvox_version.split('.').first
+openvox_release = openvox_version.empty? ? ENV.fetch('OPENVOX_RELEASE', '9') : openvox_version.split('.').first
 el_release = ENV.fetch('EL_RELEASE', '9')
 el_os_name = ENV.fetch('EL_OS_NAME', 'centos')
 def select_box(el_os_name, el_release)

@@ -22,7 +22,7 @@ The following environment variables are used to configure the Vagrant environmen
 | -------------------- | -------------          | -----------                                          |
 | `IP_SUBNET`          | `192.168.32`           | The internal IP subnet used by Vagrant               |
 | `OPENVOX_VERSION`    | none (use the latest)  | The OpenVox agent version                            |
-| `OPENVOX_RELEASE`    | `8`                    | The OpenVox major release version                    |
+| `OPENVOX_RELEASE`    | `9`                    | The OpenVox major release version                    |
 | `EL_RELEASE`         | `9`                    | The EL release of the base box                       |
 | `EL_OS_NAME`         | `centos`               | The base box OS                                      |
 | `BOX`                | Depends on EL_OS_NAME  | The base box name                                    |

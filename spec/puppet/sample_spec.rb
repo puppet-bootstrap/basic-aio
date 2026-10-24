@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 openvox_version = ENV.fetch('OPENVOX_VERSION', '')
-openvox_release = openvox_version.empty? ? ENV.fetch('OPENVOX_RELEASE', '8') : openvox_version.split('.').first
+openvox_release = openvox_version.empty? ? ENV.fetch('OPENVOX_RELEASE', '9') : openvox_version.split('.').first
 
 describe 'server' do
   # Verify the physical setup of the server
