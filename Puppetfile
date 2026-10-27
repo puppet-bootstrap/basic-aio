@@ -7,7 +7,7 @@ mod 'puppetlabs-stdlib', '10.1.0'
 mod 'puppetlabs-puppetdb', '9.0.0'
 
 # These modules are all dependencies for puppetdb.
-mod 'puppetlabs-inifile', '6.5.0'
+mod 'puppetlabs-inifile', '6.6.0'
 mod 'puppetlabs-postgresql', '10.7.0'
 mod 'puppetlabs-concat', '10.1.0'
 mod 'puppetlabs-firewall', '8.6.0'
