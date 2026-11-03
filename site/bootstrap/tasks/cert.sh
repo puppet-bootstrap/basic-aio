@@ -24,14 +24,24 @@ case "$action" in
       fi
       exit 0
     fi
-    if [ -f "${requestdir}/${certname}.pem" ]; then
-      log "A CSR for ${certname} is already pending; not resubmitting"
-      exit 0
-    fi
-    if [ -n "$alt_names" ]; then
+    if [ -n "$alt_names" ] && [ ! -f "${requestdir}/${certname}.pem" ]; then
       puppet_set main dns_alt_names "$alt_names"
     fi
-    puppet ssl submit_request --certname "$certname"
+    # A local CSR doesn't mean the CA has it (the submission could have
+    # failed), so always submit.  If the CA already has a request (or a
+    # certificate) for this name, `puppet ssl` reports a conflict.  A pending
+    # request gets signed next; a certificate that doesn't match this host's
+    # key makes the download step fail.
+    if ! output="$(puppet ssl submit_request --certname "$certname" 2>&1)"; then
+      if echo "$output" | grep -q 'due to a conflict on the server'; then
+        log "The CA already has a request for ${certname}"
+      else
+        echo "$output" >&2
+        fail "Submitting the certificate request for ${certname} failed"
+      fi
+    else
+      echo "$output"
+    fi
     ;;
   download)
     if [ -f "$hostcert" ]; then

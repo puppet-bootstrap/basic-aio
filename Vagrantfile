@@ -50,6 +50,7 @@ def bolt_debug_options
   ]
 end
 
+require 'shellwords'
 require 'yaml'
 stream = YAML.safe_load(ENV.fetch('VERBOSE', 'true'))
 native_ssh = YAML.safe_load(ENV.fetch('NATIVE_SSH', 'true'))
@@ -105,7 +106,7 @@ Vagrant.configure('2') do |config|
         'bolt plan run basic_aio -t all --run-as root',
         'server_target=puppet',
         "db_targets=#{(db_names.empty? ? ['puppet'] : db_names).join(',')}",
-        "db_password=#{db_password}",
+        Shellwords.escape("db_password=#{db_password}"),
         'control_repo=file:///vagrant/',
         'manage_hosts=true',
         'manage_topology_data=true',

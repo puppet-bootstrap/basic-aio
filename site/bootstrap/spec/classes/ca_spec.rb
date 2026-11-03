@@ -24,6 +24,7 @@ describe 'bootstrap::ca' do
         let(:params) { { autosign: ['*.example.com', 'special.example.org'] } }
 
         it { is_expected.to contain_file('/etc/puppetlabs/puppet/autosign.conf').with_content("*.example.com\nspecial.example.org\n") }
+        it { is_expected.to contain_ini_setting('puppet.conf server autosign').with_value('/etc/puppetlabs/puppet/autosign.conf') }
       end
 
       context 'with autosign enabled' do

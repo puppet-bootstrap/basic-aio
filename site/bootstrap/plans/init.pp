@@ -103,6 +103,12 @@ plan bootstrap (
     'start_service' => $start_service,
   )
 
+  # Copy certificates signed during the agent runs to any standby CAs.
+  unless $ca_targets =~ Undef {
+    $cas = get_targets($ca_targets)
+    run_plan('bootstrap::sync_ca', 'active' => $cas[0], 'standbys' => $cas[1, -1])
+  }
+
   if $smoke_test and $topology['compilers'].length > 1 {
     run_plan('bootstrap::smoke_test', 'targets' => $all, 'servers' => $topology['compilers'])
   }

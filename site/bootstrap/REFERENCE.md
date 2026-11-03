@@ -1115,9 +1115,14 @@ The certnames of the compile masters to test
 ### <a name="bootstrap--sync_ca"></a>`bootstrap::sync_ca`
 
 The copy passes through the Bolt host's `downloads` directory and is
-deleted afterward.  Run this again after the active CA signs or revokes
-certificates to keep the standbys current.  Don't point agents at a
+deleted afterward.  Run this again after the active CA signs, revokes, or
+cleans certificates to keep the standbys current; files removed on the
+active CA are removed from the standbys too.  Don't point agents at a
 standby until it is promoted, or its serial numbers will diverge.
+
+The active CA keeps running during the copy.  Its serial counter is
+archived last, so it is never older than the certificates in the copy and a
+promoted standby can't reuse a serial number (at worst it skips some).
 
 #### Parameters
 

@@ -39,6 +39,15 @@ class bootstrap::ca (
         mode    => '0644',
         content => $autosign.map |$entry| { "${entry}\n" }.join,
       }
+      # Point `autosign` at the file, in case it was `true` before.
+      ini_setting { 'puppet.conf server autosign':
+        ensure  => present,
+        path    => "${confdir}/puppet.conf",
+        section => 'server',
+        setting => 'autosign',
+        value   => "${confdir}/autosign.conf",
+        notify  => Service['puppetserver'],
+      }
     }
     true: {
       ini_setting { 'puppet.conf server autosign':
