@@ -11,7 +11,7 @@
 
 ### Plans
 
-* [`role`](#role): Build an OpenVox server and attach agents
+* [`role`](#role): Build the basic-aio Vagrant environment
 
 ## Classes
 
@@ -43,7 +43,9 @@ include role::server
 
 ### <a name="role"></a>`role`
 
-Build an OpenVox server and attach agents
+Uses the portable plans in the `bootstrap` module to install OpenVox, and
+adds the parts that are specific to this Vagrant environment: the hosts
+file, r10k, and a Choria certificate for the demo user.
 
 #### Parameters
 
@@ -69,7 +71,8 @@ The major version of OpenVox to use
 Data type: `Optional[String]`
 
 The version of openvox-agent to install.  Defaults to the latest version
-in `openvox_collection`.
+in `openvox_collection`.  Installing openvox-server may upgrade the agent
+on the server to satisfy openvox-server's dependencies.
 
 Default value: `undef`
 

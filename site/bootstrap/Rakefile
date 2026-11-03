@@ -1,0 +1,22 @@
+# frozen_string_literal: true
+
+require 'bundler'
+require 'voxpupuli/test/rake'
+require 'openvox-strings/tasks' if Gem.loaded_specs.key? 'openvox-strings'
+
+PuppetLint.configuration.send('disable_relative')
+PuppetLint.configuration.send('disable_80chars')
+PuppetLint.configuration.send('disable_140chars')
+PuppetLint.configuration.send('disable_class_inherits_from_params_class')
+PuppetLint.configuration.send('disable_autoloader_layout')
+PuppetLint.configuration.send('disable_documentation')
+PuppetLint.configuration.send('disable_single_quote_string_with_variables')
+PuppetLint.configuration.fail_on_warnings = true
+PuppetLint.configuration.ignore_paths = [".vendor/**/*.pp", ".bundle/**/*.pp", "pkg/**/*.pp", "spec/**/*.pp", "tests/**/*.pp", "types/**/*.pp", "vendor/**/*.pp"]
+
+# Restore the original `check` task prerequisites (drop `check:trailing_whitespace`,
+# which was not run by puppetlabs_spec_helper).
+if Rake::Task.task_defined?('check')
+  Rake::Task['check'].clear_prerequisites
+  task check: ['check:test_file', 'check:dot_underscore', 'check:git_ignore']
+end
