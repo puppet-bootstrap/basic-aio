@@ -77,3 +77,43 @@ jobs:
         run: pip install 'yamllint>=1,<2'
       - name: Run yamllint
         run: yamllint .
+
+  plans:
+    # Pinned because the openvox-release package is specific to the Ubuntu release.
+    runs-on: ubuntu-24.04
+    env:
+      BOLT_DISABLE_ANALYTICS: 'true'
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install OpenBolt
+        # OpenBolt is not yet in the openvox9 collection.
+        run: |
+          wget -q https://apt.voxpupuli.org/openvox8-release-ubuntu24.04.deb
+          sudo dpkg -i openvox8-release-ubuntu24.04.deb
+          sudo apt-get update -q
+          sudo apt-get install -y openbolt
+      - name: Install Bolt modules
+        run: bolt module install
+        working-directory: Boltdir
+      - name: Parse plans
+        working-directory: Boltdir
+        run: |
+          project=$(sed -n 's/^name: *//p' bolt-project.yaml)
+          rc=0
+          for file in $(find ../site/*/plans plans -name '*.pp' 2>/dev/null | sort); do
+            case "$file" in
+              ../site/*)
+                src=${file#../}
+                path=${file#../site/}; module=${path%%/*}; rel=${path#*/plans/} ;;
+              *)
+                src=Boltdir/$file
+                module=$project; rel=${file#plans/} ;;
+            esac
+            rel=${rel%.pp}
+            name=$module
+            [ "$rel" = init ] || name="${module}::${rel//\//::}"
+            echo "::group::${name} (${src})"
+            bolt plan show "$name" || { echo "::error file=${src}::Failed to parse plan ${name}"; rc=1; }
+            echo '::endgroup::'
+          done
+          exit $rc
