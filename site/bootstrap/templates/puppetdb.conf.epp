@@ -1,0 +1,5 @@
+<%- | Array[String[1], 1] $puppetdb_urls | -%>
+# Managed by Puppet (bootstrap::server::puppetdb).
+[main]
+server_urls = <%= $puppetdb_urls.join(',') %>
+soft_write_failure = false

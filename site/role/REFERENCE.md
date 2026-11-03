@@ -7,7 +7,7 @@
 ### Classes
 
 * [`role::agent`](#role--agent): Agent class
-* [`role::server`](#role--server): Puppet server class
+* [`role::server`](#role--server): OpenVox infrastructure host
 
 ## Classes
 
@@ -25,7 +25,8 @@ include role::agent
 
 ### <a name="role--server"></a>`role::server`
 
-Puppet server class
+Applied to every compile master, CA, and OpenVoxDB host.  Which profiles
+apply depends on the host's place in `profile::topology`.
 
 #### Examples
 

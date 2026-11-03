@@ -2,6 +2,32 @@
 classes:
   - role::agent
 
+# The layout of the OpenVox infrastructure.  The `basic_aio` Bolt plan writes
+# the real values into the global Hiera layer on the compile masters; these
+# defaults describe the all-in-one demo.
+basic_aio::primary: puppet.vagrant
+basic_aio::server: puppet.vagrant
+basic_aio::compilers:
+  - puppet.vagrant
+basic_aio::ca_servers:
+  - puppet.vagrant
+basic_aio::db_servers:
+  - puppet.vagrant
+# Demo only.  `basic_aio` writes the password it was given into the global
+# Hiera layer.
+basic_aio::db_password: puppetdb
+
+lookup_options:
+  profile::db::database_password:
+    convert_to: Sensitive
+
+profile::topology::primary: "%{lookup('basic_aio::primary')}"
+profile::topology::server: "%{lookup('basic_aio::server')}"
+profile::topology::compilers: "%{alias('basic_aio::compilers')}"
+profile::topology::ca_servers: "%{alias('basic_aio::ca_servers')}"
+profile::topology::db_servers: "%{alias('basic_aio::db_servers')}"
+profile::db::database_password: "%{lookup('basic_aio::db_password')}"
+
 mcollective::site_policies:
   - action: "allow"
     callers: "choria=vagrant.mcollective"
@@ -9,15 +35,15 @@ mcollective::site_policies:
     facts: "*"
     classes: "*"
 
+# `choria enroll` requests its certificate from the active CA.
+mcollective::client_config:
+  plugin.choria.puppetca_host: "%{lookup('basic_aio::ca_servers.0')}"
+
 r10k::remote: "%{facts.role__server__r10k_remote}"
 
-profile::server::config::autosign:
+profile::ca::autosign:
   - "*.%{facts.networking.domain}"
   - vagrant.mcollective
-
-openvoxdb::master::config::create_puppet_service_resource: false
-openvoxdb::manage_firewall: false
-openvoxdb::postgres_version: '17'
 
 choria::manage_package_repo: true
 # Choria before 0.30.3 looks up `ssldir` with `puppet apply --configprint`,

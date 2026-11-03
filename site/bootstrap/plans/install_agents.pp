@@ -19,6 +19,12 @@
 # @param openvox_server
 #   The value of `server` in `puppet.conf`.  Defaults to the FQDN of
 #   `server_target`.  (OpenVox 9 no longer defaults `server` to `puppet`.)
+# @param ca_target
+#   The CA target, if the CA isn't on `server_target`.  Used to find the
+#   default value of `openvox_ca_server`.
+# @param openvox_ca_server
+#   The value of `ca_server` in `puppet.conf`.  Defaults to the FQDN of
+#   `ca_target`, or isn't set if neither is set.
 #
 # @return [String] The value of `server` set on the targets
 plan bootstrap::install_agents (
@@ -31,6 +37,8 @@ plan bootstrap::install_agents (
     default => "openvox${openvox_release}",
   },
   Optional[String[1]]   $openvox_server     = undef,
+  Optional[TargetSpec]  $ca_target          = undef,
+  Optional[String[1]]   $openvox_ca_server  = undef,
 ) {
   if $openvox_server =~ Undef and $server_target =~ Undef {
     fail_plan('Either openvox_server or server_target must be set')
@@ -70,11 +78,28 @@ plan bootstrap::install_agents (
     $server = $server_ref.facts['networking']['fqdn']
   }
 
+  if $openvox_ca_server =~ String {
+    $ca_server = $openvox_ca_server
+  } elsif $ca_target =~ NotUndef {
+    $ca_ref = get_targets($ca_target)[0]
+    unless $ca_ref.facts['networking'] {
+      run_plan('facts', 'targets' => $ca_ref)
+    }
+    $ca_server = $ca_ref.facts['networking']['fqdn']
+  } else {
+    $ca_server = undef
+  }
+
+  $settings = $ca_server ? {
+    undef   => { 'server' => $server },
+    default => { 'server' => $server, 'ca_server' => $ca_server },
+  }
+
   run_task(
     'openvox_bootstrap::configure',
     $targets,
     "Setting server to ${server}",
-    'puppet_conf'            => { 'main' => { 'server' => $server } },
+    'puppet_conf'            => { 'main' => $settings },
     'puppet_service_running' => false,
     'puppet_service_enabled' => false,
   )

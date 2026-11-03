@@ -1,0 +1,13 @@
+---
+fixtures:
+  forge_modules:
+    apt: puppetlabs-apt
+    concat: puppetlabs-concat
+    firewall: puppetlabs-firewall
+    inifile: puppetlabs-inifile
+    openvox_bootstrap: puppet-openvox_bootstrap
+    openvoxdb: puppet-openvoxdb
+    postgresql: puppetlabs-postgresql
+    stdlib: puppetlabs-stdlib
+    cron_core: puppetlabs-cron_core
+    yumrepo_core: puppetlabs-yumrepo_core

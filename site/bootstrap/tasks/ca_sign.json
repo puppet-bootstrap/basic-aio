@@ -1,0 +1,12 @@
+{
+  "description": "Sign pending CSRs on the CA. Certnames that are already signed are skipped; a certname with neither a CSR nor a signed cert fails the task.",
+  "input_method": "environment",
+  "supports_noop": false,
+  "parameters": {
+    "certnames": {
+      "description": "Certnames to sign.",
+      "type": "Array[String[1]]"
+    }
+  },
+  "files": ["bootstrap/files/common.sh"]
+}

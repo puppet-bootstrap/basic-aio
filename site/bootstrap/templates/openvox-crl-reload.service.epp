@@ -1,0 +1,7 @@
+# Managed by Puppet (bootstrap::server).
+[Unit]
+Description=Reload OpenVox Server after a CRL update
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/systemctl reload puppetserver

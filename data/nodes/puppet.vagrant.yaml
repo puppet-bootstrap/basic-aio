@@ -1,6 +1,5 @@
 ---
-classes:
-  - role::server
+# puppet.vagrant is the primary compile master in the Vagrant demo.
 
 mcollective::client: true
 

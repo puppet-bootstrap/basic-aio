@@ -1,0 +1,17 @@
+{
+  "description": "Generate the certificate authority and the CA host's own certificate with `puppetserver ca setup`, unless a CA already exists. Run this on the active CA before puppetserver first starts.",
+  "input_method": "environment",
+  "supports_noop": false,
+  "parameters": {
+    "certname": {
+      "description": "Certname (FQDN) of the CA host.",
+      "type": "String[1]"
+    },
+    "dns_alt_names": {
+      "description": "Subject alternative names for the CA host's own certificate (when it is also a compile master).",
+      "type": "Array[String[1]]",
+      "default": []
+    }
+  },
+  "files": ["bootstrap/files/common.sh"]
+}

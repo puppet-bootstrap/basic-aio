@@ -1,0 +1,10 @@
+<%- | String[1] $hostcrl | -%>
+# Managed by Puppet (bootstrap::server).
+[Unit]
+Description=Watch the OpenVox CRL for changes
+
+[Path]
+PathChanged=<%= $hostcrl %>
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,6 @@
+# Managed by Puppet (bootstrap::server::puppetdb).
+---
+server:
+  facts:
+    terminus: puppetdb
+    cache: yaml

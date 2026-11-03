@@ -1,8 +1,6 @@
 ---
 profile::base::packages: []
 
-profile::server::config::autosign: []
-
 profile::agent::service: puppet
 profile::agent::service_ensure: running
 profile::agent::service_enable: true
