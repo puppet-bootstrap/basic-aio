@@ -52,8 +52,6 @@ The following parameters are available in the `role` plan:
 * [`openvox_release`](#-role--openvox_release)
 * [`openvox_version`](#-role--openvox_version)
 * [`openvox_collection`](#-role--openvox_collection)
-* [`release_package`](#-role--release_package)
-* [`openvox_agent`](#-role--openvox_agent)
 * [`targets`](#-role--targets)
 * [`server_target`](#-role--server_target)
 * [`openvox_server`](#-role--openvox_server)
@@ -70,7 +68,8 @@ The major version of OpenVox to use
 
 Data type: `Optional[String]`
 
-The version of openvox-agent to install
+The version of openvox-agent to install.  Defaults to the latest version
+in `openvox_collection`.
 
 Default value: `undef`
 
@@ -81,22 +80,6 @@ Data type: `String[1]`
 The collection to use for openvox-agent
 
 Default value: `"openvox${openvox_release}"`
-
-##### <a name="-role--release_package"></a>`release_package`
-
-Data type: `String[1]`
-
-The URL of the openvox-release package
-
-Default value: `"https://yum.voxpupuli.org/${openvox_collection}-release-el-\$( rpm --eval '%{rhel}' ).noarch.rpm"`
-
-##### <a name="-role--openvox_agent"></a>`openvox_agent`
-
-Data type: `String[1]`
-
-The name of the openvox-agent package
-
-Default value: `'openvox-agent'`
 
 ##### <a name="-role--targets"></a>`targets`
 
