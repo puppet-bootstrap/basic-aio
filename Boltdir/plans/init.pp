@@ -104,7 +104,10 @@ plan basic_aio (
     apply($server_target, '_description' => 'Configure r10k') {
       class { 'git': }
       -> class { 'r10k':
-        remote => $control_repo,
+        remote   => $control_repo,
+        # The default is based on `puppet_vardir`, which is a temporary
+        # directory under apply().
+        cachedir => '/opt/puppetlabs/puppet/cache/r10k',
       }
       -> exec { 'r10k deploy environment -pv': # lint:ignore:exec_idempotency
         path => '/opt/puppetlabs/bin:/bin:/usr/bin:/sbin:/usr/sbin',
