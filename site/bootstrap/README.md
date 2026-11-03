@@ -91,6 +91,23 @@ bolt plan run bootstrap \
   --run-as root
 ```
 
+## Airgapped hosts
+
+By default, the plans install the `openvoxN-release` package from
+yum.voxpupuli.org (or apt.voxpupuli.org) to set up the OpenVox repository, and
+OpenVoxDB's PostgreSQL comes from the PGDG repository at
+download.postgresql.org.  On hosts that can't reach those but already have the
+packages available, such as from a Satellite or another mirror, pass
+`manage_repos=false`.  The plans then install packages with each host's package
+manager from the repositories it already has.
+
+The mirror needs:
+
+* The OpenVox repository for the release you want (`openvox-agent`,
+  `openvox-server`, `openvoxdb`, and `openvoxdb-termini`)
+* If you install OpenVoxDB, the PGDG repository for `postgres_version`
+  (`postgresql17-server` and `postgresql17-contrib` by default)
+
 ## Limitations
 
 * The servers must be Linux hosts with systemd.  The agent targets must be

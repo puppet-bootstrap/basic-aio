@@ -133,6 +133,7 @@ The following parameters are available in the `profile::db` class:
 
 * [`database_password`](#-profile--db--database_password)
 * [`postgres_version`](#-profile--db--postgres_version)
+* [`manage_package_repo`](#-profile--db--manage_package_repo)
 * [`manage_firewall`](#-profile--db--manage_firewall)
 
 ##### <a name="-profile--db--database_password"></a>`database_password`
@@ -148,6 +149,14 @@ Data type: `String[1]`
 The PostgreSQL major version
 
 Default value: `'17'`
+
+##### <a name="-profile--db--manage_package_repo"></a>`manage_package_repo`
+
+Data type: `Boolean`
+
+Set up the PGDG package repository
+
+Default value: `true`
 
 ##### <a name="-profile--db--manage_firewall"></a>`manage_firewall`
 

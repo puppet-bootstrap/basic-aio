@@ -40,8 +40,9 @@
 #   on the server to satisfy openvox-server's dependencies.
 # @param openvox_collection
 #   The collection to install from.  Defaults to `openvox${openvox_release}`
-#   when `openvox_release` is set; otherwise the `openvox_bootstrap::install`
-#   task picks one.
+#   when `openvox_release` is set, `openvox9` when neither `openvox_release`
+#   nor `openvox_version` is set, and otherwise the collection matching
+#   `openvox_version`.  Only used with `manage_repos`.
 # @param openvox_server
 #   The value of `server` in `puppet.conf`.  Defaults to the FQDN of
 #   `server_target`.  Set it to a load balancer name if you put one in front
@@ -58,6 +59,10 @@
 #   Add every target to every target's hosts file, using the facts collected
 #   from them.  Useful when the targets can't resolve each other's names.
 # @param postgres_version The PostgreSQL major version to install
+# @param manage_repos
+#   Set up the OpenVox package repository (and, for OpenVoxDB, the PostgreSQL
+#   repository).  Set this to `false` on hosts that can't reach the internet
+#   but already have the packages available, such as from a Satellite.
 #
 # @return [Hash] The certnames of the `primary`, `compilers` (including the
 #   primary), `ca_servers` (active CA first), and `db_servers`, and the
@@ -72,7 +77,10 @@ plan bootstrap::install_infra (
   Optional[Integer]                                  $openvox_release    = undef,
   Optional[String[1]]                                $openvox_version    = undef,
   Optional[String[1]]                                $openvox_collection = $openvox_release ? {
-    undef   => undef,
+    undef   => $openvox_version ? {
+      undef   => 'openvox9',
+      default => undef,
+    },
     default => "openvox${openvox_release}",
   },
   Optional[String[1]]                                $openvox_server     = undef,
@@ -81,6 +89,7 @@ plan bootstrap::install_infra (
   Boolean                                            $manage_firewall    = false,
   Boolean                                            $manage_hosts       = false,
   String[1]                                          $postgres_version   = '17',
+  Boolean                                            $manage_repos       = true,
 ) {
   $database_password = $db_password ? {
     String  => Sensitive($db_password),
@@ -117,6 +126,7 @@ plan bootstrap::install_infra (
     'openvox_version'    => $openvox_version,
     'openvox_collection' => $openvox_collection,
     'openvox_server'     => $openvox_server,
+    'manage_repos'       => $manage_repos,
   )
 
   $certname = $all.reduce({}) |$memo, $target| {
@@ -171,6 +181,7 @@ plan bootstrap::install_infra (
       default => [],
     },
     'manage_firewall'    => $manage_firewall,
+    'manage_repos'       => $manage_repos,
   )
 
   # 4. Certificates for the other infrastructure hosts
@@ -211,12 +222,12 @@ plan bootstrap::install_infra (
   # 5. Standby CAs.  The CA directory must be in place before puppetserver
   # first starts, or it would generate a new CA.
   unless $standby_cas.empty {
-    run_task(
-      'openvox_bootstrap::install',
-      $standby_cas,
-      'Installing openvox-server',
+    run_plan(
+      'bootstrap::install_packages',
+      'targets'               => $standby_cas,
       'package'               => 'openvox-server',
       'collection'            => $openvox_collection,
+      'manage_repos'          => $manage_repos,
       'force_release_package' => false,
     )
     run_plan('bootstrap::sync_ca', 'active' => $active_ca, 'standbys' => $standby_cas)
@@ -249,6 +260,7 @@ plan bootstrap::install_infra (
       'certificate_allowlist' => $servers.map |$target| { $certname[$target.name] },
       'postgres_version'      => $postgres_version,
       'manage_firewall'       => $manage_firewall,
+      'manage_repos'          => $manage_repos,
     ),
   }
 
@@ -262,6 +274,7 @@ plan bootstrap::install_infra (
     'openvox_collection' => $openvox_collection,
     'puppetdb_urls'      => $puppetdb_urls,
     'manage_firewall'    => $manage_firewall,
+    'manage_repos'       => $manage_repos,
   )
 
   # CAs on compile masters also need the CA configuration.

@@ -27,6 +27,7 @@
 * [`bootstrap::install_ca`](#bootstrap--install_ca): Install and start the active certificate authority
 * [`bootstrap::install_db`](#bootstrap--install_db): Install and configure OpenVoxDB
 * [`bootstrap::install_infra`](#bootstrap--install_infra): Install an OpenVox server infrastructure
+* [`bootstrap::install_packages`](#bootstrap--install_packages): Install an OpenVox package
 * [`bootstrap::install_server`](#bootstrap--install_server): Install and start OpenVox Server on compile masters
 * [`bootstrap::open_ports`](#bootstrap--open_ports): Open TCP ports in firewalld, if firewalld is running
 * [`bootstrap::request_certs`](#bootstrap--request_certs): Get signed certificates for hosts from the CA
@@ -103,6 +104,7 @@ The following parameters are available in the `bootstrap::db` class:
 * [`database_host`](#-bootstrap--db--database_host)
 * [`remote_clients`](#-bootstrap--db--remote_clients)
 * [`postgres_version`](#-bootstrap--db--postgres_version)
+* [`manage_package_repo`](#-bootstrap--db--manage_package_repo)
 
 ##### <a name="-bootstrap--db--database_password"></a>`database_password`
 
@@ -151,6 +153,16 @@ Data type: `String[1]`
 The PostgreSQL major version to install from the PGDG repo
 
 Default value: `'17'`
+
+##### <a name="-bootstrap--db--manage_package_repo"></a>`manage_package_repo`
+
+Data type: `Boolean`
+
+Set up the PGDG package repository.  Without it, the PGDG packages (such
+as `postgresql17-server`) must already be available from a configured
+repository.
+
+Default value: `true`
 
 ### <a name="bootstrap--server"></a>`bootstrap::server`
 
@@ -380,6 +392,7 @@ The following parameters are available in the `bootstrap` plan:
 * [`autosign`](#-bootstrap--autosign)
 * [`dns_alt_names`](#-bootstrap--dns_alt_names)
 * [`manage_firewall`](#-bootstrap--manage_firewall)
+* [`manage_repos`](#-bootstrap--manage_repos)
 * [`manage_hosts`](#-bootstrap--manage_hosts)
 * [`sign_certs`](#-bootstrap--sign_certs)
 * [`start_service`](#-bootstrap--start_service)
@@ -454,14 +467,18 @@ Default value: `undef`
 Data type: `Optional[String[1]]`
 
 The collection to install from.  Defaults to `openvox${openvox_release}`
-when `openvox_release` is set; otherwise the `openvox_bootstrap::install`
-task picks one.
+when `openvox_release` is set, `openvox9` when neither `openvox_release`
+nor `openvox_version` is set, and otherwise the collection matching
+`openvox_version`.  Only used with `manage_repos`.
 
 Default value:
 
 ```puppet
 $openvox_release ? {
-    undef   => undef,
+    undef   => $openvox_version ? {
+      undef   => 'openvox9',
+      default => undef,
+    },
     default => "openvox${openvox_release}"
 ```
 
@@ -499,6 +516,16 @@ Data type: `Boolean`
 Open the needed ports in firewalld, if firewalld is running
 
 Default value: `false`
+
+##### <a name="-bootstrap--manage_repos"></a>`manage_repos`
+
+Data type: `Boolean`
+
+Set up the OpenVox package repository (and, for OpenVoxDB, the PostgreSQL
+repository).  Set this to `false` on hosts that can't reach the internet
+but already have the packages available, such as from a Satellite.
+
+Default value: `true`
 
 ##### <a name="-bootstrap--manage_hosts"></a>`manage_hosts`
 
@@ -633,6 +660,7 @@ The following parameters are available in the `bootstrap::install_agents` plan:
 * [`openvox_server`](#-bootstrap--install_agents--openvox_server)
 * [`ca_target`](#-bootstrap--install_agents--ca_target)
 * [`openvox_ca_server`](#-bootstrap--install_agents--openvox_ca_server)
+* [`manage_repos`](#-bootstrap--install_agents--manage_repos)
 
 ##### <a name="-bootstrap--install_agents--targets"></a>`targets`
 
@@ -671,14 +699,18 @@ Default value: `undef`
 Data type: `Optional[String[1]]`
 
 The collection to install from.  Defaults to `openvox${openvox_release}`
-when `openvox_release` is set; otherwise the `openvox_bootstrap::install`
-task picks one.
+when `openvox_release` is set, `openvox9` when neither `openvox_release`
+nor `openvox_version` is set, and otherwise the collection matching
+`openvox_version`.  Only used with `manage_repos`.
 
 Default value:
 
 ```puppet
 $openvox_release ? {
-    undef   => undef,
+    undef   => $openvox_version ? {
+      undef   => 'openvox9',
+      default => undef,
+    },
     default => "openvox${openvox_release}"
 ```
 
@@ -709,6 +741,16 @@ The value of `ca_server` in `puppet.conf`.  Defaults to the FQDN of
 
 Default value: `undef`
 
+##### <a name="-bootstrap--install_agents--manage_repos"></a>`manage_repos`
+
+Data type: `Boolean`
+
+Set up the OpenVox package repository (and, for OpenVoxDB, the PostgreSQL
+repository).  Set this to `false` on hosts that can't reach the internet
+but already have the packages available, such as from a Satellite.
+
+Default value: `true`
+
 ### <a name="bootstrap--install_ca"></a>`bootstrap::install_ca`
 
 Installs openvox-server, generates the CA (and this host's certificate)
@@ -725,6 +767,7 @@ The following parameters are available in the `bootstrap::install_ca` plan:
 * [`autosign`](#-bootstrap--install_ca--autosign)
 * [`dns_alt_names`](#-bootstrap--install_ca--dns_alt_names)
 * [`manage_firewall`](#-bootstrap--install_ca--manage_firewall)
+* [`manage_repos`](#-bootstrap--install_ca--manage_repos)
 
 ##### <a name="-bootstrap--install_ca--targets"></a>`targets`
 
@@ -776,6 +819,16 @@ Open 8140/tcp in firewalld, if firewalld is running
 
 Default value: `false`
 
+##### <a name="-bootstrap--install_ca--manage_repos"></a>`manage_repos`
+
+Data type: `Boolean`
+
+Set up the OpenVox package repository (and, for OpenVoxDB, the PostgreSQL
+repository).  Set this to `false` on hosts that can't reach the internet
+but already have the packages available, such as from a Satellite.
+
+Default value: `true`
+
 ### <a name="bootstrap--install_db"></a>`bootstrap::install_db`
 
 The first target runs PostgreSQL (from the PGDG repo) as well as OpenVoxDB.
@@ -792,6 +845,7 @@ The following parameters are available in the `bootstrap::install_db` plan:
 * [`certificate_allowlist`](#-bootstrap--install_db--certificate_allowlist)
 * [`postgres_version`](#-bootstrap--install_db--postgres_version)
 * [`manage_firewall`](#-bootstrap--install_db--manage_firewall)
+* [`manage_repos`](#-bootstrap--install_db--manage_repos)
 
 ##### <a name="-bootstrap--install_db--targets"></a>`targets`
 
@@ -829,6 +883,16 @@ Open 8081/tcp (and 5432/tcp on the PostgreSQL host, if needed) in
 firewalld, if firewalld is running
 
 Default value: `false`
+
+##### <a name="-bootstrap--install_db--manage_repos"></a>`manage_repos`
+
+Data type: `Boolean`
+
+Set up the PostgreSQL (PGDG) package repository.  Set this to `false` on
+hosts that can't reach the internet but already have the PGDG packages
+available, such as from a Satellite.
+
+Default value: `true`
 
 ### <a name="bootstrap--install_infra"></a>`bootstrap::install_infra`
 
@@ -872,6 +936,7 @@ The following parameters are available in the `bootstrap::install_infra` plan:
 * [`manage_firewall`](#-bootstrap--install_infra--manage_firewall)
 * [`manage_hosts`](#-bootstrap--install_infra--manage_hosts)
 * [`postgres_version`](#-bootstrap--install_infra--postgres_version)
+* [`manage_repos`](#-bootstrap--install_infra--manage_repos)
 
 ##### <a name="-bootstrap--install_infra--targets"></a>`targets`
 
@@ -943,14 +1008,18 @@ Default value: `undef`
 Data type: `Optional[String[1]]`
 
 The collection to install from.  Defaults to `openvox${openvox_release}`
-when `openvox_release` is set; otherwise the `openvox_bootstrap::install`
-task picks one.
+when `openvox_release` is set, `openvox9` when neither `openvox_release`
+nor `openvox_version` is set, and otherwise the collection matching
+`openvox_version`.  Only used with `manage_repos`.
 
 Default value:
 
 ```puppet
 $openvox_release ? {
-    undef   => undef,
+    undef   => $openvox_version ? {
+      undef   => 'openvox9',
+      default => undef,
+    },
     default => "openvox${openvox_release}"
 ```
 
@@ -1008,6 +1077,83 @@ The PostgreSQL major version to install
 
 Default value: `'17'`
 
+##### <a name="-bootstrap--install_infra--manage_repos"></a>`manage_repos`
+
+Data type: `Boolean`
+
+Set up the OpenVox package repository (and, for OpenVoxDB, the PostgreSQL
+repository).  Set this to `false` on hosts that can't reach the internet
+but already have the packages available, such as from a Satellite.
+
+Default value: `true`
+
+### <a name="bootstrap--install_packages"></a>`bootstrap::install_packages`
+
+With `manage_repos` (the default), uses the `openvox_bootstrap::install`
+task, which installs the release package for `collection` from
+yum.voxpupuli.org or apt.voxpupuli.org.  Without it, installs the package
+with the target's package manager from whatever repositories are already
+configured, such as a Satellite or other local mirror.  That works on hosts
+that can't reach the internet.
+
+#### Parameters
+
+The following parameters are available in the `bootstrap::install_packages` plan:
+
+* [`targets`](#-bootstrap--install_packages--targets)
+* [`package`](#-bootstrap--install_packages--package)
+* [`version`](#-bootstrap--install_packages--version)
+* [`collection`](#-bootstrap--install_packages--collection)
+* [`manage_repos`](#-bootstrap--install_packages--manage_repos)
+* [`force_release_package`](#-bootstrap--install_packages--force_release_package)
+
+##### <a name="-bootstrap--install_packages--targets"></a>`targets`
+
+Data type: `TargetSpec`
+
+The targets to install the package on
+
+##### <a name="-bootstrap--install_packages--package"></a>`package`
+
+Data type: `String[1]`
+
+The package to install
+
+##### <a name="-bootstrap--install_packages--version"></a>`version`
+
+Data type: `Optional[String[1]]`
+
+The version to install.  Defaults to the latest available version, or the
+installed version if the package is already installed.
+
+Default value: `undef`
+
+##### <a name="-bootstrap--install_packages--collection"></a>`collection`
+
+Data type: `Optional[String[1]]`
+
+The OpenVox collection (`openvox9`, for example).  Only used with
+`manage_repos`.
+
+Default value: `undef`
+
+##### <a name="-bootstrap--install_packages--manage_repos"></a>`manage_repos`
+
+Data type: `Boolean`
+
+Set up the OpenVox package repository on the targets
+
+Default value: `true`
+
+##### <a name="-bootstrap--install_packages--force_release_package"></a>`force_release_package`
+
+Data type: `Boolean`
+
+With `manage_repos`, reinstall the release package even if it is already
+installed
+
+Default value: `true`
+
 ### <a name="bootstrap--install_server"></a>`bootstrap::install_server`
 
 Installs openvox-server, configures the CA service (enabled only on CA
@@ -1027,6 +1173,7 @@ The following parameters are available in the `bootstrap::install_server` plan:
 * [`openvox_collection`](#-bootstrap--install_server--openvox_collection)
 * [`puppetdb_urls`](#-bootstrap--install_server--puppetdb_urls)
 * [`manage_firewall`](#-bootstrap--install_server--manage_firewall)
+* [`manage_repos`](#-bootstrap--install_server--manage_repos)
 
 ##### <a name="-bootstrap--install_server--targets"></a>`targets`
 
@@ -1081,6 +1228,16 @@ Data type: `Boolean`
 Open 8140/tcp in firewalld, if firewalld is running
 
 Default value: `false`
+
+##### <a name="-bootstrap--install_server--manage_repos"></a>`manage_repos`
+
+Data type: `Boolean`
+
+Set up the OpenVox package repository (and, for OpenVoxDB, the PostgreSQL
+repository).  Set this to `false` on hosts that can't reach the internet
+but already have the packages available, such as from a Satellite.
+
+Default value: `true`
 
 ### <a name="bootstrap--open_ports"></a>`bootstrap::open_ports`
 

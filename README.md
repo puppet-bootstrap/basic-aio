@@ -100,6 +100,14 @@ bolt plan run basic_aio \
   control_repo=https://github.com/example/control-repo.git
 ```
 
+On hosts that can't reach the internet but already have the OpenVox (and, for
+OpenVoxDB, PGDG PostgreSQL) packages available, such as from a Satellite, add
+`manage_repos=false`.  See the `bootstrap` module's
+[README](site/bootstrap/README.md#airgapped-hosts) for what the mirror needs.
+`control_repo` also needs internet access unless you plan for it: r10k installs
+itself from rubygems.org, and deploys any Forge modules in the control repo's
+`Puppetfile` from forge.puppet.com.
+
 Each host's certname is the FQDN from its facts.  Decide on a load balancer
 name for the compile masters before the first run, and put it in
 `dns_alt_names` (and `openvox_server`), since alternate names only apply when

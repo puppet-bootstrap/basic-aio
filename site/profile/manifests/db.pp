@@ -6,14 +6,16 @@
 #
 # @param database_password Password for the OpenVoxDB PostgreSQL user
 # @param postgres_version The PostgreSQL major version
+# @param manage_package_repo Set up the PGDG package repository
 # @param manage_firewall Open the OpenVoxDB (and, if needed, PostgreSQL) ports
 #
 # @example
 #   include profile::db
 class profile::db (
   Sensitive[String[1]] $database_password,
-  String[1]            $postgres_version = '17',
-  Boolean              $manage_firewall  = true,
+  String[1]            $postgres_version    = '17',
+  Boolean              $manage_package_repo = true,
+  Boolean              $manage_firewall     = true,
 ) {
   include 'profile::topology'
 
@@ -27,6 +29,7 @@ class profile::db (
       certificate_allowlist => $profile::topology::compilers,
       remote_clients        => $remote_clients,
       postgres_version      => $postgres_version,
+      manage_package_repo   => $manage_package_repo,
     }
   } else {
     class { 'bootstrap::db':
@@ -35,6 +38,7 @@ class profile::db (
       manage_dbserver       => false,
       database_host         => $postgres_host,
       postgres_version      => $postgres_version,
+      manage_package_repo   => $manage_package_repo,
     }
   }
 
