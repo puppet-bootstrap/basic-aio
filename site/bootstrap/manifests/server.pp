@@ -100,6 +100,17 @@ class bootstrap::server (
       enable    => true,
       subscribe => Exec['bootstrap::server systemctl daemon-reload'],
     }
+  } else {
+    # Stop and disable the watcher before its unit files are removed, in case
+    # this host had it before.
+    service { 'openvox-crl-reload.path':
+      ensure => stopped,
+      enable => false,
+      before => [
+        File['/etc/systemd/system/openvox-crl-reload.path'],
+        File['/etc/systemd/system/openvox-crl-reload.service'],
+      ],
+    }
   }
 
   service { 'puppetserver':

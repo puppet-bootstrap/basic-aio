@@ -21,7 +21,13 @@ describe 'bootstrap::server' do
         it { is_expected.not_to contain_ini_setting('puppet.conf main server') }
         it { is_expected.not_to contain_ini_setting('puppet.conf main crl_refresh_interval') }
         it { is_expected.to contain_file('/etc/systemd/system/openvox-crl-reload.path').with_ensure('absent') }
-        it { is_expected.not_to contain_service('openvox-crl-reload.path') }
+
+        it {
+          is_expected.to contain_service('openvox-crl-reload.path')
+            .with_ensure('stopped')
+            .with_enable(false)
+            .that_comes_before('File[/etc/systemd/system/openvox-crl-reload.path]')
+        }
       end
 
       context 'without the CA service' do
@@ -52,6 +58,14 @@ describe 'bootstrap::server' do
         }
 
         it { is_expected.to contain_service('openvox-crl-reload.path').with_ensure('running').with_enable(true) }
+      end
+
+      context 'without the CA service and without reloading on CRL changes' do
+        let(:params) { { ca_enabled: false, reload_on_crl_change: false } }
+
+        it { is_expected.to compile.with_all_deps }
+        it { is_expected.to contain_file('/etc/systemd/system/openvox-crl-reload.service').with_ensure('absent') }
+        it { is_expected.to contain_service('openvox-crl-reload.path').with_ensure('stopped').with_enable(false) }
       end
     end
   end

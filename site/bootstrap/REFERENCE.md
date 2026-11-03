@@ -538,8 +538,10 @@ Default value: `true`
 Moves the certificate and keys that `bootstrap::ca_generate` created on the
 CA into the target's SSL directory, then downloads the CA certificate and
 CRL there.  The private key passes through the Bolt host's `downloads`
-directory and is deleted from it and from the CA afterward.  Targets that
-already have a certificate are skipped.
+directory and is deleted from it and from the CA afterward.  For targets
+that already have the certificate, only the last steps (downloading the CA
+certificate and CRL, and removing the keys from the CA) are repeated, in
+case an earlier run stopped partway.
 
 #### Parameters
 
