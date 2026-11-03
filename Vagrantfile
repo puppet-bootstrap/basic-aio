@@ -110,6 +110,8 @@ Vagrant.configure('2') do |config|
         'manage_hosts=true',
         'manage_topology_data=true',
         %q('autosign=["*.vagrant","vagrant.mcollective"]'),
+        # Choria servers connect to the broker as `puppet`.
+        %q('dns_alt_names=["puppet"]'),
         'choria_user=vagrant',
         "openvox_release=#{openvox_release}",
         "openvox_version=#{openvox_version}",

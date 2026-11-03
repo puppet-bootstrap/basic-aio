@@ -13,7 +13,7 @@ plan bootstrap::smoke_test (
 ) {
   $servers.each |$server| {
     run_command(
-      @("CMD"/L),
+      @("CMD"/L$),
         for try in 1 2 3 ; do \
           puppet agent --test --noop --detailed-exitcodes --server ${server} ; \
           rc=\$? ; \
