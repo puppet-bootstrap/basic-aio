@@ -12,7 +12,7 @@ server and agent with the following configured out of the box:
 
 In order to use this project, you'll need
 [Vagrant](https://vagrantup.com/) and
-[Bolt](https://puppet.com/docs/bolt/latest/bolt.html) installed.
+[OpenBolt](https://github.com/OpenVoxProject/openbolt) installed.
 
 ### Configuring basic-aio
 

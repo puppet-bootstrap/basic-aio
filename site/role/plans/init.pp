@@ -1,10 +1,10 @@
 # @summary Build an OpenVox server and attach agents
 #
 # @param openvox_release The major version of OpenVox to use
-# @param openvox_version The version of openvox-agent to install
+# @param openvox_version
+#   The version of openvox-agent to install.  Defaults to the latest version
+#   in `openvox_collection`.
 # @param openvox_collection The collection to use for openvox-agent
-# @param release_package The URL of the openvox-release package
-# @param openvox_agent The name of the openvox-agent package
 # @param targets The targets to run on
 # @param server_target The puppet server target
 # @param openvox_server
@@ -13,29 +13,30 @@
 # @param control_repo URL of the control repo
 # @param choria_user User name of the demo choria user on the Puppet server
 plan role (
-  Integer          $openvox_release,
-  Optional[String] $openvox_version    = undef,
-  String[1]        $openvox_collection = "openvox${openvox_release}",
-  String[1]        $release_package    = "https://yum.voxpupuli.org/${openvox_collection}-release-el-\$( rpm --eval '%{rhel}' ).noarch.rpm",
-  String[1]        $openvox_agent      = 'openvox-agent',
-  TargetSpec       $targets            = 'all',
-  TargetSpec       $server_target      = 'puppet',
-  Optional[String[1]] $openvox_server  = undef,
+  Integer             $openvox_release,
+  Optional[String]    $openvox_version    = undef,
+  String[1]           $openvox_collection = "openvox${openvox_release}",
+  TargetSpec          $targets            = 'all',
+  TargetSpec          $server_target      = 'puppet',
+  Optional[String[1]] $openvox_server     = undef,
   Variant[
     Stdlib::HTTPUrl,
     Pattern[/\Afile:\/\/\/([^\n\/\0]+(\/)?)+\z/]
-  ]                $control_repo       = 'file:///vagrant/',
-  Optional[String] $choria_user        = 'vagrant',
+  ]                   $control_repo       = 'file:///vagrant/',
+  Optional[String]    $choria_user        = 'vagrant',
 ) {
   # We want to specify the OpenVox agent version to install,
-  # so we start by manually installing the agent package.
-  run_command("dnf -y install ${release_package}", $targets, 'Installing openvox-release package')
-
-  if $openvox_version =~ String[1] {
-    run_command("dnf -y install ${openvox_agent}-${openvox_version}", $targets, "Installing openvox-agent package version ${openvox_version}")
-  } else {
-    run_command("dnf -y install ${openvox_agent}", $targets, 'Installing openvox-agent package')
-  }
+  # so we install the agent before calling apply_prep().
+  run_task(
+    'openvox_bootstrap::install',
+    $targets,
+    'Installing openvox-agent',
+    'collection' => $openvox_collection,
+    'version'    => $openvox_version ? {
+      String[1] => $openvox_version,
+      default   => 'latest',
+    },
+  )
 
   get_targets($targets).each |$target| {
     # Set the puppet-agent feature to true so that
@@ -53,13 +54,15 @@ plan role (
     undef   => get_targets($server_target)[0].facts['networking']['fqdn'],
     default => $openvox_server,
   }
-  run_command(
-    "puppet config set server ${server} --section main",
+  # Leave the puppet service stopped; profile::agent starts it during the
+  # first agent run.
+  run_task(
+    'openvox_bootstrap::configure',
     $targets,
     "Setting server to ${server}",
-    '_env_vars' => {
-      'PATH' => '/opt/puppetlabs/bin:/bin:/usr/bin',
-    },
+    'puppet_conf'            => { 'main' => { 'server' => $server } },
+    'puppet_service_running' => false,
+    'puppet_service_enabled' => false,
   )
 
   # Use the collected facts to build a hash of `host` resources.

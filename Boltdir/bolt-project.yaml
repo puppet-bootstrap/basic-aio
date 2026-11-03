@@ -27,3 +27,6 @@ modules:
 # renovate: datasource=puppet-forge
 - name: puppet/systemd
   version_requirement: 10.3.0
+# renovate: datasource=puppet-forge
+- name: puppet/openvox_bootstrap
+  version_requirement: 1.7.0
