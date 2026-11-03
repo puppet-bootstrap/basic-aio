@@ -88,7 +88,11 @@ Vagrant.configure('2') do |config|
     trigger.info = 'Running bolt plan'
     trigger.run = {
       inline: [
-        'bolt plan run role -t all --run-as root',
+        'bolt plan run basic_aio -t all --run-as root',
+        'server_target=puppet',
+        'control_repo=file:///vagrant/',
+        'manage_hosts=true',
+        'choria_user=vagrant',
         "openvox_release=#{openvox_release}",
         "openvox_version=#{openvox_version}",
       ].concat(bolt_debug_options)

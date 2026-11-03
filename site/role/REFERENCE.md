@@ -9,10 +9,6 @@
 * [`role::agent`](#role--agent): Agent class
 * [`role::server`](#role--server): Puppet server class
 
-### Plans
-
-* [`role`](#role): Build the basic-aio Vagrant environment
-
 ## Classes
 
 ### <a name="role--agent"></a>`role::agent`
@@ -38,96 +34,3 @@ Puppet server class
 ```puppet
 include role::server
 ```
-
-## Plans
-
-### <a name="role"></a>`role`
-
-Uses the portable plans in the `bootstrap` module to install OpenVox, and
-adds the parts that are specific to this Vagrant environment: the hosts
-file, r10k, and a Choria certificate for the demo user.
-
-#### Parameters
-
-The following parameters are available in the `role` plan:
-
-* [`openvox_release`](#-role--openvox_release)
-* [`openvox_version`](#-role--openvox_version)
-* [`openvox_collection`](#-role--openvox_collection)
-* [`targets`](#-role--targets)
-* [`server_target`](#-role--server_target)
-* [`openvox_server`](#-role--openvox_server)
-* [`control_repo`](#-role--control_repo)
-* [`choria_user`](#-role--choria_user)
-
-##### <a name="-role--openvox_release"></a>`openvox_release`
-
-Data type: `Integer`
-
-The major version of OpenVox to use
-
-##### <a name="-role--openvox_version"></a>`openvox_version`
-
-Data type: `Optional[String]`
-
-The version of openvox-agent to install.  Defaults to the latest version
-in `openvox_collection`.  Installing openvox-server may upgrade the agent
-on the server to satisfy openvox-server's dependencies.
-
-Default value: `undef`
-
-##### <a name="-role--openvox_collection"></a>`openvox_collection`
-
-Data type: `String[1]`
-
-The collection to use for openvox-agent
-
-Default value: `"openvox${openvox_release}"`
-
-##### <a name="-role--targets"></a>`targets`
-
-Data type: `TargetSpec`
-
-The targets to run on
-
-Default value: `'all'`
-
-##### <a name="-role--server_target"></a>`server_target`
-
-Data type: `TargetSpec`
-
-The puppet server target
-
-Default value: `'puppet'`
-
-##### <a name="-role--openvox_server"></a>`openvox_server`
-
-Data type: `Optional[String[1]]`
-
-The value of `server` in the agents' `puppet.conf`.  Defaults to the FQDN of
-`server_target`.  (OpenVox 9 no longer defaults `server` to `puppet`.)
-
-Default value: `undef`
-
-##### <a name="-role--control_repo"></a>`control_repo`
-
-Data type:
-
-```puppet
-Variant[
-    Stdlib::HTTPUrl,
-    Pattern[/\Afile:\/\/\/([^\n\/\0]+(\/)?)+\z/]
-  ]
-```
-
-URL of the control repo
-
-Default value: `'file:///vagrant/'`
-
-##### <a name="-role--choria_user"></a>`choria_user`
-
-Data type: `Optional[String]`
-
-User name of the demo choria user on the Puppet server
-
-Default value: `'vagrant'`

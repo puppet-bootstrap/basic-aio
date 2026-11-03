@@ -11,8 +11,8 @@ server and agent with the following configured out of the box:
 ## Prerequisites
 
 In order to use this project, you'll need
-[Vagrant](https://vagrantup.com/) and
-[OpenBolt](https://github.com/OpenVoxProject/openbolt) installed.
+[OpenBolt](https://github.com/OpenVoxProject/openbolt) installed.  For the
+demo environment, you'll also need [Vagrant](https://vagrantup.com/).
 
 ### Configuring basic-aio
 
@@ -29,6 +29,32 @@ The following environment variables are used to configure the Vagrant environmen
 | `DEBUG`              | not set                | Set to enable debugging output                       |
 | `VERBOSE`            | `true`                 | Set to `false` to disable verbose (streaming) output |
 | `NATIVE_SSH`         | `true`                 | Set to `false` to disable native SSH                 |
+
+## Bootstrapping your own nodes
+
+The `Boltdir` in this repo is an OpenBolt project, and `vagrant up` just runs
+its `basic_aio` plan.  You can run the same plan against your own hosts to
+install an OpenVox server and agents, and optionally deploy your own control
+repo to the server with r10k before the first agent run:
+
+```sh
+cd Boltdir
+bolt module install
+bolt plan run basic_aio \
+  --targets server.example.com,agent1.example.com,agent2.example.com \
+  --run-as root \
+  server_target=server.example.com \
+  openvox_release=9 \
+  control_repo=https://github.com/example/control-repo.git
+```
+
+Agents whose certificates aren't autosigned are signed by the plan after their
+first run.  Run `bolt plan show basic_aio` for all of the options, such as
+`autosign`, `dns_alt_names`, and `openvox_version`.  The plan works on Linux
+targets; the server must use systemd.
+
+The portable parts live in the `bootstrap` module in `site/bootstrap`, which
+you can also use on its own.  See its [README](site/bootstrap/README.md).
 
 ## See also
 
