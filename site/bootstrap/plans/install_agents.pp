@@ -14,8 +14,9 @@
 #   on the server to satisfy openvox-server's dependencies.
 # @param openvox_collection
 #   The collection to install from.  Defaults to `openvox${openvox_release}`
-#   when `openvox_release` is set; otherwise the `openvox_bootstrap::install`
-#   task picks one.
+#   when `openvox_release` is set, `openvox9` when neither `openvox_release`
+#   nor `openvox_version` is set, and otherwise the collection matching
+#   `openvox_version`.  Only used with `manage_repos`.
 # @param openvox_server
 #   The value of `server` in `puppet.conf`.  Defaults to the FQDN of
 #   `server_target`.  (OpenVox 9 no longer defaults `server` to `puppet`.)
@@ -25,6 +26,10 @@
 # @param openvox_ca_server
 #   The value of `ca_server` in `puppet.conf`.  Defaults to the FQDN of
 #   `ca_target`, or isn't set if neither is set.
+# @param manage_repos
+#   Set up the OpenVox package repository (and, for OpenVoxDB, the PostgreSQL
+#   repository).  Set this to `false` on hosts that can't reach the internet
+#   but already have the packages available, such as from a Satellite.
 #
 # @return [String] The value of `server` set on the targets
 plan bootstrap::install_agents (
@@ -33,12 +38,16 @@ plan bootstrap::install_agents (
   Optional[Integer]     $openvox_release    = undef,
   Optional[String[1]]   $openvox_version    = undef,
   Optional[String[1]]   $openvox_collection = $openvox_release ? {
-    undef   => undef,
+    undef   => $openvox_version ? {
+      undef   => 'openvox9',
+      default => undef,
+    },
     default => "openvox${openvox_release}",
   },
   Optional[String[1]]   $openvox_server     = undef,
   Optional[TargetSpec]  $ca_target          = undef,
   Optional[String[1]]   $openvox_ca_server  = undef,
+  Boolean               $manage_repos       = true,
 ) {
   if $openvox_server =~ Undef and $server_target =~ Undef {
     fail_plan('Either openvox_server or server_target must be set')
@@ -46,15 +55,13 @@ plan bootstrap::install_agents (
 
   # We want to choose the OpenVox agent version to install,
   # so we install the agent before calling apply_prep().
-  run_task(
-    'openvox_bootstrap::install',
-    $targets,
-    'Installing openvox-agent',
-    'collection' => $openvox_collection,
-    'version'    => $openvox_version ? {
-      undef   => 'latest',
-      default => $openvox_version,
-    },
+  run_plan(
+    'bootstrap::install_packages',
+    'targets'      => $targets,
+    'package'      => 'openvox-agent',
+    'version'      => $openvox_version,
+    'collection'   => $openvox_collection,
+    'manage_repos' => $manage_repos,
   )
 
   get_targets($targets).each |$target| {

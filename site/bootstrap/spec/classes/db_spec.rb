@@ -50,6 +50,20 @@ describe 'bootstrap::db' do
         }
       end
 
+      context 'without managing the PGDG repository' do
+        let(:params) do
+          {
+            database_password: sensitive('secret'),
+            manage_package_repo: false,
+          }
+        end
+
+        it { is_expected.to compile.with_all_deps }
+        it { is_expected.to contain_class('openvoxdb').with_manage_package_repo(false) }
+        it { is_expected.not_to contain_yumrepo('yum.postgresql.org') }
+        it { is_expected.to contain_package('postgresql-server').with_name('postgresql17-server') }
+      end
+
       context 'connecting to a remote PostgreSQL server' do
         let(:params) do
           {

@@ -17,6 +17,10 @@
 #   OpenVoxDB URLs for `puppetdb.conf`.  The compile masters aren't connected
 #   to OpenVoxDB if this is empty.
 # @param manage_firewall Open 8140/tcp in firewalld, if firewalld is running
+# @param manage_repos
+#   Set up the OpenVox package repository (and, for OpenVoxDB, the PostgreSQL
+#   repository).  Set this to `false` on hosts that can't reach the internet
+#   but already have the packages available, such as from a Satellite.
 plan bootstrap::install_server (
   TargetSpec          $targets,
   String[1]           $ca_server,
@@ -25,6 +29,7 @@ plan bootstrap::install_server (
   Optional[String[1]] $openvox_collection = undef,
   Array[String[1]]    $puppetdb_urls      = [],
   Boolean             $manage_firewall    = false,
+  Boolean             $manage_repos       = true,
 ) {
   $servers = get_targets($targets)
   if $servers.empty {
@@ -32,12 +37,12 @@ plan bootstrap::install_server (
   }
   $ca_names = get_targets($ca_targets).map |$target| { $target.name }
 
-  run_task(
-    'openvox_bootstrap::install',
-    $servers,
-    'Installing openvox-server',
+  run_plan(
+    'bootstrap::install_packages',
+    'targets'               => $servers,
     'package'               => 'openvox-server',
     'collection'            => $openvox_collection,
+    'manage_repos'          => $manage_repos,
     'force_release_package' => false,
   )
 

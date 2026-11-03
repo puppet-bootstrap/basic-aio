@@ -13,6 +13,10 @@
 # @param manage_firewall
 #   Open 8081/tcp (and 5432/tcp on the PostgreSQL host, if needed) in
 #   firewalld, if firewalld is running
+# @param manage_repos
+#   Set up the PostgreSQL (PGDG) package repository.  Set this to `false` on
+#   hosts that can't reach the internet but already have the PGDG packages
+#   available, such as from a Satellite.
 #
 # @return [Array[String]] OpenVoxDB URLs for the compile masters' `puppetdb.conf`
 plan bootstrap::install_db (
@@ -21,6 +25,7 @@ plan bootstrap::install_db (
   Array[String[1]]     $certificate_allowlist = [],
   String[1]            $postgres_version      = '17',
   Boolean              $manage_firewall       = false,
+  Boolean              $manage_repos          = true,
 ) {
   $db = get_targets($targets)
   if $db.empty {
@@ -46,6 +51,7 @@ plan bootstrap::install_db (
       certificate_allowlist => $certificate_allowlist,
       remote_clients        => $remote_clients,
       postgres_version      => $postgres_version,
+      manage_package_repo   => $manage_repos,
     }
   }
 
@@ -57,6 +63,7 @@ plan bootstrap::install_db (
         manage_dbserver       => false,
         database_host         => $postgres_host,
         postgres_version      => $postgres_version,
+        manage_package_repo   => $manage_repos,
       }
     }
   }

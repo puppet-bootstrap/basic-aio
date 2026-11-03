@@ -16,6 +16,9 @@ basic_aio::db_servers:
 # Demo only.  `basic_aio` writes the password it was given into the global
 # Hiera layer.
 basic_aio::db_password: puppetdb
+# Whether the bootstrap set up package repositories (false on airgapped hosts
+# that get packages from a Satellite or other mirror).
+basic_aio::manage_repos: true
 
 lookup_options:
   profile::db::database_password:
@@ -27,6 +30,7 @@ profile::topology::compilers: "%{alias('basic_aio::compilers')}"
 profile::topology::ca_servers: "%{alias('basic_aio::ca_servers')}"
 profile::topology::db_servers: "%{alias('basic_aio::db_servers')}"
 profile::db::database_password: "%{lookup('basic_aio::db_password')}"
+profile::db::manage_package_repo: "%{alias('basic_aio::manage_repos')}"
 
 mcollective::site_policies:
   - action: "allow"

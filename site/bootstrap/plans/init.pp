@@ -25,8 +25,9 @@
 #   on the server to satisfy openvox-server's dependencies.
 # @param openvox_collection
 #   The collection to install from.  Defaults to `openvox${openvox_release}`
-#   when `openvox_release` is set; otherwise the `openvox_bootstrap::install`
-#   task picks one.
+#   when `openvox_release` is set, `openvox9` when neither `openvox_release`
+#   nor `openvox_version` is set, and otherwise the collection matching
+#   `openvox_version`.  Only used with `manage_repos`.
 # @param openvox_server
 #   The value of `server` in `puppet.conf`.  Defaults to the FQDN of
 #   `server_target`.
@@ -36,6 +37,10 @@
 #   alone.
 # @param dns_alt_names Alternate DNS names for the compile masters' certificates
 # @param manage_firewall Open the needed ports in firewalld, if firewalld is running
+# @param manage_repos
+#   Set up the OpenVox package repository (and, for OpenVoxDB, the PostgreSQL
+#   repository).  Set this to `false` on hosts that can't reach the internet
+#   but already have the packages available, such as from a Satellite.
 # @param manage_hosts Add every target to every target's hosts file
 # @param sign_certs Sign certificate requests for agents whose first run fails
 # @param start_service Start and enable the puppet service after the first run
@@ -54,7 +59,10 @@ plan bootstrap (
   Optional[Integer]                                  $openvox_release    = undef,
   Optional[String[1]]                                $openvox_version    = undef,
   Optional[String[1]]                                $openvox_collection = $openvox_release ? {
-    undef   => undef,
+    undef   => $openvox_version ? {
+      undef   => 'openvox9',
+      default => undef,
+    },
     default => "openvox${openvox_release}",
   },
   Optional[String[1]]                                $openvox_server     = undef,
@@ -62,6 +70,7 @@ plan bootstrap (
   Array[String[1]]                                   $dns_alt_names      = [],
   Boolean                                            $manage_firewall    = false,
   Boolean                                            $manage_hosts       = false,
+  Boolean                                            $manage_repos       = true,
   Boolean                                            $sign_certs         = true,
   Boolean                                            $start_service      = true,
   Boolean                                            $smoke_test         = true,
@@ -86,6 +95,7 @@ plan bootstrap (
     'dns_alt_names'      => $dns_alt_names,
     'manage_firewall'    => $manage_firewall,
     'manage_hosts'       => $manage_hosts,
+    'manage_repos'       => $manage_repos,
   )
 
   $ca_target = $ca_targets ? {

@@ -15,6 +15,10 @@
 #   Other OpenVoxDB hosts that connect to the PostgreSQL server on this host.
 #   They must be able to resolve each other's names.
 # @param postgres_version The PostgreSQL major version to install from the PGDG repo
+# @param manage_package_repo
+#   Set up the PGDG package repository.  Without it, the PGDG packages (such
+#   as `postgresql17-server`) must already be available from a configured
+#   repository.
 #
 # @example
 #   class { 'bootstrap::db':
@@ -28,6 +32,7 @@ class bootstrap::db (
   Stdlib::Host         $database_host         = 'localhost',
   Array[String[1]]     $remote_clients        = [],
   String[1]            $postgres_version      = '17',
+  Boolean              $manage_package_repo   = true,
 ) {
   $remote = $manage_dbserver and !$remote_clients.empty
   $listen_address = $remote ? {
@@ -43,6 +48,7 @@ class bootstrap::db (
     database_listen_address => $listen_address,
     certificate_whitelist   => $certificate_allowlist,
     postgres_version        => $postgres_version,
+    manage_package_repo     => $manage_package_repo,
     manage_firewall         => false,
   }
 

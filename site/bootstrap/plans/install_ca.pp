@@ -17,6 +17,10 @@
 #   Alternate DNS names for the CA host's own certificate, if it is also a
 #   compile master
 # @param manage_firewall Open 8140/tcp in firewalld, if firewalld is running
+# @param manage_repos
+#   Set up the OpenVox package repository (and, for OpenVoxDB, the PostgreSQL
+#   repository).  Set this to `false` on hosts that can't reach the internet
+#   but already have the packages available, such as from a Satellite.
 #
 # @return [String] The CA host's certname
 plan bootstrap::install_ca (
@@ -26,18 +30,19 @@ plan bootstrap::install_ca (
   Variant[Boolean, Array[String[1]]]  $autosign           = false,
   Array[String[1]]                    $dns_alt_names      = [],
   Boolean                             $manage_firewall    = false,
+  Boolean                             $manage_repos       = true,
 ) {
   $ca = get_targets($targets)
   if $ca.length != 1 {
     fail_plan("bootstrap::install_ca needs exactly one target (got ${ca.length})")
   }
 
-  run_task(
-    'openvox_bootstrap::install',
-    $ca,
-    'Installing openvox-server',
+  run_plan(
+    'bootstrap::install_packages',
+    'targets'               => $ca,
     'package'               => 'openvox-server',
     'collection'            => $openvox_collection,
+    'manage_repos'          => $manage_repos,
     'force_release_package' => false,
   )
 
