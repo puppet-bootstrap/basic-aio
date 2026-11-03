@@ -3,8 +3,8 @@
 # @example
 #   include profile::db
 class profile::db {
-  include 'puppetdb'
-  include 'puppetdb::master::config'
+  include 'openvoxdb'
+  include 'openvoxdb::master::config'
 
   if $facts['os']['family'] == 'RedHat' and Integer($facts['os']['release']['major']) > 7 {
     package { 'postgresql-dnfmodule':
@@ -17,6 +17,6 @@ class profile::db {
     -> Class['postgresql::server']
   }
 
-  Class['puppetdb']
-  -> Class['puppetdb::master::config']
+  Class['openvoxdb']
+  -> Class['openvoxdb::master::config']
 }

@@ -2,7 +2,7 @@
 fixtures:
   forge_modules:
     stdlib: puppetlabs-stdlib
-    puppetdb: puppetlabs-puppetdb
+    openvoxdb: puppet-openvoxdb
     inifile: puppetlabs-inifile
     postgresql: puppetlabs-postgresql
     concat: puppetlabs-concat

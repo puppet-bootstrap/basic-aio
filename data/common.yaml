@@ -15,11 +15,9 @@ profile::server::config::autosign:
   - "*.%{facts.networking.domain}"
   - vagrant.mcollective
 
-puppetdb::master::config::create_puppet_service_resource: false
-puppetdb::manage_firewall: false
-puppetdb::postgres_version: '17'
-puppetdb::puppetdb_package: 'openvoxdb'
-puppetdb::master::config::terminus_package: 'openvoxdb-termini'
+openvoxdb::master::config::create_puppet_service_resource: false
+openvoxdb::manage_firewall: false
+openvoxdb::postgres_version: '17'
 
 choria::manage_package_repo: true
 # Choria before 0.30.3 looks up `ssldir` with `puppet apply --configprint`,
