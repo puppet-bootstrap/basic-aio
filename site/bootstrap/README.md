@@ -22,8 +22,8 @@ otherwise, so they don't depend on any particular control repo.
   again.  Then it starts the puppet service.
 
 If you need to do something between those steps, such as deploying code to
-the server, call the individual plans yourself.  This repo's `role` plan does
-that to set up r10k before the server's first agent run.
+the server, call the individual plans yourself.  This repo's `basic_aio` plan
+does that to set up r10k before the server's first agent run.
 
 See [REFERENCE.md](REFERENCE.md) for parameters.
 
