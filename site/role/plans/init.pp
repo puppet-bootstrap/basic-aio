@@ -1,9 +1,14 @@
-# @summary Build an OpenVox server and attach agents
+# @summary Build the basic-aio Vagrant environment
+#
+# Uses the portable plans in the `bootstrap` module to install OpenVox, and
+# adds the parts that are specific to this Vagrant environment: the hosts
+# file, r10k, and a Choria certificate for the demo user.
 #
 # @param openvox_release The major version of OpenVox to use
 # @param openvox_version
 #   The version of openvox-agent to install.  Defaults to the latest version
-#   in `openvox_collection`.
+#   in `openvox_collection`.  Installing openvox-server may upgrade the agent
+#   on the server to satisfy openvox-server's dependencies.
 # @param openvox_collection The collection to use for openvox-agent
 # @param targets The targets to run on
 # @param server_target The puppet server target
@@ -25,44 +30,16 @@ plan role (
   ]                   $control_repo       = 'file:///vagrant/',
   Optional[String]    $choria_user        = 'vagrant',
 ) {
-  # We want to specify the OpenVox agent version to install,
-  # so we install the agent before calling apply_prep().
-  run_task(
-    'openvox_bootstrap::install',
-    $targets,
-    'Installing openvox-agent',
-    'collection' => $openvox_collection,
-    'version'    => $openvox_version ? {
+  run_plan(
+    'bootstrap::install_agents',
+    'targets'            => $targets,
+    'server_target'      => $server_target,
+    'openvox_version'    => $openvox_version ? {
       String[1] => $openvox_version,
-      default   => 'latest',
+      default   => undef,
     },
-  )
-
-  get_targets($targets).each |$target| {
-    # Set the puppet-agent feature to true so that
-    # apply_prep() will not attempt to install the agent.
-    set_feature($target, 'puppet-agent', true)
-  }
-
-  # apply_prep will see that puppet-agent is already
-  # installed and collect facts.
-  apply_prep($targets)
-
-  # OpenVox 9 no longer falls back to `puppet` when `server` is unset,
-  # so set it explicitly on every target.
-  $server = $openvox_server ? {
-    undef   => get_targets($server_target)[0].facts['networking']['fqdn'],
-    default => $openvox_server,
-  }
-  # Leave the puppet service stopped; profile::agent starts it during the
-  # first agent run.
-  run_task(
-    'openvox_bootstrap::configure',
-    $targets,
-    "Setting server to ${server}",
-    'puppet_conf'            => { 'main' => { 'server' => $server } },
-    'puppet_service_running' => false,
-    'puppet_service_enabled' => false,
+    'openvox_collection' => $openvox_collection,
+    'openvox_server'     => $openvox_server,
   )
 
   # Use the collected facts to build a hash of `host` resources.
@@ -105,19 +82,18 @@ plan role (
     }
   }
 
-  # On the server target, install and start the server service.
-  apply($server_target, '_description' => 'Install and start server components') {
-    include profile::server
-  }
+  # Autosigning and the firewall are left to profile::server, which the
+  # server's first agent run applies before any other agent runs.
+  run_plan(
+    'bootstrap::install_server',
+    'targets'            => $server_target,
+    'openvox_collection' => $openvox_collection,
+  )
 
-  # Run the agent to finish.
-  run_command(
-    'puppet agent -t -w 30 || { [ $? -eq 2 ] && true; };',
-    $server_target,
-    'First agent run',
-    '_env_vars' => {
-      'PATH' => '/opt/puppetlabs/bin:/bin:/usr/bin',
-    },
+  run_plan(
+    'bootstrap::first_run',
+    'targets'       => $server_target,
+    'server_target' => $server_target,
   )
 
   if $choria_user {
@@ -139,12 +115,9 @@ plan role (
   }
 
   # Run the agent on the remaining targets.
-  run_command(
-    'puppet agent -t -w 30 || { [ $? -eq 2 ] && true; };',
-    get_targets($targets) - get_targets($server_target),
-    'First agent run',
-    '_env_vars' => {
-      'PATH' => '/opt/puppetlabs/bin:/bin:/usr/bin',
-    },
+  run_plan(
+    'bootstrap::first_run',
+    'targets'       => get_targets($targets) - get_targets($server_target),
+    'server_target' => $server_target,
   )
 }

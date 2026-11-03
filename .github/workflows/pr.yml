@@ -20,6 +20,7 @@ jobs:
     strategy:
       matrix:
         module:
+          - bootstrap
           - profile
           - role
         openvox:
@@ -48,6 +49,7 @@ jobs:
     strategy:
       matrix:
         module:
+          - bootstrap
           - profile
           - role
         openvox:
