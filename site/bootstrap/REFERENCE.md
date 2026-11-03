@@ -13,6 +13,7 @@
 
 ### Tasks
 
+* [`ca_generate`](#ca_generate): On the active CA, generate certificates that are authorized to use the CA API (`puppetserver ca generate --ca-client`), for standby CAs. pupp
 * [`ca_setup`](#ca_setup): Generate the certificate authority and the CA host's own certificate with `puppetserver ca setup`, unless a CA already exists. Run this on th
 * [`ca_sign`](#ca_sign): Sign pending CSRs on the CA. Certnames that are already signed are skipped; a certname with neither a CSR nor a signed cert fails the task.
 * [`cert`](#cert): Submit a certificate request (action=request) or download the signed certificate (action=download). Idempotent. Set `server` and `ca_server`
@@ -20,6 +21,7 @@
 ### Plans
 
 * [`bootstrap`](#bootstrap): Bootstrap an OpenVox server infrastructure and agents
+* [`bootstrap::copy_cert`](#bootstrap--copy_cert): Move a certificate generated on the CA to the host it belongs to
 * [`bootstrap::first_run`](#bootstrap--first_run): Run the OpenVox agent for the first time
 * [`bootstrap::install_agents`](#bootstrap--install_agents): Install and configure the OpenVox agent
 * [`bootstrap::install_ca`](#bootstrap--install_ca): Install and start the active certificate authority
@@ -269,6 +271,26 @@ Default value: `'store,puppetdb'`
 
 ## Tasks
 
+### <a name="ca_generate"></a>`ca_generate`
+
+On the active CA, generate certificates that are authorized to use the CA API (`puppetserver ca generate --ca-client`), for standby CAs. puppetserver is stopped while they are generated and restarted afterward if it was running. Certnames that are already signed are skipped.
+
+**Supports noop?** false
+
+#### Parameters
+
+##### `certnames`
+
+Data type: `Array[String[1]]`
+
+Certnames to generate certificates for.
+
+##### `dns_alt_names`
+
+Data type: `Array[String[1]]`
+
+Subject alternative names for every certificate.
+
 ### <a name="ca_setup"></a>`ca_setup`
 
 Generate the certificate authority and the CA host's own certificate with `puppetserver ca setup`, unless a CA already exists. Run this on the active CA before puppetserver first starts.
@@ -510,6 +532,33 @@ If there is more than one compile master, run the agent in no-op mode on
 every target against each of them
 
 Default value: `true`
+
+### <a name="bootstrap--copy_cert"></a>`bootstrap::copy_cert`
+
+Moves the certificate and keys that `bootstrap::ca_generate` created on the
+CA into the target's SSL directory, then downloads the CA certificate and
+CRL there.  The private key passes through the Bolt host's `downloads`
+directory and is deleted from it and from the CA afterward.  Targets that
+already have a certificate are skipped.
+
+#### Parameters
+
+The following parameters are available in the `bootstrap::copy_cert` plan:
+
+* [`ca_target`](#-bootstrap--copy_cert--ca_target)
+* [`targets`](#-bootstrap--copy_cert--targets)
+
+##### <a name="-bootstrap--copy_cert--ca_target"></a>`ca_target`
+
+Data type: `TargetSpec`
+
+The CA host where the certificate was generated
+
+##### <a name="-bootstrap--copy_cert--targets"></a>`targets`
+
+Data type: `TargetSpec`
+
+The hosts to move certificates to.  Each one's certname is its FQDN.
 
 ### <a name="bootstrap--first_run"></a>`bootstrap::first_run`
 
@@ -791,7 +840,10 @@ Order of operations:
 1. Install the agent on every host and set `server` and `ca_server`.
 2. Optionally add every host to every host's hosts file.
 3. Set up the active CA.
-4. Get signed certificates for the other infrastructure hosts.
+4. Get signed certificates for the other infrastructure hosts.  Standby
+   CAs get certificates generated on the active CA that are authorized to
+   use the CA API (like the active CA's own), so `puppetserver ca` works on
+   them once they are promoted.
 5. Copy the CA directory to any standby CAs.
 6. Set up OpenVoxDB.  The first OpenVoxDB host also runs PostgreSQL.
 7. Set up the compile masters, with the CA service disabled on hosts that

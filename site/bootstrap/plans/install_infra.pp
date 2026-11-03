@@ -10,7 +10,10 @@
 # 1. Install the agent on every host and set `server` and `ca_server`.
 # 2. Optionally add every host to every host's hosts file.
 # 3. Set up the active CA.
-# 4. Get signed certificates for the other infrastructure hosts.
+# 4. Get signed certificates for the other infrastructure hosts.  Standby
+#    CAs get certificates generated on the active CA that are authorized to
+#    use the CA API (like the active CA's own), so `puppetserver ca` works on
+#    them once they are promoted.
 # 5. Copy the CA directory to any standby CAs.
 # 6. Set up OpenVoxDB.  The first OpenVoxDB host also runs PostgreSQL.
 # 7. Set up the compile masters, with the CA service disabled on hosts that
@@ -173,15 +176,37 @@ plan bootstrap::install_infra (
   # 4. Certificates for the other infrastructure hosts
   run_plan(
     'bootstrap::request_certs',
-    'targets'       => $servers - $active_ca,
+    'targets'       => $servers - $active_ca - $standby_cas,
     'ca_target'     => $active_ca,
     'dns_alt_names' => $dns_alt_names,
   )
   run_plan(
     'bootstrap::request_certs',
-    'targets'   => ($standby_cas + $dbs).unique - $servers - $active_ca,
+    'targets'   => $dbs - $servers - $cas,
     'ca_target' => $active_ca,
   )
+  unless $standby_cas.empty {
+    $server_standbys = $standby_cas.filter |$target| { $target in $servers }
+    $other_standbys = $standby_cas - $server_standbys
+    unless $server_standbys.empty {
+      run_task(
+        'bootstrap::ca_generate',
+        $active_ca,
+        'Generating certificates for standby CAs',
+        'certnames'     => $server_standbys.map |$target| { $certname[$target.name] },
+        'dns_alt_names' => $dns_alt_names,
+      )
+    }
+    unless $other_standbys.empty {
+      run_task(
+        'bootstrap::ca_generate',
+        $active_ca,
+        'Generating certificates for standby CAs',
+        'certnames' => $other_standbys.map |$target| { $certname[$target.name] },
+      )
+    }
+    run_plan('bootstrap::copy_cert', 'ca_target' => $active_ca, 'targets' => $standby_cas)
+  }
 
   # 5. Standby CAs.  The CA directory must be in place before puppetserver
   # first starts, or it would generate a new CA.

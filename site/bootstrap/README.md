@@ -30,6 +30,8 @@ configuration after the bootstrap.
   hosts that aren't the CA.
 * `bootstrap::sync_ca`: copies the CA directory from the active CA to standby
   CAs.  Rerun it after the active CA signs or revokes certificates.
+* `bootstrap::copy_cert`: moves certificates generated on the CA (for standby
+  CAs, by the `bootstrap::ca_generate` task) to the hosts they belong to.
 * `bootstrap::install_db`: sets up OpenVoxDB, with PostgreSQL (from the PGDG
   repo) on the first OpenVoxDB host.
 * `bootstrap::install_server`: sets up compile masters, with the CA service
