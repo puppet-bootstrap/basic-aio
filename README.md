@@ -87,7 +87,9 @@ bolt plan run basic_aio \
 
 Every target's agent uses the `production` environment, deployed from the
 control repo's `production` branch.  Set `control_branch` to use another
-branch, such as one you're testing.
+branch, such as one you're testing.  The control repo still needs a
+`production` branch: the server expects the `production` environment to
+exist, and fails to process reports without it.
 
 Agents whose certificates aren't autosigned are signed by the plan after their
 first run.  Run `bolt plan show basic_aio` for all of the options, such as
