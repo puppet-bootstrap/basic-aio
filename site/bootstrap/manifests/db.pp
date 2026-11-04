@@ -21,8 +21,9 @@
 #   `postgresql` module stream for `postgres_version`.
 # @param postgres_version
 #   The PostgreSQL major version.  Defaults to `17` with `pgdg` and `16` with
-#   `os`.  OpenVoxDB needs PostgreSQL 14 or later.  With `os` on EL 10, this
-#   must be the operating system's version (16).
+#   `os`.  OpenVoxDB needs PostgreSQL 14 or later.  With `os` on EL 8 and 9,
+#   this is the module stream to enable (EL 9 has 15, 16, and 18).  With `os`
+#   on EL 10, only the default `postgresql` packages (16) are supported.
 # @param manage_package_repo
 #   Set up the PGDG package repository.  Without it, the PGDG packages must
 #   already be available from a configured repository.  Ignored with `os`.
@@ -48,6 +49,13 @@ class bootstrap::db (
   })
   $os_postgres = $postgres_source == 'os'
   $el_with_modules = $facts['os']['family'] == 'RedHat' and $facts['os']['release']['major'] in ['8', '9']
+
+  # EL 10's other PostgreSQL versions are separate packages (such as
+  # `postgresql18-server`) that puppetlabs/postgresql doesn't know the paths
+  # for.
+  if $os_postgres and $manage_dbserver and $facts['os']['family'] == 'RedHat' and $facts['os']['release']['major'] == '10' and $version != '16' {
+    fail("postgres_source 'os' supports only PostgreSQL 16 on EL 10 (got ${version})")
+  }
   $remote = $manage_dbserver and !$remote_clients.empty
   $listen_address = $remote ? {
     true    => '0.0.0.0',

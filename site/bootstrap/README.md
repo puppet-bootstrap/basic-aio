@@ -118,9 +118,9 @@ The mirror needs:
 
 `postgres_source=os` works whether or not `manage_repos` is set, since the
 operating system's repositories are already configured.  OpenVoxDB needs
-PostgreSQL 14 or later, so on EL 9 use the 15 or 16 module stream rather than
-the default PostgreSQL 13.  On EL 10, which has no module streams, use the
-version it ships (16).  Choose the source before OpenVoxDB is first installed:
+PostgreSQL 14 or later, so on EL 9 use the 15, 16, or 18 module stream (set
+`postgres_version`) rather than the default PostgreSQL 13.  On EL 10, which has
+no module streams, only its default `postgresql` packages (16) are supported.  Choose the source before OpenVoxDB is first installed:
 switching later installs a second, empty PostgreSQL server rather than
 migrating the data.
 

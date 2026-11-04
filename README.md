@@ -34,6 +34,7 @@ The following environment variables are used to configure the Vagrant environmen
 | `DB_SERVERS`         | `0`                    | The number of standalone OpenVoxDB servers (0-9)     |
 | `DB_PASSWORD`        | `puppetdb`             | The OpenVoxDB PostgreSQL password                    |
 | `POSTGRES_SOURCE`    | `pgdg`                 | Where PostgreSQL comes from (`pgdg` or `os`)         |
+| `POSTGRES_VERSION`   | `17` (`16` with `os`)  | The PostgreSQL major version                         |
 
 ### Splitting up the infrastructure
 
