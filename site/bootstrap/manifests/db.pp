@@ -23,7 +23,8 @@
 #   The PostgreSQL major version.  Defaults to `17` with `pgdg` and `16` with
 #   `os`.  OpenVoxDB needs PostgreSQL 14 or later.  With `os` on EL 8 and 9,
 #   this is the module stream to enable (EL 9 has 15, 16, and 18).  With `os`
-#   on EL 10, only the default `postgresql` packages (16) are supported.
+#   on EL 10, versions other than 16 use the versioned packages (such as
+#   `postgresql18-server`).
 # @param manage_package_repo
 #   Set up the PGDG package repository.  Without it, the PGDG packages must
 #   already be available from a configured repository.  Ignored with `os`.
@@ -50,11 +51,22 @@ class bootstrap::db (
   $os_postgres = $postgres_source == 'os'
   $el_with_modules = $facts['os']['family'] == 'RedHat' and $facts['os']['release']['major'] in ['8', '9']
 
-  # EL 10's other PostgreSQL versions are separate packages (such as
-  # `postgresql18-server`) that puppetlabs/postgresql doesn't know the paths
-  # for.
-  if $os_postgres and $manage_dbserver and $facts['os']['family'] == 'RedHat' and $facts['os']['release']['major'] == '10' and $version != '16' {
-    fail("postgres_source 'os' supports only PostgreSQL 16 on EL 10 (got ${version})")
+  # EL 10 has no module streams.  Its other PostgreSQL versions are packages
+  # such as `postgresql18-server`, with the same paths and service as the
+  # default version's packages.  puppetlabs/postgresql would use PGDG paths
+  # for them.
+  $el10_versioned = $facts['os']['family'] == 'RedHat' and $facts['os']['release']['major'] == '10' and $version != '16'
+  $versioned_settings = $el10_versioned ? {
+    true    => {
+      'client_package_name'  => "postgresql${version}",
+      'server_package_name'  => "postgresql${version}-server",
+      'contrib_package_name' => "postgresql${version}-contrib",
+      'bindir'               => '/usr/bin',
+      'datadir'              => '/var/lib/pgsql/data',
+      'confdir'              => '/var/lib/pgsql/data',
+      'service_name'         => 'postgresql',
+    },
+    default => {},
   }
   $remote = $manage_dbserver and !$remote_clients.empty
   $listen_address = $remote ? {
@@ -71,6 +83,7 @@ class bootstrap::db (
       manage_dnf_module   => $el_with_modules,
       manage_package_repo => false,
       version             => $version,
+      *                   => $versioned_settings,
     }
 
     # The same settings puppet/openvoxdb uses.

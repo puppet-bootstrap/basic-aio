@@ -165,7 +165,8 @@ Data type: `Optional[String[1]]`
 The PostgreSQL major version.  Defaults to `17` with `pgdg` and `16` with
 `os`.  OpenVoxDB needs PostgreSQL 14 or later.  With `os` on EL 8 and 9,
 this is the module stream to enable (EL 9 has 15, 16, and 18).  With `os`
-on EL 10, only the default `postgresql` packages (16) are supported.
+on EL 10, versions other than 16 use the versioned packages (such as
+`postgresql18-server`).
 
 Default value: `undef`
 

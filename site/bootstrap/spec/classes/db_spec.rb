@@ -108,13 +108,29 @@ describe 'bootstrap::db' do
           }
         end
 
-        if os_facts[:os]['release']['major'] == '10'
-          it { is_expected.to compile.and_raise_error(%r{supports only PostgreSQL 16 on EL 10}) }
-        else
-          it { is_expected.to compile.with_all_deps }
-          it { is_expected.to contain_package('postgresql dnf module').with_ensure('18') }
-          it { is_expected.to contain_package('postgresql-server').with_name('postgresql-server') }
+        it { is_expected.to compile.with_all_deps }
+        it { is_expected.to contain_package('postgresql dnf module').with_ensure('18') }
+        it { is_expected.to contain_package('postgresql-server').with_name('postgresql-server') }
+      end
+
+      context 'with the operating system PostgreSQL 18 packages on EL 10' do
+        let(:facts) do
+          os_facts.merge(os: os_facts[:os].merge('release' => { 'major' => '10', 'minor' => '0', 'full' => '10.0' }))
         end
+        let(:params) do
+          {
+            database_password: sensitive('secret'),
+            postgres_source: 'os',
+            postgres_version: '18',
+          }
+        end
+
+        it { is_expected.to compile.with_all_deps }
+        it { is_expected.not_to contain_package('postgresql dnf module') }
+        it { is_expected.to contain_package('postgresql-server').with_name('postgresql18-server') }
+        it { is_expected.to contain_package('postgresql-contrib').with_name('postgresql18-contrib') }
+        it { is_expected.to contain_postgresql__server__instance__service('main').with_service_name('postgresql') }
+        it { is_expected.to contain_file('/var/lib/pgsql/data') }
       end
 
       context 'with the operating system PostgreSQL packages and remote OpenVoxDB hosts' do
