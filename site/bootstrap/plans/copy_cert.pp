@@ -58,9 +58,10 @@ plan bootstrap::copy_cert (
       )
     }
 
-    # These are safe to repeat.
+    # These are safe to repeat.  Set certname like the other certificate
+    # paths do, so later agent and puppetserver runs use this certificate.
     run_command(
-      "puppet ssl bootstrap --certname ${certname} --waitforcert 0",
+      "puppet config set certname ${certname} --section main && puppet ssl bootstrap --certname ${certname} --waitforcert 0",
       $target,
       "Downloading the CA certificate and CRL to ${certname}",
       '_env_vars' => $env_vars,
