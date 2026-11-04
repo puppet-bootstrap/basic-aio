@@ -17,6 +17,7 @@
 # @param openvox_collection Ignored
 # @param openvox_server The value of `server` in `puppet.conf`
 # @param control_repo URL of the control repo to deploy with r10k
+# @param control_branch Ignored
 # @param autosign Ignored
 # @param dns_alt_names Ignored
 # @param manage_firewall Ignored
@@ -43,6 +44,7 @@ plan basic_aio::preflight (
   Optional[String[1]]                                $openvox_collection   = undef,
   Optional[String[1]]                                $openvox_server       = undef,
   Optional[String[1]]                                $control_repo         = undef,
+  Pattern[/\A\w+\z/]                                  $control_branch       = 'production',
   Variant[Boolean, Array[String[1]]]                 $autosign             = false,
   Array[String[1]]                                   $dns_alt_names        = [],
   Boolean                                            $manage_firewall      = true,

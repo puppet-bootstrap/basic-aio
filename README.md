@@ -35,6 +35,7 @@ The following environment variables are used to configure the Vagrant environmen
 | `DB_PASSWORD`        | `puppetdb`             | The OpenVoxDB PostgreSQL password                    |
 | `POSTGRES_SOURCE`    | `pgdg`                 | Where PostgreSQL comes from (`pgdg` or `os`)         |
 | `POSTGRES_VERSION`   | `17` (`16` with `os`)  | The PostgreSQL major version                         |
+| `CONTROL_BRANCH`     | `production`           | The branch of this repo the agents use               |
 
 ### Splitting up the infrastructure
 
@@ -55,6 +56,11 @@ two OpenVoxDB hosts (plus the agent):
 ```sh
 COMPILERS=2 CA_SERVERS=2 DB_SERVERS=2 vagrant up
 ```
+
+r10k deploys every local branch of this repo as an environment, and the
+agents use the `CONTROL_BRANCH` environment.  To try out a branch, create it
+(with a name that is a valid environment name, using only letters, digits,
+and underscores), commit to it, and set `CONTROL_BRANCH` to it.
 
 Agents use `puppet.vagrant` as their server.  Every compile master gets the
 code from `/vagrant` with r10k and connects to every OpenVoxDB host.  To switch
@@ -78,6 +84,10 @@ bolt plan run basic_aio \
   openvox_release=9 \
   control_repo=https://github.com/example/control-repo.git
 ```
+
+Every target's agent uses the `production` environment, deployed from the
+control repo's `production` branch.  Set `control_branch` to use another
+branch, such as one you're testing.
 
 Agents whose certificates aren't autosigned are signed by the plan after their
 first run.  Run `bolt plan show basic_aio` for all of the options, such as

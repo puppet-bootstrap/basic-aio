@@ -36,6 +36,10 @@
 # @param control_repo
 #   URL of a control repo to deploy to every compile master with r10k before
 #   the first agent run.  No code is deployed if this isn't set.
+# @param control_branch
+#   The control repo branch (and so the environment) that every target's
+#   agent uses.  It must be a valid environment name (letters, digits, and
+#   underscores).  Only used with `control_repo`.
 # @param autosign
 #   `true` to autosign every certificate request, or a list of certnames and
 #   domain name globs to write to `autosign.conf` on the CAs.  `false` leaves
@@ -88,6 +92,7 @@ plan basic_aio (
   },
   Optional[String[1]]                                $openvox_server       = undef,
   Optional[String[1]]                                $control_repo         = undef,
+  Pattern[/\A\w+\z/]                                  $control_branch       = 'production',
   Variant[Boolean, Array[String[1]]]                 $autosign             = false,
   Array[String[1]]                                   $dns_alt_names        = [],
   Boolean                                            $manage_firewall      = true,
@@ -213,7 +218,20 @@ plan basic_aio (
         path => '/opt/puppetlabs/bin:/bin:/usr/bin:/sbin:/usr/sbin',
         # Always run this command to ensure that the environment is deployed.
       }
+      -> exec { "r10k deployed ${control_branch}":
+        command => "echo 'The control repo has no ${control_branch} branch' >&2; false",
+        unless  => "test -d /etc/puppetlabs/code/environments/${control_branch}",
+        path    => '/bin:/usr/bin',
+      }
     }
+
+    # Point every agent at the control branch's environment.
+    run_command(
+      "puppet config set environment ${control_branch} --section agent",
+      $all,
+      "Setting the agent environment to ${control_branch}",
+      '_env_vars' => { 'PATH' => '/opt/puppetlabs/bin:/bin:/usr/bin:/sbin:/usr/sbin' },
+    )
   }
 
   run_plan(
