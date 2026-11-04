@@ -1,0 +1,89 @@
+---
+name: 'Acceptance tests'
+
+'on':
+  - pull_request
+
+concurrency:
+  group: acceptance-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  vagrant:
+    # Pinned because the openvox-release package is specific to the Ubuntu release.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    env:
+      BOLT_DISABLE_ANALYTICS: 'true'
+      VAGRANT_DEFAULT_PROVIDER: libvirt
+      # r10k deploys the local branches in /vagrant, and environment names
+      # can't contain the characters PR branch names usually have, so the PR
+      # is deployed from a local `ci` branch.  The server also needs a
+      # `production` environment, so that comes from the base branch.
+      CONTROL_BRANCH: ci
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Create the ci and production branches
+        run: |
+          git checkout -B ci
+          git branch -f production "origin/${GITHUB_BASE_REF}"
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Install libvirt
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends \
+            libvirt-daemon-system libvirt-dev qemu-kvm qemu-utils dnsmasq-base \
+            ebtables rsync build-essential pkg-config
+          sudo systemctl start libvirtd
+          sudo setfacl -m "user:$USER:rw" /var/run/libvirt/libvirt-sock
+      - name: Install Vagrant
+        # Ubuntu no longer packages Vagrant, so use HashiCorp's repository.
+        run: |
+          wget -qO- https://apt.releases.hashicorp.com/gpg \
+            | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
+            | sudo tee /etc/apt/sources.list.d/hashicorp.list
+          sudo apt-get update -q
+          sudo apt-get install -y vagrant
+          vagrant plugin install vagrant-libvirt
+          vagrant --version
+          vagrant plugin list
+      - name: Install OpenBolt
+        # OpenBolt is not yet in the openvox9 collection.
+        run: |
+          wget -q https://apt.voxpupuli.org/openvox8-release-ubuntu24.04.deb
+          sudo dpkg -i openvox8-release-ubuntu24.04.deb
+          sudo apt-get update -q
+          sudo apt-get install -y openbolt
+      - name: Cache Vagrant boxes
+        uses: actions/cache@v6
+        with:
+          path: ~/.vagrant.d/boxes
+          key: vagrant-boxes-libvirt-${{ hashFiles('Vagrantfile') }}
+          restore-keys: vagrant-boxes-libvirt-
+      - name: Build the environment
+        run: vagrant up --no-tty
+      # Set up Ruby after `vagrant up` so its environment can't affect
+      # Vagrant's own Ruby.
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+      - name: Run the acceptance tests
+        run: bundle exec rake spec
+      - name: Show the agent's last run
+        if: failure()
+        run: |
+          for host in puppet agent; do
+            vagrant ssh "$host" -c 'sudo cat /opt/puppetlabs/puppet/cache/state/last_run_report.yaml | head -100' || true
+          done
+      - name: Destroy the environment
+        if: always()
+        run: vagrant destroy -f || true

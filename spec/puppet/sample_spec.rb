@@ -4,6 +4,7 @@ require 'spec_helper'
 
 openvox_version = ENV.fetch('OPENVOX_VERSION', '')
 openvox_release = openvox_version.empty? ? ENV.fetch('OPENVOX_RELEASE', '9') : openvox_version.split('.').first
+control_branch = ENV.fetch('CONTROL_BRANCH', 'production')
 
 describe 'server' do
   # Verify the physical setup of the server
@@ -25,7 +26,7 @@ describe 'server' do
 
   # Initial Boostrap configuration
   # Items in this section are configured during application of bootstrap.pp
-  describe file('/etc/puppetlabs/code/environments/production/hiera.yaml') do
+  describe file("/etc/puppetlabs/code/environments/#{control_branch}/hiera.yaml") do
     it { is_expected.to be_file }
     its(:content_as_yaml) { is_expected.to include('version' => 5) }
 
@@ -53,11 +54,11 @@ describe 'server' do
     end
   end
 
-  describe file('/etc/puppetlabs/code/environments/production') do
+  describe file("/etc/puppetlabs/code/environments/#{control_branch}") do
     it { is_expected.to be_directory }
   end
 
-  describe file('/etc/puppetlabs/code/environments/production/modules/r10k') do
+  describe file("/etc/puppetlabs/code/environments/#{control_branch}/modules/r10k") do
     it { is_expected.to be_directory }
   end
 
@@ -85,6 +86,10 @@ describe 'server' do
   end
 
   # Verify puppet agent configuration
+  describe command('/opt/puppetlabs/bin/puppet config print environment --section agent') do
+    its(:stdout) { is_expected.to eq "#{control_branch}\n" }
+  end
+
   describe package('openvox-agent') do
     it { is_expected.to be_installed }
   end
@@ -102,7 +107,7 @@ describe 'server' do
 
   # Puppet Boostrap configuration
   # Items in this section should have been configured during the initial puppet agent run
-  describe command('/opt/puppetlabs/bin/puppet module list') do
+  describe command("/opt/puppetlabs/bin/puppet module list --environment #{control_branch}") do
     its(:stdout) { is_expected.to match 'puppet-r10k' }
     its(:stdout) { is_expected.to match 'puppet-epel' }
     its(:stdout) { is_expected.to match 'puppetlabs-stdlib' }
