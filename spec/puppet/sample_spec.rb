@@ -107,7 +107,7 @@ describe 'server' do
 
   # Puppet Boostrap configuration
   # Items in this section should have been configured during the initial puppet agent run
-  describe command('/opt/puppetlabs/bin/puppet module list') do
+  describe command("/opt/puppetlabs/bin/puppet module list --environment #{control_branch}") do
     its(:stdout) { is_expected.to match 'puppet-r10k' }
     its(:stdout) { is_expected.to match 'puppet-epel' }
     its(:stdout) { is_expected.to match 'puppetlabs-stdlib' }
