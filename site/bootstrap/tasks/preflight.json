@@ -1,0 +1,32 @@
+{
+  "description": "Check, without changing anything, that a host is ready for the bootstrap plans: root access, a fully qualified hostname, name resolution, package availability, and reachable URLs. Reports problems in its result instead of failing.",
+  "input_method": "environment",
+  "supports_noop": true,
+  "parameters": {
+    "require_fqdn": {
+      "description": "Report an error if `hostname -f` isn't fully qualified.",
+      "type": "Boolean",
+      "default": false
+    },
+    "resolve": {
+      "description": "Space-separated host names that must resolve on this host.",
+      "type": "Optional[String]"
+    },
+    "packages": {
+      "description": "Space-separated packages that must be available from this host's configured repositories (dnf only).",
+      "type": "Optional[String]"
+    },
+    "postgres_source": {
+      "description": "Check that the PostgreSQL server packages for this source (`pgdg` or `os`) are available.",
+      "type": "Optional[Enum['pgdg', 'os']]"
+    },
+    "postgres_version": {
+      "description": "The PostgreSQL major version to check for.",
+      "type": "Optional[String[1]]"
+    },
+    "urls": {
+      "description": "Space-separated URLs that must be reachable from this host.",
+      "type": "Optional[String]"
+    }
+  }
+}
