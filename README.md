@@ -120,6 +120,15 @@ every target's hosts file as aliases of `server_target`.  When adding compile
 masters later, rerun the plan with the complete list: the OpenVoxDB
 certificate allowlist is rebuilt from it.
 
+To check the hosts first without changing anything, run
+`basic_aio::preflight` with the same parameters.  It reports unreachable
+hosts, missing root access, names that don't resolve, and packages or URLs
+that aren't available:
+
+```sh
+bolt plan run basic_aio::preflight --targets ... --run-as root ...
+```
+
 The portable parts live in the `bootstrap` module in `site/bootstrap`, which
 you can also use on its own.  See its [README](site/bootstrap/README.md).
 

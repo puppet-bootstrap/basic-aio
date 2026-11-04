@@ -17,6 +17,7 @@
 * [`ca_setup`](#ca_setup): Generate the certificate authority and the CA host's own certificate with `puppetserver ca setup`, unless a CA already exists. Run this on th
 * [`ca_sign`](#ca_sign): Sign pending CSRs on the CA. Certnames that are already signed are skipped; a certname with neither a CSR nor a signed cert fails the task.
 * [`cert`](#cert): Submit a certificate request (action=request) or download the signed certificate (action=download). Idempotent. Set `server` and `ca_server`
+* [`preflight`](#preflight): Check, without changing anything, that a host is ready for the bootstrap plans: root access, a fully qualified hostname, name resolution, pac
 
 ### Plans
 
@@ -30,6 +31,7 @@
 * [`bootstrap::install_packages`](#bootstrap--install_packages): Install an OpenVox package
 * [`bootstrap::install_server`](#bootstrap--install_server): Install and start OpenVox Server on compile masters
 * [`bootstrap::open_ports`](#bootstrap--open_ports): Open TCP ports in firewalld, if firewalld is running
+* [`bootstrap::preflight`](#bootstrap--preflight): Check that the targets are ready for `bootstrap` without changing them
 * [`bootstrap::request_certs`](#bootstrap--request_certs): Get signed certificates for hosts from the CA
 * [`bootstrap::smoke_test`](#bootstrap--smoke_test): Check that every compile master serves catalogs to every target
 * [`bootstrap::sync_ca`](#bootstrap--sync_ca): Copy the CA directory from the active CA to standby CAs
@@ -377,6 +379,50 @@ Certname (FQDN) for this host.
 Data type: `Array[String[1]]`
 
 Subject alternative names to request. Only takes effect before the first CSR is submitted.
+
+### <a name="preflight"></a>`preflight`
+
+Check, without changing anything, that a host is ready for the bootstrap plans: root access, a fully qualified hostname, name resolution, package availability, and reachable URLs. Reports problems in its result instead of failing.
+
+**Supports noop?** true
+
+#### Parameters
+
+##### `require_fqdn`
+
+Data type: `Boolean`
+
+Report an error if `hostname -f` isn't fully qualified.
+
+##### `resolve`
+
+Data type: `Optional[String]`
+
+Space-separated host names that must resolve on this host.
+
+##### `packages`
+
+Data type: `Optional[String]`
+
+Space-separated packages that must be available from this host's configured repositories (dnf only).
+
+##### `postgres_source`
+
+Data type: `Optional[Enum['pgdg', 'os']]`
+
+Check that the PostgreSQL server packages for this source (`pgdg` or `os`) are available.
+
+##### `postgres_version`
+
+Data type: `Optional[String[1]]`
+
+The PostgreSQL major version to check for.
+
+##### `urls`
+
+Data type: `Optional[String]`
+
+Space-separated URLs that must be reachable from this host.
 
 ## Plans
 
@@ -1343,6 +1389,145 @@ The targets to open the ports on
 Data type: `Array[Integer[1], 1]`
 
 The TCP ports to open
+
+### <a name="bootstrap--preflight"></a>`bootstrap::preflight`
+
+Takes the same target and repository parameters as `bootstrap` (and
+`bootstrap::install_infra`) and checks each target without changing
+anything:
+
+* Bolt can connect, with root access
+* Infrastructure hosts have a fully qualified hostname (their certname)
+* No two targets have the same hostname
+* Clocks are within a minute of the Bolt host's
+* The names each target will use resolve: the server and active CA on every
+  target, and every infrastructure host on the infrastructure hosts
+  (except names that `manage_hosts` or `alias_server_names` will add to the
+  hosts file)
+* With `manage_repos`, yum.voxpupuli.org (and, for OpenVoxDB with `pgdg`,
+  download.postgresql.org) is reachable
+* Without `manage_repos`, the OpenVox packages each target needs are
+  available from its configured repositories
+* The PostgreSQL packages (or module stream) are available on the first
+  OpenVoxDB host, unless they'll come from the PGDG repository the plans set
+  up
+
+Package checks use dnf, so they only run on EL hosts.  The plan reports
+every problem it finds and then fails if there were any.
+
+#### Parameters
+
+The following parameters are available in the `bootstrap::preflight` plan:
+
+* [`targets`](#-bootstrap--preflight--targets)
+* [`server_target`](#-bootstrap--preflight--server_target)
+* [`compilers`](#-bootstrap--preflight--compilers)
+* [`ca_targets`](#-bootstrap--preflight--ca_targets)
+* [`db_targets`](#-bootstrap--preflight--db_targets)
+* [`openvox_server`](#-bootstrap--preflight--openvox_server)
+* [`manage_repos`](#-bootstrap--preflight--manage_repos)
+* [`manage_hosts`](#-bootstrap--preflight--manage_hosts)
+* [`alias_server_names`](#-bootstrap--preflight--alias_server_names)
+* [`postgres_source`](#-bootstrap--preflight--postgres_source)
+* [`postgres_version`](#-bootstrap--preflight--postgres_version)
+* [`server_urls`](#-bootstrap--preflight--server_urls)
+
+##### <a name="-bootstrap--preflight--targets"></a>`targets`
+
+Data type: `TargetSpec`
+
+The agent targets.  The infrastructure hosts are added to them.
+
+##### <a name="-bootstrap--preflight--server_target"></a>`server_target`
+
+Data type: `TargetSpec`
+
+The primary compile master
+
+##### <a name="-bootstrap--preflight--compilers"></a>`compilers`
+
+Data type: `TargetSpec`
+
+Additional compile masters
+
+Default value: `[]`
+
+##### <a name="-bootstrap--preflight--ca_targets"></a>`ca_targets`
+
+Data type: `Optional[TargetSpec]`
+
+The CA hosts.  Defaults to `server_target`.
+
+Default value: `undef`
+
+##### <a name="-bootstrap--preflight--db_targets"></a>`db_targets`
+
+Data type: `TargetSpec`
+
+The OpenVoxDB hosts
+
+Default value: `[]`
+
+##### <a name="-bootstrap--preflight--openvox_server"></a>`openvox_server`
+
+Data type: `Optional[String[1]]`
+
+The value of `server` in `puppet.conf`.  Defaults to the FQDN of
+`server_target`.
+
+Default value: `undef`
+
+##### <a name="-bootstrap--preflight--manage_repos"></a>`manage_repos`
+
+Data type: `Boolean`
+
+Whether the bootstrap will set up package repositories
+
+Default value: `true`
+
+##### <a name="-bootstrap--preflight--manage_hosts"></a>`manage_hosts`
+
+Data type: `Boolean`
+
+Whether the bootstrap will add every target to every target's hosts file
+
+Default value: `false`
+
+##### <a name="-bootstrap--preflight--alias_server_names"></a>`alias_server_names`
+
+Data type: `Boolean`
+
+Whether the bootstrap will add `openvox_server` to every target's hosts
+file
+
+Default value: `false`
+
+##### <a name="-bootstrap--preflight--postgres_source"></a>`postgres_source`
+
+Data type: `Enum['pgdg', 'os']`
+
+Where PostgreSQL will come from (`pgdg` or `os`)
+
+Default value: `'pgdg'`
+
+##### <a name="-bootstrap--preflight--postgres_version"></a>`postgres_version`
+
+Data type: `Optional[String[1]]`
+
+The PostgreSQL major version.  Defaults to `17` with `pgdg` and `16` with
+`os`.
+
+Default value: `undef`
+
+##### <a name="-bootstrap--preflight--server_urls"></a>`server_urls`
+
+Data type: `Array[String[1]]`
+
+Additional URLs the compile masters must be able to reach, such as
+https://rubygems.org and https://forge.puppet.com for deploying a control
+repo with r10k
+
+Default value: `[]`
 
 ### <a name="bootstrap--request_certs"></a>`bootstrap::request_certs`
 
