@@ -394,6 +394,7 @@ The following parameters are available in the `bootstrap` plan:
 * [`manage_firewall`](#-bootstrap--manage_firewall)
 * [`manage_repos`](#-bootstrap--manage_repos)
 * [`manage_hosts`](#-bootstrap--manage_hosts)
+* [`alias_server_names`](#-bootstrap--alias_server_names)
 * [`sign_certs`](#-bootstrap--sign_certs)
 * [`start_service`](#-bootstrap--start_service)
 * [`smoke_test`](#-bootstrap--smoke_test)
@@ -532,6 +533,15 @@ Default value: `true`
 Data type: `Boolean`
 
 Add every target to every target's hosts file
+
+Default value: `false`
+
+##### <a name="-bootstrap--alias_server_names"></a>`alias_server_names`
+
+Data type: `Boolean`
+
+Add `openvox_server` and `dns_alt_names` to every target's hosts file as
+aliases of `server_target`, so those names resolve without DNS.
 
 Default value: `false`
 
@@ -935,6 +945,7 @@ The following parameters are available in the `bootstrap::install_infra` plan:
 * [`dns_alt_names`](#-bootstrap--install_infra--dns_alt_names)
 * [`manage_firewall`](#-bootstrap--install_infra--manage_firewall)
 * [`manage_hosts`](#-bootstrap--install_infra--manage_hosts)
+* [`alias_server_names`](#-bootstrap--install_infra--alias_server_names)
 * [`postgres_version`](#-bootstrap--install_infra--postgres_version)
 * [`manage_repos`](#-bootstrap--install_infra--manage_repos)
 
@@ -1066,6 +1077,17 @@ Data type: `Boolean`
 
 Add every target to every target's hosts file, using the facts collected
 from them.  Useful when the targets can't resolve each other's names.
+
+Default value: `false`
+
+##### <a name="-bootstrap--install_infra--alias_server_names"></a>`alias_server_names`
+
+Data type: `Boolean`
+
+Add `openvox_server` and `dns_alt_names` to every target's hosts file as
+aliases of `server_target`, so those names resolve without DNS.  Without
+`manage_hosts`, only `server_target`'s entry is added.  Rerunning without
+this doesn't remove the entries.
 
 Default value: `false`
 

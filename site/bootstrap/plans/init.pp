@@ -42,6 +42,9 @@
 #   repository).  Set this to `false` on hosts that can't reach the internet
 #   but already have the packages available, such as from a Satellite.
 # @param manage_hosts Add every target to every target's hosts file
+# @param alias_server_names
+#   Add `openvox_server` and `dns_alt_names` to every target's hosts file as
+#   aliases of `server_target`, so those names resolve without DNS.
 # @param sign_certs Sign certificate requests for agents whose first run fails
 # @param start_service Start and enable the puppet service after the first run
 # @param smoke_test
@@ -70,6 +73,7 @@ plan bootstrap (
   Array[String[1]]                                   $dns_alt_names      = [],
   Boolean                                            $manage_firewall    = false,
   Boolean                                            $manage_hosts       = false,
+  Boolean                                            $alias_server_names = false,
   Boolean                                            $manage_repos       = true,
   Boolean                                            $sign_certs         = true,
   Boolean                                            $start_service      = true,
@@ -95,6 +99,7 @@ plan bootstrap (
     'dns_alt_names'      => $dns_alt_names,
     'manage_firewall'    => $manage_firewall,
     'manage_hosts'       => $manage_hosts,
+    'alias_server_names' => $alias_server_names,
     'manage_repos'       => $manage_repos,
   )
 

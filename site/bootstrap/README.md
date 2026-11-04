@@ -91,6 +91,11 @@ bolt plan run bootstrap \
   --run-as root
 ```
 
+To make `openvox_server` and the `dns_alt_names` resolve to `server_target`
+without DNS, add `alias_server_names=true`.  Every target's hosts file then
+lists them as aliases of `server_target`.  Rerunning the plan without
+`alias_server_names` doesn't remove those entries.
+
 ## Airgapped hosts
 
 By default, the plans install the `openvoxN-release` package from

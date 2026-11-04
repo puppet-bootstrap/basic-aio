@@ -111,9 +111,10 @@ itself from rubygems.org, and deploys any Forge modules in the control repo's
 Each host's certname is the FQDN from its facts.  Decide on a load balancer
 name for the compile masters before the first run, and put it in
 `dns_alt_names` (and `openvox_server`), since alternate names only apply when
-a certificate is first issued.  When adding compile masters later, rerun the
-plan with the complete list: the OpenVoxDB certificate allowlist is rebuilt
-from it.
+a certificate is first issued.  `alias_server_names=true` adds those names to
+every target's hosts file as aliases of `server_target`.  When adding compile
+masters later, rerun the plan with the complete list: the OpenVoxDB
+certificate allowlist is rebuilt from it.
 
 The portable parts live in the `bootstrap` module in `site/bootstrap`, which
 you can also use on its own.  See its [README](site/bootstrap/README.md).
