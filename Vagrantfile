@@ -13,10 +13,12 @@ db_servers = Integer(ENV.fetch('DB_SERVERS', '0'))
 db_password = ENV.fetch('DB_PASSWORD', 'puppetdb')
 postgres_source = ENV.fetch('POSTGRES_SOURCE', 'pgdg')
 postgres_version = ENV.fetch('POSTGRES_VERSION', nil)
+control_branch = ENV.fetch('CONTROL_BRANCH', 'production')
 raise 'COMPILERS must be between 1 and 9' unless (1..9).cover?(compilers)
 raise 'CA_SERVERS must be between 0 and 9' unless (0..9).cover?(ca_servers)
 raise 'DB_SERVERS must be between 0 and 9' unless (0..9).cover?(db_servers)
 raise 'POSTGRES_SOURCE must be pgdg or os' unless ['pgdg', 'os'].include?(postgres_source)
+raise 'CONTROL_BRANCH must contain only letters, digits, and underscores' unless control_branch.match?(/\A\w+\z/)
 
 # The first compile master is always `puppet`.  The CA and OpenVoxDB run on it
 # unless CA_SERVERS or DB_SERVERS is set.
@@ -112,6 +114,7 @@ Vagrant.configure('2') do |config|
         Shellwords.escape("db_password=#{db_password}"),
         "postgres_source=#{postgres_source}",
         'control_repo=file:///vagrant/',
+        "control_branch=#{control_branch}",
         'manage_hosts=true',
         'manage_topology_data=true',
         %q('autosign=["*.vagrant","vagrant.mcollective"]'),
