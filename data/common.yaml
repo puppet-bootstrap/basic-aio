@@ -19,6 +19,9 @@ basic_aio::db_password: puppetdb
 # Whether the bootstrap set up package repositories (false on airgapped hosts
 # that get packages from a Satellite or other mirror).
 basic_aio::manage_repos: true
+# Where PostgreSQL comes from (pgdg or os) and its major version.
+basic_aio::postgres_source: pgdg
+basic_aio::postgres_version: '17'
 
 lookup_options:
   profile::db::database_password:
@@ -31,6 +34,8 @@ profile::topology::ca_servers: "%{alias('basic_aio::ca_servers')}"
 profile::topology::db_servers: "%{alias('basic_aio::db_servers')}"
 profile::db::database_password: "%{lookup('basic_aio::db_password')}"
 profile::db::manage_package_repo: "%{alias('basic_aio::manage_repos')}"
+profile::db::postgres_source: "%{lookup('basic_aio::postgres_source')}"
+profile::db::postgres_version: "%{lookup('basic_aio::postgres_version')}"
 
 mcollective::site_policies:
   - action: "allow"

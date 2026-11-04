@@ -103,6 +103,7 @@ The following parameters are available in the `bootstrap::db` class:
 * [`manage_dbserver`](#-bootstrap--db--manage_dbserver)
 * [`database_host`](#-bootstrap--db--database_host)
 * [`remote_clients`](#-bootstrap--db--remote_clients)
+* [`postgres_source`](#-bootstrap--db--postgres_source)
 * [`postgres_version`](#-bootstrap--db--postgres_version)
 * [`manage_package_repo`](#-bootstrap--db--manage_package_repo)
 
@@ -146,21 +147,35 @@ They must be able to resolve each other's names.
 
 Default value: `[]`
 
+##### <a name="-bootstrap--db--postgres_source"></a>`postgres_source`
+
+Data type: `Enum['pgdg', 'os']`
+
+Where PostgreSQL comes from.  `pgdg` installs the PGDG packages (such as
+`postgresql17-server`).  `os` installs the operating system's packages
+(`postgresql-server`); on EL 8 and 9, it enables the AppStream
+`postgresql` module stream for `postgres_version`.
+
+Default value: `'pgdg'`
+
 ##### <a name="-bootstrap--db--postgres_version"></a>`postgres_version`
 
-Data type: `String[1]`
+Data type: `Optional[String[1]]`
 
-The PostgreSQL major version to install from the PGDG repo
+The PostgreSQL major version.  Defaults to `17` with `pgdg` and `16` with
+`os`.  OpenVoxDB needs PostgreSQL 14 or later.  With `os` on EL 8 and 9,
+this is the module stream to enable (EL 9 has 15, 16, and 18).  With `os`
+on EL 10, versions other than 16 use the versioned packages (such as
+`postgresql18-server`).
 
-Default value: `'17'`
+Default value: `undef`
 
 ##### <a name="-bootstrap--db--manage_package_repo"></a>`manage_package_repo`
 
 Data type: `Boolean`
 
-Set up the PGDG package repository.  Without it, the PGDG packages (such
-as `postgresql17-server`) must already be available from a configured
-repository.
+Set up the PGDG package repository.  Without it, the PGDG packages must
+already be available from a configured repository.  Ignored with `os`.
 
 Default value: `true`
 
@@ -393,6 +408,8 @@ The following parameters are available in the `bootstrap` plan:
 * [`dns_alt_names`](#-bootstrap--dns_alt_names)
 * [`manage_firewall`](#-bootstrap--manage_firewall)
 * [`manage_repos`](#-bootstrap--manage_repos)
+* [`postgres_source`](#-bootstrap--postgres_source)
+* [`postgres_version`](#-bootstrap--postgres_version)
 * [`manage_hosts`](#-bootstrap--manage_hosts)
 * [`alias_server_names`](#-bootstrap--alias_server_names)
 * [`sign_certs`](#-bootstrap--sign_certs)
@@ -527,6 +544,25 @@ repository).  Set this to `false` on hosts that can't reach the internet
 but already have the packages available, such as from a Satellite.
 
 Default value: `true`
+
+##### <a name="-bootstrap--postgres_source"></a>`postgres_source`
+
+Data type: `Enum['pgdg', 'os']`
+
+Where PostgreSQL comes from: `pgdg` for the PGDG packages, or `os` for
+the operating system's packages (the AppStream module stream on EL 8 and
+9).  Choose this before OpenVoxDB is first installed.
+
+Default value: `'pgdg'`
+
+##### <a name="-bootstrap--postgres_version"></a>`postgres_version`
+
+Data type: `Optional[String[1]]`
+
+The PostgreSQL major version.  Defaults to `17` with `pgdg` and `16` with
+`os`.
+
+Default value: `undef`
 
 ##### <a name="-bootstrap--manage_hosts"></a>`manage_hosts`
 
@@ -841,7 +877,7 @@ Default value: `true`
 
 ### <a name="bootstrap--install_db"></a>`bootstrap::install_db`
 
-The first target runs PostgreSQL (from the PGDG repo) as well as OpenVoxDB.
+The first target runs PostgreSQL as well as OpenVoxDB.
 Any other targets run OpenVoxDB against that PostgreSQL server, so the
 targets must be able to resolve each other's names.  The targets need
 signed certificates first (see `bootstrap::request_certs`).
@@ -853,6 +889,7 @@ The following parameters are available in the `bootstrap::install_db` plan:
 * [`targets`](#-bootstrap--install_db--targets)
 * [`database_password`](#-bootstrap--install_db--database_password)
 * [`certificate_allowlist`](#-bootstrap--install_db--certificate_allowlist)
+* [`postgres_source`](#-bootstrap--install_db--postgres_source)
 * [`postgres_version`](#-bootstrap--install_db--postgres_version)
 * [`manage_firewall`](#-bootstrap--install_db--manage_firewall)
 * [`manage_repos`](#-bootstrap--install_db--manage_repos)
@@ -877,13 +914,24 @@ Certnames allowed to connect to OpenVoxDB, normally every compile master
 
 Default value: `[]`
 
+##### <a name="-bootstrap--install_db--postgres_source"></a>`postgres_source`
+
+Data type: `Enum['pgdg', 'os']`
+
+Where PostgreSQL comes from: `pgdg` for the PGDG packages, or `os` for
+the operating system's packages (the AppStream module stream on EL 8 and
+9).  Choose this before OpenVoxDB is first installed.
+
+Default value: `'pgdg'`
+
 ##### <a name="-bootstrap--install_db--postgres_version"></a>`postgres_version`
 
-Data type: `String[1]`
+Data type: `Optional[String[1]]`
 
-The PostgreSQL major version to install
+The PostgreSQL major version.  Defaults to `17` with `pgdg` and `16` with
+`os`.
 
-Default value: `'17'`
+Default value: `undef`
 
 ##### <a name="-bootstrap--install_db--manage_firewall"></a>`manage_firewall`
 
@@ -898,9 +946,9 @@ Default value: `false`
 
 Data type: `Boolean`
 
-Set up the PostgreSQL (PGDG) package repository.  Set this to `false` on
-hosts that can't reach the internet but already have the PGDG packages
-available, such as from a Satellite.
+Set up the PostgreSQL (PGDG) package repository when `postgres_source`
+is `pgdg`.  Set this to `false` on hosts that can't reach the internet but
+already have the PGDG packages available, such as from a Satellite.
 
 Default value: `true`
 
@@ -946,6 +994,7 @@ The following parameters are available in the `bootstrap::install_infra` plan:
 * [`manage_firewall`](#-bootstrap--install_infra--manage_firewall)
 * [`manage_hosts`](#-bootstrap--install_infra--manage_hosts)
 * [`alias_server_names`](#-bootstrap--install_infra--alias_server_names)
+* [`postgres_source`](#-bootstrap--install_infra--postgres_source)
 * [`postgres_version`](#-bootstrap--install_infra--postgres_version)
 * [`manage_repos`](#-bootstrap--install_infra--manage_repos)
 
@@ -1091,13 +1140,24 @@ this doesn't remove the entries.
 
 Default value: `false`
 
+##### <a name="-bootstrap--install_infra--postgres_source"></a>`postgres_source`
+
+Data type: `Enum['pgdg', 'os']`
+
+Where PostgreSQL comes from: `pgdg` for the PGDG packages, or `os` for
+the operating system's packages (the AppStream module stream on EL 8 and
+9).  Choose this before OpenVoxDB is first installed.
+
+Default value: `'pgdg'`
+
 ##### <a name="-bootstrap--install_infra--postgres_version"></a>`postgres_version`
 
-Data type: `String[1]`
+Data type: `Optional[String[1]]`
 
-The PostgreSQL major version to install
+The PostgreSQL major version.  Defaults to `17` with `pgdg` and `16` with
+`os`.
 
-Default value: `'17'`
+Default value: `undef`
 
 ##### <a name="-bootstrap--install_infra--manage_repos"></a>`manage_repos`
 

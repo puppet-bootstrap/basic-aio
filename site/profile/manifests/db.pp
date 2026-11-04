@@ -5,6 +5,7 @@
 # PostgreSQL for the others.
 #
 # @param database_password Password for the OpenVoxDB PostgreSQL user
+# @param postgres_source Where PostgreSQL comes from (`pgdg` or `os`)
 # @param postgres_version The PostgreSQL major version
 # @param manage_package_repo Set up the PGDG package repository
 # @param manage_firewall Open the OpenVoxDB (and, if needed, PostgreSQL) ports
@@ -13,7 +14,8 @@
 #   include profile::db
 class profile::db (
   Sensitive[String[1]] $database_password,
-  String[1]            $postgres_version    = '17',
+  Enum['pgdg', 'os']   $postgres_source     = 'pgdg',
+  Optional[String[1]]  $postgres_version    = undef,
   Boolean              $manage_package_repo = true,
   Boolean              $manage_firewall     = true,
 ) {
@@ -28,6 +30,7 @@ class profile::db (
       database_password     => $database_password,
       certificate_allowlist => $profile::topology::compilers,
       remote_clients        => $remote_clients,
+      postgres_source       => $postgres_source,
       postgres_version      => $postgres_version,
       manage_package_repo   => $manage_package_repo,
     }
@@ -37,6 +40,7 @@ class profile::db (
       certificate_allowlist => $profile::topology::compilers,
       manage_dbserver       => false,
       database_host         => $postgres_host,
+      postgres_source       => $postgres_source,
       postgres_version      => $postgres_version,
       manage_package_repo   => $manage_package_repo,
     }

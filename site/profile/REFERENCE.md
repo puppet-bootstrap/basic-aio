@@ -132,6 +132,7 @@ include profile::db
 The following parameters are available in the `profile::db` class:
 
 * [`database_password`](#-profile--db--database_password)
+* [`postgres_source`](#-profile--db--postgres_source)
 * [`postgres_version`](#-profile--db--postgres_version)
 * [`manage_package_repo`](#-profile--db--manage_package_repo)
 * [`manage_firewall`](#-profile--db--manage_firewall)
@@ -142,13 +143,21 @@ Data type: `Sensitive[String[1]]`
 
 Password for the OpenVoxDB PostgreSQL user
 
+##### <a name="-profile--db--postgres_source"></a>`postgres_source`
+
+Data type: `Enum['pgdg', 'os']`
+
+Where PostgreSQL comes from (`pgdg` or `os`)
+
+Default value: `'pgdg'`
+
 ##### <a name="-profile--db--postgres_version"></a>`postgres_version`
 
-Data type: `String[1]`
+Data type: `Optional[String[1]]`
 
 The PostgreSQL major version
 
-Default value: `'17'`
+Default value: `undef`
 
 ##### <a name="-profile--db--manage_package_repo"></a>`manage_package_repo`
 

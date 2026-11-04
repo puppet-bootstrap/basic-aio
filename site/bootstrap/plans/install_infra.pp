@@ -63,7 +63,13 @@
 #   aliases of `server_target`, so those names resolve without DNS.  Without
 #   `manage_hosts`, only `server_target`'s entry is added.  Rerunning without
 #   this doesn't remove the entries.
-# @param postgres_version The PostgreSQL major version to install
+# @param postgres_source
+#   Where PostgreSQL comes from: `pgdg` for the PGDG packages, or `os` for
+#   the operating system's packages (the AppStream module stream on EL 8 and
+#   9).  Choose this before OpenVoxDB is first installed.
+# @param postgres_version
+#   The PostgreSQL major version.  Defaults to `17` with `pgdg` and `16` with
+#   `os`.
 # @param manage_repos
 #   Set up the OpenVox package repository (and, for OpenVoxDB, the PostgreSQL
 #   repository).  Set this to `false` on hosts that can't reach the internet
@@ -94,7 +100,8 @@ plan bootstrap::install_infra (
   Boolean                                            $manage_firewall    = false,
   Boolean                                            $manage_hosts       = false,
   Boolean                                            $alias_server_names = false,
-  String[1]                                          $postgres_version   = '17',
+  Enum['pgdg', 'os']                                 $postgres_source    = 'pgdg',
+  Optional[String[1]]                                $postgres_version   = undef,
   Boolean                                            $manage_repos       = true,
 ) {
   $database_password = $db_password ? {
@@ -285,6 +292,7 @@ plan bootstrap::install_infra (
       'targets'               => $dbs,
       'database_password'     => $database_password,
       'certificate_allowlist' => $servers.map |$target| { $certname[$target.name] },
+      'postgres_source'      => $postgres_source,
       'postgres_version'      => $postgres_version,
       'manage_firewall'       => $manage_firewall,
       'manage_repos'          => $manage_repos,

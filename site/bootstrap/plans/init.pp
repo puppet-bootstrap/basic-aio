@@ -41,6 +41,13 @@
 #   Set up the OpenVox package repository (and, for OpenVoxDB, the PostgreSQL
 #   repository).  Set this to `false` on hosts that can't reach the internet
 #   but already have the packages available, such as from a Satellite.
+# @param postgres_source
+#   Where PostgreSQL comes from: `pgdg` for the PGDG packages, or `os` for
+#   the operating system's packages (the AppStream module stream on EL 8 and
+#   9).  Choose this before OpenVoxDB is first installed.
+# @param postgres_version
+#   The PostgreSQL major version.  Defaults to `17` with `pgdg` and `16` with
+#   `os`.
 # @param manage_hosts Add every target to every target's hosts file
 # @param alias_server_names
 #   Add `openvox_server` and `dns_alt_names` to every target's hosts file as
@@ -75,6 +82,8 @@ plan bootstrap (
   Boolean                                            $manage_hosts       = false,
   Boolean                                            $alias_server_names = false,
   Boolean                                            $manage_repos       = true,
+  Enum['pgdg', 'os']                                 $postgres_source    = 'pgdg',
+  Optional[String[1]]                                $postgres_version   = undef,
   Boolean                                            $sign_certs         = true,
   Boolean                                            $start_service      = true,
   Boolean                                            $smoke_test         = true,
@@ -101,6 +110,8 @@ plan bootstrap (
     'manage_hosts'       => $manage_hosts,
     'alias_server_names' => $alias_server_names,
     'manage_repos'       => $manage_repos,
+    'postgres_source'    => $postgres_source,
+    'postgres_version'   => $postgres_version,
   )
 
   $ca_target = $ca_targets ? {
