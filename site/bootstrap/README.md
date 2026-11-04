@@ -32,8 +32,8 @@ configuration after the bootstrap.
   CAs.  Rerun it after the active CA signs or revokes certificates.
 * `bootstrap::copy_cert`: moves certificates generated on the CA (for standby
   CAs, by the `bootstrap::ca_generate` task) to the hosts they belong to.
-* `bootstrap::install_db`: sets up OpenVoxDB, with PostgreSQL (from the PGDG
-  repo) on the first OpenVoxDB host.
+* `bootstrap::install_db`: sets up OpenVoxDB, with PostgreSQL on the first
+  OpenVoxDB host.
 * `bootstrap::install_server`: sets up compile masters, with the CA service
   disabled on hosts that aren't CAs, and connects them to OpenVoxDB.
 * `bootstrap::first_run`: runs the agent on the server, then on the other
@@ -43,6 +43,8 @@ configuration after the bootstrap.
 * `bootstrap::smoke_test`: runs the agent in no-op mode on every target against
   each compile master.
 * `bootstrap::open_ports`: opens TCP ports in firewalld.
+* `bootstrap::preflight`: checks, without changing anything, that the targets
+  are ready for `bootstrap`.  See [Preflight checks](#preflight-checks).
 
 If you need to do something between those steps, such as deploying code to
 the compile masters, call the individual plans yourself.  This repo's
@@ -95,6 +97,41 @@ To make `openvox_server` and the `dns_alt_names` resolve to `server_target`
 without DNS, add `alias_server_names=true`.  Every target's hosts file then
 lists them as aliases of `server_target`.  Rerunning the plan without
 `alias_server_names` doesn't remove those entries.
+
+## Preflight checks
+
+`bootstrap::preflight` takes the same target and repository parameters as
+`bootstrap` and reports, for each target, anything that would make the
+bootstrap fail, without changing anything:
+
+* Bolt can't connect, or doesn't have root access
+* An infrastructure host's `hostname -f` (its certname) isn't fully qualified,
+  or two targets have the same hostname
+* A name the target will use doesn't resolve: the server and active CA on
+  every target, and every infrastructure host on the infrastructure hosts
+  (names that `manage_hosts` or `alias_server_names` will add to the hosts
+  file are skipped)
+* With `manage_repos`, yum.voxpupuli.org (or, for PGDG PostgreSQL,
+  download.postgresql.org) isn't reachable
+* Without `manage_repos`, a package the target needs isn't available from its
+  configured repositories
+* The PostgreSQL packages or module stream for `postgres_source` and
+  `postgres_version` aren't available on the first OpenVoxDB host
+
+Clocks more than a minute off from the Bolt host's are reported as warnings.
+Package checks use dnf, so they're skipped on other platforms.  The plan
+fails if it finds any errors.
+
+```sh
+bolt plan run bootstrap::preflight \
+  --targets agent1.example.com,agent2.example.com \
+  --run-as root \
+  server_target=primary.example.com \
+  db_targets=db1.example.com \
+  manage_repos=false \
+  postgres_source=os \
+  postgres_version=18
+```
 
 ## Airgapped hosts
 

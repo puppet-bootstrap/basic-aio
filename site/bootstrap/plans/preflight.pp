@@ -109,8 +109,12 @@ plan bootstrap::preflight (
   # Clocks more than a minute off can make new certificates invalid.
   $skewed = $basic.reduce({}) |$memo, $entry| {
     $time = $entry[1]['time']
-    if $time < $started - 60 or $time > $finished + 60 {
-      $memo + { $entry[0] => ["The clock is ${time - $finished} seconds off from the Bolt host's"] }
+    if $time < $started - 60 {
+      $behind = $started - $time
+      $memo + { $entry[0] => ["The clock is about ${behind} seconds behind the Bolt host's"] }
+    } elsif $time > $finished + 60 {
+      $ahead = $time - $finished
+      $memo + { $entry[0] => ["The clock is about ${ahead} seconds ahead of the Bolt host's"] }
     } else {
       $memo
     }
@@ -150,12 +154,12 @@ plan bootstrap::preflight (
     }
     $resolve = ($needed.unique - $hosts_names - [$fqdn[$name]]).filter |$n| { $n =~ NotUndef }
 
-    $is_postgres_host = $postgres_host =~ NotUndef and $name == $postgres_host.name
+    $is_postgres_host = ($postgres_host =~ NotUndef) and ($name == $postgres_host.name)
     $check_postgres = $is_postgres_host and ($postgres_source == 'os' or !$manage_repos)
 
     if $manage_repos {
       $packages = []
-      $repo_urls = $is_postgres_host and $postgres_source == 'pgdg' ? {
+      $repo_urls = ($is_postgres_host and $postgres_source == 'pgdg') ? {
         true    => ['https://yum.voxpupuli.org/', 'https://download.postgresql.org/pub/repos/yum/'],
         default => ['https://yum.voxpupuli.org/'],
       }
@@ -169,7 +173,7 @@ plan bootstrap::preflight (
       $repo_urls = []
     }
 
-    $urls = $name in $server_names ? {
+    $urls = ($name in $server_names) ? {
       true    => $repo_urls + $server_urls,
       default => $repo_urls,
     }
