@@ -91,6 +91,14 @@ bolt plan run bootstrap \
   --run-as root
 ```
 
+If the load balancer isn't ready yet, add `alias_server_names=true`.  Every
+target's hosts file then lists `openvox_server` and the `dns_alt_names` as
+aliases of `server_target`, so agents use the primary compile master under the
+load balancer's name until DNS points at the load balancer.  The certificates
+already include the name, so nothing needs to be reissued then.  Remove the
+hosts file entries by hand afterward; rerunning the plan without
+`alias_server_names` doesn't remove them.
+
 ## Airgapped hosts
 
 By default, the plans install the `openvoxN-release` package from

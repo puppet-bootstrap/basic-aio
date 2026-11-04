@@ -50,6 +50,10 @@
 # @param manage_hosts
 #   Add every target to every target's hosts file, using the facts collected
 #   from them.  Useful when the targets can't resolve each other's names.
+# @param alias_server_names
+#   Add `openvox_server` and `dns_alt_names` to every target's hosts file as
+#   aliases of `server_target`, so agents can use those names before DNS (or
+#   a load balancer) is set up for them.
 # @param choria_user
 #   If set, request a Choria certificate for this user on the primary compile
 #   master after its first agent run.  The control repo must set up Choria.
@@ -83,6 +87,7 @@ plan basic_aio (
   Boolean                                            $manage_firewall      = true,
   Boolean                                            $sign_certs           = true,
   Boolean                                            $manage_hosts         = false,
+  Boolean                                            $alias_server_names   = false,
   Boolean                                            $manage_repos         = true,
   Optional[String[1]]                                $choria_user          = undef,
   Boolean                                            $manage_topology_data = false,
@@ -111,6 +116,7 @@ plan basic_aio (
     'dns_alt_names'      => $dns_alt_names,
     'manage_firewall'    => $manage_firewall,
     'manage_hosts'       => $manage_hosts,
+    'alias_server_names' => $alias_server_names,
     'manage_repos'       => $manage_repos,
   )
 

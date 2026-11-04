@@ -58,6 +58,12 @@
 # @param manage_hosts
 #   Add every target to every target's hosts file, using the facts collected
 #   from them.  Useful when the targets can't resolve each other's names.
+# @param alias_server_names
+#   Add `openvox_server` and `dns_alt_names` to every target's hosts file as
+#   aliases of `server_target`, so agents can use those names before DNS (or
+#   a load balancer) is set up for them.  Without `manage_hosts`, only
+#   `server_target`'s entry is added.  Remove the entries by hand once DNS
+#   is in place; rerunning without this doesn't remove them.
 # @param postgres_version The PostgreSQL major version to install
 # @param manage_repos
 #   Set up the OpenVox package repository (and, for OpenVoxDB, the PostgreSQL
@@ -88,6 +94,7 @@ plan bootstrap::install_infra (
   Array[String[1]]                                   $dns_alt_names      = [],
   Boolean                                            $manage_firewall    = false,
   Boolean                                            $manage_hosts       = false,
+  Boolean                                            $alias_server_names = false,
   String[1]                                          $postgres_version   = '17',
   Boolean                                            $manage_repos       = true,
 ) {
@@ -139,11 +146,34 @@ plan bootstrap::install_infra (
   }
 
   # 2. Hosts file
-  if $manage_hosts {
-    # Use the collected facts to build a hash of `host` resources.
-    $hosts = $all.reduce({}) |$memo, $target| {
+  if $manage_hosts or $alias_server_names {
+    $primary_fqdn = $primary[0].facts['networking']['fqdn']
+
+    # `server` and the DNS alt names (without any `DNS:` prefix), skipping
+    # IP addresses, wildcards, and names the primary already has.
+    $server_aliases = $alias_server_names ? {
+      true    => ([$server] + $dns_alt_names).filter |$name| {
+        $name !~ /\AIP:/ and $name !~ /\*/
+      }.map |$name| {
+        $name.regsubst(/\ADNS:/, '')
+      }.unique - [$primary_fqdn, $primary[0].facts['networking']['hostname']],
+      default => [],
+    }
+
+    # Use the collected facts to build a hash of `host` resources.  Without
+    # `manage_hosts`, only the primary compile master gets an entry.
+    $host_targets = $manage_hosts ? {
+      true    => $all,
+      default => $primary,
+    }
+    $hosts = $host_targets.reduce({}) |$memo, $target| {
+      $fqdn = $target.facts['networking']['fqdn']
+      $extra_aliases = $fqdn ? {
+        $primary_fqdn => $server_aliases,
+        default       => [],
+      }
       $this_host = {
-        $target.facts['networking']['fqdn'] => {
+        $fqdn => {
           'ip' => $target.facts['networking']['interfaces'].reduce('') |$m, $v| {
             if $v[0] =~ /^e/ and $v[1]['ip'] {
               $v[1]['ip']
@@ -151,9 +181,7 @@ plan bootstrap::install_infra (
               $m
             }
           },
-          'host_aliases' => [
-            $target.facts['networking']['hostname'],
-          ],
+          'host_aliases' => [$target.facts['networking']['hostname']] + $extra_aliases,
         },
       }
       $memo + $this_host
