@@ -14,11 +14,18 @@
 # @param remote_clients
 #   Other OpenVoxDB hosts that connect to the PostgreSQL server on this host.
 #   They must be able to resolve each other's names.
-# @param postgres_version The PostgreSQL major version to install from the PGDG repo
+# @param postgres_source
+#   Where PostgreSQL comes from.  `pgdg` installs the PGDG packages (such as
+#   `postgresql17-server`).  `os` installs the operating system's packages
+#   (`postgresql-server`); on EL 8 and 9, it enables the AppStream
+#   `postgresql` module stream for `postgres_version`.
+# @param postgres_version
+#   The PostgreSQL major version.  Defaults to `17` with `pgdg` and `16` with
+#   `os`.  OpenVoxDB needs PostgreSQL 14 or later.  With `os` on EL 10, this
+#   must be the operating system's version (16).
 # @param manage_package_repo
-#   Set up the PGDG package repository.  Without it, the PGDG packages (such
-#   as `postgresql17-server`) must already be available from a configured
-#   repository.
+#   Set up the PGDG package repository.  Without it, the PGDG packages must
+#   already be available from a configured repository.  Ignored with `os`.
 #
 # @example
 #   class { 'bootstrap::db':
@@ -31,30 +38,65 @@ class bootstrap::db (
   Boolean              $manage_dbserver       = true,
   Stdlib::Host         $database_host         = 'localhost',
   Array[String[1]]     $remote_clients        = [],
-  String[1]            $postgres_version      = '17',
+  Enum['pgdg', 'os']   $postgres_source       = 'pgdg',
+  Optional[String[1]]  $postgres_version      = undef,
   Boolean              $manage_package_repo   = true,
 ) {
+  $version = pick($postgres_version, $postgres_source ? {
+    'os'    => '16',
+    default => '17',
+  })
+  $os_postgres = $postgres_source == 'os'
+  $el_with_modules = $facts['os']['family'] == 'RedHat' and $facts['os']['release']['major'] in ['8', '9']
   $remote = $manage_dbserver and !$remote_clients.empty
   $listen_address = $remote ? {
     true    => '0.0.0.0',
     default => 'localhost',
   }
 
+  # puppet/openvoxdb always sets up PostgreSQL for the PGDG packages (it
+  # turns off postgresql::globals' `manage_dnf_module`, which also selects the
+  # operating system's package names).  For the operating system's packages,
+  # let it create only the database, and set up the server here instead.
+  if $manage_dbserver and $os_postgres {
+    class { 'postgresql::globals':
+      manage_dnf_module   => $el_with_modules,
+      manage_package_repo => false,
+      version             => $version,
+    }
+
+    # The same settings puppet/openvoxdb uses.
+    class { 'postgresql::server':
+      ip_mask_allow_all_users => '0.0.0.0/0',
+      listen_addresses        => $listen_address,
+      port                    => 5432,
+      password_encryption     => 'scram-sha-256',
+    }
+
+    class { 'postgresql::server::contrib': }
+
+    postgresql::server::extension { 'pg_trgm':
+      database => 'puppetdb',
+      port     => 5432,
+      require  => Postgresql::Server::Db['puppetdb'],
+    }
+  }
+
   class { 'openvoxdb':
-    manage_dbserver         => $manage_dbserver,
+    manage_dbserver         => $manage_dbserver and !$os_postgres,
     manage_database         => $manage_dbserver,
     database_host           => $database_host,
     database_password       => $database_password,
     database_listen_address => $listen_address,
     certificate_whitelist   => $certificate_allowlist,
-    postgres_version        => $postgres_version,
-    manage_package_repo     => $manage_package_repo,
+    postgres_version        => $version,
+    manage_package_repo     => $manage_package_repo and !$os_postgres,
     manage_firewall         => false,
   }
 
   # EL 8 and 9 ship a postgresql module stream that can mask the PGDG
   # packages.  (EL 10 has no module streams.)
-  if $manage_dbserver and $facts['os']['family'] == 'RedHat' and $facts['os']['release']['major'] in ['8', '9'] {
+  if $manage_dbserver and !$os_postgres and $el_with_modules {
     package { 'postgresql-dnfmodule':
       ensure   => disabled,
       name     => 'postgresql',

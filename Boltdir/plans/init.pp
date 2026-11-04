@@ -47,6 +47,13 @@
 #   Set up the OpenVox package repository (and, for OpenVoxDB, the PostgreSQL
 #   repository).  Set this to `false` on hosts that can't reach the internet
 #   but already have the packages available, such as from a Satellite.
+# @param postgres_source
+#   Where PostgreSQL comes from: `pgdg` for the PGDG packages, or `os` for
+#   the operating system's packages (the AppStream module stream on EL 8 and
+#   9).  Choose this before OpenVoxDB is first installed.
+# @param postgres_version
+#   The PostgreSQL major version.  Defaults to `17` with `pgdg` and `16` with
+#   `os`.
 # @param manage_hosts
 #   Add every target to every target's hosts file, using the facts collected
 #   from them.  Useful when the targets can't resolve each other's names.
@@ -88,6 +95,8 @@ plan basic_aio (
   Boolean                                            $manage_hosts         = false,
   Boolean                                            $alias_server_names   = false,
   Boolean                                            $manage_repos         = true,
+  Enum['pgdg', 'os']                                 $postgres_source      = 'pgdg',
+  Optional[String[1]]                                $postgres_version     = undef,
   Optional[String[1]]                                $choria_user          = undef,
   Boolean                                            $manage_topology_data = false,
   Boolean                                            $smoke_test           = true,
@@ -117,6 +126,8 @@ plan basic_aio (
     'manage_hosts'       => $manage_hosts,
     'alias_server_names' => $alias_server_names,
     'manage_repos'       => $manage_repos,
+    'postgres_source'    => $postgres_source,
+    'postgres_version'   => $postgres_version,
   )
 
   $primary = get_targets($server_target)
@@ -139,6 +150,11 @@ plan basic_aio (
       'basic_aio::ca_servers' => $topology['ca_servers'],
       'basic_aio::db_servers' => $topology['db_servers'],
       'basic_aio::manage_repos' => $manage_repos,
+      'basic_aio::postgres_source' => $postgres_source,
+      'basic_aio::postgres_version' => pick($postgres_version, $postgres_source ? {
+        'os'    => '16',
+        default => '17',
+      }),
     } + $password_data
 
     apply($servers, '_description' => 'Writing the infrastructure layout to Hiera') {

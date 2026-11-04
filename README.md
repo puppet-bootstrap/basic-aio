@@ -33,6 +33,7 @@ The following environment variables are used to configure the Vagrant environmen
 | `CA_SERVERS`         | `0`                    | The number of standalone CA servers (0-9)            |
 | `DB_SERVERS`         | `0`                    | The number of standalone OpenVoxDB servers (0-9)     |
 | `DB_PASSWORD`        | `puppetdb`             | The OpenVoxDB PostgreSQL password                    |
+| `POSTGRES_SOURCE`    | `pgdg`                 | Where PostgreSQL comes from (`pgdg` or `os`)         |
 
 ### Splitting up the infrastructure
 
@@ -101,8 +102,10 @@ bolt plan run basic_aio \
 ```
 
 On hosts that can't reach the internet but already have the OpenVox (and, for
-OpenVoxDB, PGDG PostgreSQL) packages available, such as from a Satellite, add
-`manage_repos=false`.  See the `bootstrap` module's
+OpenVoxDB, PostgreSQL) packages available, such as from a Satellite, add
+`manage_repos=false`.  Add `postgres_source=os` to use the operating system's
+PostgreSQL packages (on EL 8 and 9, the AppStream `postgresql:16` module
+stream) instead of PGDG's.  See the `bootstrap` module's
 [README](site/bootstrap/README.md#airgapped-hosts) for what the mirror needs.
 `control_repo` also needs internet access unless you plan for it: r10k installs
 itself from rubygems.org, and deploys any Forge modules in the control repo's

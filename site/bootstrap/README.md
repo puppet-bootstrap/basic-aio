@@ -110,8 +110,19 @@ The mirror needs:
 
 * The OpenVox repository for the release you want (`openvox-agent`,
   `openvox-server`, `openvoxdb`, and `openvoxdb-termini`)
-* If you install OpenVoxDB, the PGDG repository for `postgres_version`
-  (`postgresql17-server` and `postgresql17-contrib` by default)
+* If you install OpenVoxDB, the PostgreSQL server and contrib packages for
+  `postgres_version`: from the PGDG repository (`postgresql17-server` and
+  `postgresql17-contrib` by default), or, with `postgres_source=os`, from the
+  operating system (`postgresql-server` and `postgresql-contrib`, from the
+  AppStream `postgresql:16` module stream by default on EL 8 and 9)
+
+`postgres_source=os` works whether or not `manage_repos` is set, since the
+operating system's repositories are already configured.  OpenVoxDB needs
+PostgreSQL 14 or later, so on EL 9 use the 15 or 16 module stream rather than
+the default PostgreSQL 13.  On EL 10, which has no module streams, use the
+version it ships (16).  Choose the source before OpenVoxDB is first installed:
+switching later installs a second, empty PostgreSQL server rather than
+migrating the data.
 
 ## Limitations
 
