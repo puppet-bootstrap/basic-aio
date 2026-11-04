@@ -1,3 +1,0 @@
-<% $profile::server::config::autosign.each |String $s| { -%>
-<%=  $s %>
-<% } -%>

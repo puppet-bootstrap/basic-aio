@@ -15,3 +15,5 @@ fixtures:
     apt: puppetlabs-apt
     systemd: puppet-systemd
     augeas_core: puppetlabs-augeas_core
+  symlinks:
+    bootstrap: "../../../../bootstrap"

@@ -1,0 +1,17 @@
+{
+  "description": "On the active CA, generate certificates that are authorized to use the CA API (`puppetserver ca generate --ca-client`), for standby CAs. puppetserver is stopped while they are generated and restarted afterward if it was running. Certnames that are already signed are skipped.",
+  "input_method": "environment",
+  "supports_noop": false,
+  "parameters": {
+    "certnames": {
+      "description": "Certnames to generate certificates for.",
+      "type": "Array[String[1]]"
+    },
+    "dns_alt_names": {
+      "description": "Subject alternative names for every certificate.",
+      "type": "Array[String[1]]",
+      "default": []
+    }
+  },
+  "files": ["bootstrap/files/common.sh"]
+}

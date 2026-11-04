@@ -1,0 +1,21 @@
+{
+  "description": "Submit a certificate request (action=request) or download the signed certificate (action=download). Idempotent. Set `server` and `ca_server` in puppet.conf first.",
+  "input_method": "environment",
+  "supports_noop": false,
+  "parameters": {
+    "action": {
+      "description": "request: submit a CSR to the CA. download: fetch the signed certificate.",
+      "type": "Enum[request, download]"
+    },
+    "certname": {
+      "description": "Certname (FQDN) for this host.",
+      "type": "String[1]"
+    },
+    "dns_alt_names": {
+      "description": "Subject alternative names to request. Only takes effect before the first CSR is submitted.",
+      "type": "Array[String[1]]",
+      "default": []
+    }
+  },
+  "files": ["bootstrap/files/common.sh"]
+}

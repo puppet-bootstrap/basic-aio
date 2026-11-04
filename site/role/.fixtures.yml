@@ -32,3 +32,4 @@ fixtures:
     augeas_core: puppetlabs-augeas_core
   symlinks:
     profile: "../../../../profile"
+    bootstrap: "../../../../bootstrap"

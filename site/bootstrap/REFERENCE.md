@@ -4,22 +4,364 @@
 
 ## Table of Contents
 
+### Classes
+
+* [`bootstrap::ca`](#bootstrap--ca): Configure the certificate authority on a CA host
+* [`bootstrap::db`](#bootstrap--db): Configure OpenVoxDB, optionally with a local PostgreSQL server
+* [`bootstrap::server`](#bootstrap--server): Configure OpenVox Server on a compile master or CA host
+* [`bootstrap::server::puppetdb`](#bootstrap--server--puppetdb): Connect OpenVox Server to OpenVoxDB
+
+### Tasks
+
+* [`ca_generate`](#ca_generate): On the active CA, generate certificates that are authorized to use the CA API (`puppetserver ca generate --ca-client`), for standby CAs. pupp
+* [`ca_setup`](#ca_setup): Generate the certificate authority and the CA host's own certificate with `puppetserver ca setup`, unless a CA already exists. Run this on th
+* [`ca_sign`](#ca_sign): Sign pending CSRs on the CA. Certnames that are already signed are skipped; a certname with neither a CSR nor a signed cert fails the task.
+* [`cert`](#cert): Submit a certificate request (action=request) or download the signed certificate (action=download). Idempotent. Set `server` and `ca_server`
+
 ### Plans
 
-* [`bootstrap`](#bootstrap): Bootstrap an OpenVox server and agents
+* [`bootstrap`](#bootstrap): Bootstrap an OpenVox server infrastructure and agents
+* [`bootstrap::copy_cert`](#bootstrap--copy_cert): Move a certificate generated on the CA to the host it belongs to
 * [`bootstrap::first_run`](#bootstrap--first_run): Run the OpenVox agent for the first time
 * [`bootstrap::install_agents`](#bootstrap--install_agents): Install and configure the OpenVox agent
-* [`bootstrap::install_server`](#bootstrap--install_server): Install and start the OpenVox server
+* [`bootstrap::install_ca`](#bootstrap--install_ca): Install and start the active certificate authority
+* [`bootstrap::install_db`](#bootstrap--install_db): Install and configure OpenVoxDB
+* [`bootstrap::install_infra`](#bootstrap--install_infra): Install an OpenVox server infrastructure
+* [`bootstrap::install_server`](#bootstrap--install_server): Install and start OpenVox Server on compile masters
+* [`bootstrap::open_ports`](#bootstrap--open_ports): Open TCP ports in firewalld, if firewalld is running
+* [`bootstrap::request_certs`](#bootstrap--request_certs): Get signed certificates for hosts from the CA
+* [`bootstrap::smoke_test`](#bootstrap--smoke_test): Check that every compile master serves catalogs to every target
+* [`bootstrap::sync_ca`](#bootstrap--sync_ca): Copy the CA directory from the active CA to standby CAs
+
+## Classes
+
+### <a name="bootstrap--ca"></a>`bootstrap::ca`
+
+Use with `bootstrap::server` (with `ca_enabled => true`).
+
+#### Examples
+
+#####
+
+```puppet
+class { 'bootstrap::ca':
+  autosign => ['*.example.com'],
+}
+```
+
+#### Parameters
+
+The following parameters are available in the `bootstrap::ca` class:
+
+* [`autosign`](#-bootstrap--ca--autosign)
+* [`allow_subject_alt_names`](#-bootstrap--ca--allow_subject_alt_names)
+
+##### <a name="-bootstrap--ca--autosign"></a>`autosign`
+
+Data type: `Variant[Boolean, Array[String[1]]]`
+
+`true` to autosign every certificate request, or a list of certnames and
+domain name globs to write to `autosign.conf`.  `false` leaves autosigning
+alone.
+
+Default value: `false`
+
+##### <a name="-bootstrap--ca--allow_subject_alt_names"></a>`allow_subject_alt_names`
+
+Data type: `Boolean`
+
+Let the CA sign requests that include DNS alt names, which compile masters
+behind a load balancer need.
+
+Default value: `true`
+
+### <a name="bootstrap--db"></a>`bootstrap::db`
+
+A thin wrapper around the `openvoxdb` class from puppet/openvoxdb.  The
+first OpenVoxDB host runs PostgreSQL (`manage_dbserver => true`); any other
+OpenVoxDB hosts set `database_host` to it and are listed in its
+`remote_clients`.
+
+#### Examples
+
+#####
+
+```puppet
+class { 'bootstrap::db':
+  database_password     => Sensitive('secret'),
+  certificate_allowlist => ['puppet.example.com'],
+}
+```
+
+#### Parameters
+
+The following parameters are available in the `bootstrap::db` class:
+
+* [`database_password`](#-bootstrap--db--database_password)
+* [`certificate_allowlist`](#-bootstrap--db--certificate_allowlist)
+* [`manage_dbserver`](#-bootstrap--db--manage_dbserver)
+* [`database_host`](#-bootstrap--db--database_host)
+* [`remote_clients`](#-bootstrap--db--remote_clients)
+* [`postgres_version`](#-bootstrap--db--postgres_version)
+
+##### <a name="-bootstrap--db--database_password"></a>`database_password`
+
+Data type: `Sensitive[String[1]]`
+
+Password for the OpenVoxDB PostgreSQL user
+
+##### <a name="-bootstrap--db--certificate_allowlist"></a>`certificate_allowlist`
+
+Data type: `Array[String[1]]`
+
+Certnames allowed to connect to OpenVoxDB over HTTPS, normally every
+compile master.
+
+Default value: `[]`
+
+##### <a name="-bootstrap--db--manage_dbserver"></a>`manage_dbserver`
+
+Data type: `Boolean`
+
+Install and manage PostgreSQL on this host
+
+Default value: `true`
+
+##### <a name="-bootstrap--db--database_host"></a>`database_host`
+
+Data type: `Stdlib::Host`
+
+The PostgreSQL host, as seen from this host
+
+Default value: `'localhost'`
+
+##### <a name="-bootstrap--db--remote_clients"></a>`remote_clients`
+
+Data type: `Array[String[1]]`
+
+Other OpenVoxDB hosts that connect to the PostgreSQL server on this host.
+They must be able to resolve each other's names.
+
+Default value: `[]`
+
+##### <a name="-bootstrap--db--postgres_version"></a>`postgres_version`
+
+Data type: `String[1]`
+
+The PostgreSQL major version to install from the PGDG repo
+
+Default value: `'17'`
+
+### <a name="bootstrap--server"></a>`bootstrap::server`
+
+The `bootstrap` plans apply this class with Bolt, and a control repo can
+include it to keep managing the same settings afterward.
+
+#### Examples
+
+#####
+
+```puppet
+class { 'bootstrap::server':
+  ca_enabled => false,
+  ca_server  => 'ca.example.com',
+}
+```
+
+#### Parameters
+
+The following parameters are available in the `bootstrap::server` class:
+
+* [`ca_enabled`](#-bootstrap--server--ca_enabled)
+* [`server`](#-bootstrap--server--server)
+* [`ca_server`](#-bootstrap--server--ca_server)
+* [`crl_refresh_interval`](#-bootstrap--server--crl_refresh_interval)
+* [`reload_on_crl_change`](#-bootstrap--server--reload_on_crl_change)
+* [`package_ensure`](#-bootstrap--server--package_ensure)
+
+##### <a name="-bootstrap--server--ca_enabled"></a>`ca_enabled`
+
+Data type: `Boolean`
+
+Run the CA service on this host.  Disable it on compile masters that use
+a CA on another host, before puppetserver first starts; otherwise it
+generates its own CA.
+
+Default value: `true`
+
+##### <a name="-bootstrap--server--server"></a>`server`
+
+Data type: `Optional[String[1]]`
+
+The value of `server` in `puppet.conf`.  Not managed if unset.
+
+Default value: `undef`
+
+##### <a name="-bootstrap--server--ca_server"></a>`ca_server`
+
+Data type: `Optional[String[1]]`
+
+The value of `ca_server` in `puppet.conf`.  Not managed if unset.
+
+Default value: `undef`
+
+##### <a name="-bootstrap--server--crl_refresh_interval"></a>`crl_refresh_interval`
+
+Data type: `String[1]`
+
+How often a host without the CA service refreshes the CRL from the CA.
+
+Default value: `'1h'`
+
+##### <a name="-bootstrap--server--reload_on_crl_change"></a>`reload_on_crl_change`
+
+Data type: `Boolean`
+
+On hosts without the CA service, reload puppetserver whenever the CRL
+changes, so that revocations take effect without a manual reload.
+
+Default value: `true`
+
+##### <a name="-bootstrap--server--package_ensure"></a>`package_ensure`
+
+Data type: `String[1]`
+
+The `ensure` value for the openvox-server package
+
+Default value: `'installed'`
+
+### <a name="bootstrap--server--puppetdb"></a>`bootstrap::server::puppetdb`
+
+Unlike `openvoxdb::master::config`, this supports several OpenVoxDB
+servers (for failover).  Declare `bootstrap::server` as well.
+
+#### Examples
+
+#####
+
+```puppet
+include bootstrap::server
+class { 'bootstrap::server::puppetdb':
+  puppetdb_urls => ['https://openvoxdb.example.com:8081'],
+}
+```
+
+#### Parameters
+
+The following parameters are available in the `bootstrap::server::puppetdb` class:
+
+* [`puppetdb_urls`](#-bootstrap--server--puppetdb--puppetdb_urls)
+* [`reports`](#-bootstrap--server--puppetdb--reports)
+
+##### <a name="-bootstrap--server--puppetdb--puppetdb_urls"></a>`puppetdb_urls`
+
+Data type: `Array[Pattern[/\Ahttps:\/\//], 1]`
+
+OpenVoxDB URLs for `server_urls` in `puppetdb.conf`, such as
+`https://openvoxdb.example.com:8081`
+
+##### <a name="-bootstrap--server--puppetdb--reports"></a>`reports`
+
+Data type: `String[1]`
+
+The value of `reports` in `puppet.conf`.  (OpenVox 9 defaults it to
+`none`.)
+
+Default value: `'store,puppetdb'`
+
+## Tasks
+
+### <a name="ca_generate"></a>`ca_generate`
+
+On the active CA, generate certificates that are authorized to use the CA API (`puppetserver ca generate --ca-client`), for standby CAs. puppetserver is stopped while they are generated and restarted afterward if it was running. Certnames that are already signed are skipped.
+
+**Supports noop?** false
+
+#### Parameters
+
+##### `certnames`
+
+Data type: `Array[String[1]]`
+
+Certnames to generate certificates for.
+
+##### `dns_alt_names`
+
+Data type: `Array[String[1]]`
+
+Subject alternative names for every certificate.
+
+### <a name="ca_setup"></a>`ca_setup`
+
+Generate the certificate authority and the CA host's own certificate with `puppetserver ca setup`, unless a CA already exists. Run this on the active CA before puppetserver first starts.
+
+**Supports noop?** false
+
+#### Parameters
+
+##### `certname`
+
+Data type: `String[1]`
+
+Certname (FQDN) of the CA host.
+
+##### `dns_alt_names`
+
+Data type: `Array[String[1]]`
+
+Subject alternative names for the CA host's own certificate (when it is also a compile master).
+
+### <a name="ca_sign"></a>`ca_sign`
+
+Sign pending CSRs on the CA. Certnames that are already signed are skipped; a certname with neither a CSR nor a signed cert fails the task.
+
+**Supports noop?** false
+
+#### Parameters
+
+##### `certnames`
+
+Data type: `Array[String[1]]`
+
+Certnames to sign.
+
+### <a name="cert"></a>`cert`
+
+Submit a certificate request (action=request) or download the signed certificate (action=download). Idempotent. Set `server` and `ca_server` in puppet.conf first.
+
+**Supports noop?** false
+
+#### Parameters
+
+##### `action`
+
+Data type: `Enum[request, download]`
+
+request: submit a CSR to the CA. download: fetch the signed certificate.
+
+##### `certname`
+
+Data type: `String[1]`
+
+Certname (FQDN) for this host.
+
+##### `dns_alt_names`
+
+Data type: `Array[String[1]]`
+
+Subject alternative names to request. Only takes effect before the first CSR is submitted.
 
 ## Plans
 
 ### <a name="bootstrap"></a>`bootstrap`
 
-Installs the agent everywhere, installs and starts the server, and then
-runs the agent on the server and the remaining targets.  To do something
-between those steps (deploy code to the server, for example), call
-`bootstrap::install_agents`, `bootstrap::install_server`, and
+Runs `bootstrap::install_infra` to set up the CA, OpenVoxDB, and compile
+masters, then runs the agent on the primary compile master and on every
+other target.  To do something between those steps (deploy code to the
+compile masters, for example), call `bootstrap::install_infra` and
 `bootstrap::first_run` yourself.
+
+By default, everything runs on `server_target`, without OpenVoxDB.
 
 #### Parameters
 
@@ -27,6 +369,10 @@ The following parameters are available in the `bootstrap` plan:
 
 * [`targets`](#-bootstrap--targets)
 * [`server_target`](#-bootstrap--server_target)
+* [`compilers`](#-bootstrap--compilers)
+* [`ca_targets`](#-bootstrap--ca_targets)
+* [`db_targets`](#-bootstrap--db_targets)
+* [`db_password`](#-bootstrap--db_password)
 * [`openvox_release`](#-bootstrap--openvox_release)
 * [`openvox_version`](#-bootstrap--openvox_version)
 * [`openvox_collection`](#-bootstrap--openvox_collection)
@@ -34,20 +380,56 @@ The following parameters are available in the `bootstrap` plan:
 * [`autosign`](#-bootstrap--autosign)
 * [`dns_alt_names`](#-bootstrap--dns_alt_names)
 * [`manage_firewall`](#-bootstrap--manage_firewall)
+* [`manage_hosts`](#-bootstrap--manage_hosts)
 * [`sign_certs`](#-bootstrap--sign_certs)
 * [`start_service`](#-bootstrap--start_service)
+* [`smoke_test`](#-bootstrap--smoke_test)
 
 ##### <a name="-bootstrap--targets"></a>`targets`
 
 Data type: `TargetSpec`
 
-The targets to bootstrap, including the server
+The agent targets.  The infrastructure hosts are added to them.
 
 ##### <a name="-bootstrap--server_target"></a>`server_target`
 
 Data type: `TargetSpec`
 
-The target to install the OpenVox server on
+The primary compile master
+
+##### <a name="-bootstrap--compilers"></a>`compilers`
+
+Data type: `TargetSpec`
+
+Additional compile masters
+
+Default value: `[]`
+
+##### <a name="-bootstrap--ca_targets"></a>`ca_targets`
+
+Data type: `Optional[TargetSpec]`
+
+The CA hosts.  The first is the active CA; any others are standbys.
+Defaults to `server_target`.
+
+Default value: `undef`
+
+##### <a name="-bootstrap--db_targets"></a>`db_targets`
+
+Data type: `TargetSpec`
+
+The OpenVoxDB hosts.  The first one also runs PostgreSQL.  OpenVoxDB isn't
+installed if this is empty.
+
+Default value: `[]`
+
+##### <a name="-bootstrap--db_password"></a>`db_password`
+
+Data type: `Optional[Variant[String[1], Sensitive[String[1]]]]`
+
+Password for the OpenVoxDB PostgreSQL user
+
+Default value: `undef`
 
 ##### <a name="-bootstrap--openvox_release"></a>`openvox_release`
 
@@ -106,7 +488,7 @@ Default value: `false`
 
 Data type: `Array[String[1]]`
 
-Alternate DNS names for the server's certificate
+Alternate DNS names for the compile masters' certificates
 
 Default value: `[]`
 
@@ -114,7 +496,15 @@ Default value: `[]`
 
 Data type: `Boolean`
 
-Open the `puppetmaster` service in firewalld, if firewalld is running
+Open the needed ports in firewalld, if firewalld is running
+
+Default value: `false`
+
+##### <a name="-bootstrap--manage_hosts"></a>`manage_hosts`
+
+Data type: `Boolean`
+
+Add every target to every target's hosts file
 
 Default value: `false`
 
@@ -134,12 +524,50 @@ Start and enable the puppet service after the first run
 
 Default value: `true`
 
+##### <a name="-bootstrap--smoke_test"></a>`smoke_test`
+
+Data type: `Boolean`
+
+If there is more than one compile master, run the agent in no-op mode on
+every target against each of them
+
+Default value: `true`
+
+### <a name="bootstrap--copy_cert"></a>`bootstrap::copy_cert`
+
+Moves the certificate and keys that `bootstrap::ca_generate` created on the
+CA into the target's SSL directory, then downloads the CA certificate and
+CRL there.  The private key passes through the Bolt host's `downloads`
+directory and is deleted from it and from the CA afterward.  For targets
+that already have the certificate, only the last steps (downloading the CA
+certificate and CRL, and removing the keys from the CA) are repeated, in
+case an earlier run stopped partway.
+
+#### Parameters
+
+The following parameters are available in the `bootstrap::copy_cert` plan:
+
+* [`ca_target`](#-bootstrap--copy_cert--ca_target)
+* [`targets`](#-bootstrap--copy_cert--targets)
+
+##### <a name="-bootstrap--copy_cert--ca_target"></a>`ca_target`
+
+Data type: `TargetSpec`
+
+The CA host where the certificate was generated
+
+##### <a name="-bootstrap--copy_cert--targets"></a>`targets`
+
+Data type: `TargetSpec`
+
+The hosts to move certificates to.  Each one's certname is its FQDN.
+
 ### <a name="bootstrap--first_run"></a>`bootstrap::first_run`
 
 Runs the agent on the server first (if it is one of the targets), then on
 the remaining targets.  If an agent's first run fails, probably because its
 certificate hasn't been signed, its certificate request is signed on the
-server and the agent is run again.  Finally, the puppet service is started.
+CA and the agent is run again.  Finally, the puppet service is started.
 
 #### Parameters
 
@@ -147,6 +575,7 @@ The following parameters are available in the `bootstrap::first_run` plan:
 
 * [`targets`](#-bootstrap--first_run--targets)
 * [`server_target`](#-bootstrap--first_run--server_target)
+* [`ca_target`](#-bootstrap--first_run--ca_target)
 * [`sign_certs`](#-bootstrap--first_run--sign_certs)
 * [`start_service`](#-bootstrap--first_run--start_service)
 
@@ -160,7 +589,15 @@ The targets to run the agent on
 
 Data type: `TargetSpec`
 
-The OpenVox server target, which must also be the CA
+The OpenVox server target
+
+##### <a name="-bootstrap--first_run--ca_target"></a>`ca_target`
+
+Data type: `TargetSpec`
+
+The CA target.  Defaults to `server_target`.
+
+Default value: `$server_target`
 
 ##### <a name="-bootstrap--first_run--sign_certs"></a>`sign_certs`
 
@@ -194,6 +631,8 @@ The following parameters are available in the `bootstrap::install_agents` plan:
 * [`openvox_version`](#-bootstrap--install_agents--openvox_version)
 * [`openvox_collection`](#-bootstrap--install_agents--openvox_collection)
 * [`openvox_server`](#-bootstrap--install_agents--openvox_server)
+* [`ca_target`](#-bootstrap--install_agents--ca_target)
+* [`openvox_ca_server`](#-bootstrap--install_agents--openvox_ca_server)
 
 ##### <a name="-bootstrap--install_agents--targets"></a>`targets`
 
@@ -252,31 +691,236 @@ The value of `server` in `puppet.conf`.  Defaults to the FQDN of
 
 Default value: `undef`
 
-### <a name="bootstrap--install_server"></a>`bootstrap::install_server`
+##### <a name="-bootstrap--install_agents--ca_target"></a>`ca_target`
 
-Installs openvox-server, optionally configures autosigning and the
-firewall, and starts the puppetserver service.  Run
-`bootstrap::install_agents` on the server target first.  Installing
-openvox-server may upgrade openvox-agent to satisfy its dependencies.
+Data type: `Optional[TargetSpec]`
+
+The CA target, if the CA isn't on `server_target`.  Used to find the
+default value of `openvox_ca_server`.
+
+Default value: `undef`
+
+##### <a name="-bootstrap--install_agents--openvox_ca_server"></a>`openvox_ca_server`
+
+Data type: `Optional[String[1]]`
+
+The value of `ca_server` in `puppet.conf`.  Defaults to the FQDN of
+`ca_target`, or isn't set if neither is set.
+
+Default value: `undef`
+
+### <a name="bootstrap--install_ca"></a>`bootstrap::install_ca`
+
+Installs openvox-server, generates the CA (and this host's certificate)
+with `puppetserver ca setup`, configures the CA, and starts puppetserver.
+Run `bootstrap::install_agents` on the target first.
 
 #### Parameters
 
-The following parameters are available in the `bootstrap::install_server` plan:
+The following parameters are available in the `bootstrap::install_ca` plan:
 
-* [`targets`](#-bootstrap--install_server--targets)
-* [`openvox_release`](#-bootstrap--install_server--openvox_release)
-* [`openvox_collection`](#-bootstrap--install_server--openvox_collection)
-* [`autosign`](#-bootstrap--install_server--autosign)
-* [`dns_alt_names`](#-bootstrap--install_server--dns_alt_names)
-* [`manage_firewall`](#-bootstrap--install_server--manage_firewall)
+* [`targets`](#-bootstrap--install_ca--targets)
+* [`server`](#-bootstrap--install_ca--server)
+* [`openvox_collection`](#-bootstrap--install_ca--openvox_collection)
+* [`autosign`](#-bootstrap--install_ca--autosign)
+* [`dns_alt_names`](#-bootstrap--install_ca--dns_alt_names)
+* [`manage_firewall`](#-bootstrap--install_ca--manage_firewall)
 
-##### <a name="-bootstrap--install_server--targets"></a>`targets`
+##### <a name="-bootstrap--install_ca--targets"></a>`targets`
 
 Data type: `TargetSpec`
 
-The OpenVox server target
+The CA host
 
-##### <a name="-bootstrap--install_server--openvox_release"></a>`openvox_release`
+##### <a name="-bootstrap--install_ca--server"></a>`server`
+
+Data type: `Optional[String[1]]`
+
+The value of `server` in the CA host's `puppet.conf`.  Defaults to the CA
+host itself.
+
+Default value: `undef`
+
+##### <a name="-bootstrap--install_ca--openvox_collection"></a>`openvox_collection`
+
+Data type: `Optional[String[1]]`
+
+The collection to install openvox-server from
+
+Default value: `undef`
+
+##### <a name="-bootstrap--install_ca--autosign"></a>`autosign`
+
+Data type: `Variant[Boolean, Array[String[1]]]`
+
+`true` to autosign every certificate request, or a list of certnames and
+domain name globs to write to `autosign.conf`.  `false` leaves autosigning
+alone.
+
+Default value: `false`
+
+##### <a name="-bootstrap--install_ca--dns_alt_names"></a>`dns_alt_names`
+
+Data type: `Array[String[1]]`
+
+Alternate DNS names for the CA host's own certificate, if it is also a
+compile master
+
+Default value: `[]`
+
+##### <a name="-bootstrap--install_ca--manage_firewall"></a>`manage_firewall`
+
+Data type: `Boolean`
+
+Open 8140/tcp in firewalld, if firewalld is running
+
+Default value: `false`
+
+### <a name="bootstrap--install_db"></a>`bootstrap::install_db`
+
+The first target runs PostgreSQL (from the PGDG repo) as well as OpenVoxDB.
+Any other targets run OpenVoxDB against that PostgreSQL server, so the
+targets must be able to resolve each other's names.  The targets need
+signed certificates first (see `bootstrap::request_certs`).
+
+#### Parameters
+
+The following parameters are available in the `bootstrap::install_db` plan:
+
+* [`targets`](#-bootstrap--install_db--targets)
+* [`database_password`](#-bootstrap--install_db--database_password)
+* [`certificate_allowlist`](#-bootstrap--install_db--certificate_allowlist)
+* [`postgres_version`](#-bootstrap--install_db--postgres_version)
+* [`manage_firewall`](#-bootstrap--install_db--manage_firewall)
+
+##### <a name="-bootstrap--install_db--targets"></a>`targets`
+
+Data type: `TargetSpec`
+
+The OpenVoxDB hosts
+
+##### <a name="-bootstrap--install_db--database_password"></a>`database_password`
+
+Data type: `Sensitive[String[1]]`
+
+Password for the OpenVoxDB PostgreSQL user
+
+##### <a name="-bootstrap--install_db--certificate_allowlist"></a>`certificate_allowlist`
+
+Data type: `Array[String[1]]`
+
+Certnames allowed to connect to OpenVoxDB, normally every compile master
+
+Default value: `[]`
+
+##### <a name="-bootstrap--install_db--postgres_version"></a>`postgres_version`
+
+Data type: `String[1]`
+
+The PostgreSQL major version to install
+
+Default value: `'17'`
+
+##### <a name="-bootstrap--install_db--manage_firewall"></a>`manage_firewall`
+
+Data type: `Boolean`
+
+Open 8081/tcp (and 5432/tcp on the PostgreSQL host, if needed) in
+firewalld, if firewalld is running
+
+Default value: `false`
+
+### <a name="bootstrap--install_infra"></a>`bootstrap::install_infra`
+
+Installs the agent on every target, then sets up the certificate
+authority, OpenVoxDB, and compile masters.  The CA and OpenVoxDB can be on
+their own hosts or on the primary compile master.  It doesn't run the
+agent; see `bootstrap::first_run`.
+
+Order of operations:
+
+1. Install the agent on every host and set `server` and `ca_server`.
+2. Optionally add every host to every host's hosts file.
+3. Set up the active CA.
+4. Get signed certificates for the other infrastructure hosts.  Standby
+   CAs get certificates generated on the active CA that are authorized to
+   use the CA API (like the active CA's own), so `puppetserver ca` works on
+   them once they are promoted.
+5. Copy the CA directory to any standby CAs.
+6. Set up OpenVoxDB.  The first OpenVoxDB host also runs PostgreSQL.
+7. Set up the compile masters, with the CA service disabled on hosts that
+   aren't CAs.
+
+Every host's certname is the FQDN reported by its facts.
+
+#### Parameters
+
+The following parameters are available in the `bootstrap::install_infra` plan:
+
+* [`targets`](#-bootstrap--install_infra--targets)
+* [`server_target`](#-bootstrap--install_infra--server_target)
+* [`compilers`](#-bootstrap--install_infra--compilers)
+* [`ca_targets`](#-bootstrap--install_infra--ca_targets)
+* [`db_targets`](#-bootstrap--install_infra--db_targets)
+* [`db_password`](#-bootstrap--install_infra--db_password)
+* [`openvox_release`](#-bootstrap--install_infra--openvox_release)
+* [`openvox_version`](#-bootstrap--install_infra--openvox_version)
+* [`openvox_collection`](#-bootstrap--install_infra--openvox_collection)
+* [`openvox_server`](#-bootstrap--install_infra--openvox_server)
+* [`autosign`](#-bootstrap--install_infra--autosign)
+* [`dns_alt_names`](#-bootstrap--install_infra--dns_alt_names)
+* [`manage_firewall`](#-bootstrap--install_infra--manage_firewall)
+* [`manage_hosts`](#-bootstrap--install_infra--manage_hosts)
+* [`postgres_version`](#-bootstrap--install_infra--postgres_version)
+
+##### <a name="-bootstrap--install_infra--targets"></a>`targets`
+
+Data type: `TargetSpec`
+
+The agent targets.  The infrastructure hosts are added to them.
+
+##### <a name="-bootstrap--install_infra--server_target"></a>`server_target`
+
+Data type: `TargetSpec`
+
+The primary compile master
+
+##### <a name="-bootstrap--install_infra--compilers"></a>`compilers`
+
+Data type: `TargetSpec`
+
+Additional compile masters
+
+Default value: `[]`
+
+##### <a name="-bootstrap--install_infra--ca_targets"></a>`ca_targets`
+
+Data type: `Optional[TargetSpec]`
+
+The CA hosts.  The first is the active CA; any others are standbys with a
+copy of its CA directory.  Defaults to `server_target`.
+
+Default value: `undef`
+
+##### <a name="-bootstrap--install_infra--db_targets"></a>`db_targets`
+
+Data type: `TargetSpec`
+
+The OpenVoxDB hosts.  The first one also runs PostgreSQL.  OpenVoxDB isn't
+installed if this is empty.
+
+Default value: `[]`
+
+##### <a name="-bootstrap--install_infra--db_password"></a>`db_password`
+
+Data type: `Optional[Variant[String[1], Sensitive[String[1]]]]`
+
+Password for the OpenVoxDB PostgreSQL user.  Required if `db_targets` is
+set.
+
+Default value: `undef`
+
+##### <a name="-bootstrap--install_infra--openvox_release"></a>`openvox_release`
 
 Data type: `Optional[Integer]`
 
@@ -284,7 +928,17 @@ The major version of OpenVox to install
 
 Default value: `undef`
 
-##### <a name="-bootstrap--install_server--openvox_collection"></a>`openvox_collection`
+##### <a name="-bootstrap--install_infra--openvox_version"></a>`openvox_version`
+
+Data type: `Optional[String[1]]`
+
+The version of openvox-agent to install.  Defaults to the latest version
+in `openvox_collection`.  Installing openvox-server may upgrade the agent
+on the server to satisfy openvox-server's dependencies.
+
+Default value: `undef`
+
+##### <a name="-bootstrap--install_infra--openvox_collection"></a>`openvox_collection`
 
 Data type: `Optional[String[1]]`
 
@@ -300,22 +954,123 @@ $openvox_release ? {
     default => "openvox${openvox_release}"
 ```
 
-##### <a name="-bootstrap--install_server--autosign"></a>`autosign`
+##### <a name="-bootstrap--install_infra--openvox_server"></a>`openvox_server`
+
+Data type: `Optional[String[1]]`
+
+The value of `server` in `puppet.conf`.  Defaults to the FQDN of
+`server_target`.  Set it to a load balancer name if you put one in front
+of the compile masters (and add it to `dns_alt_names`).
+
+Default value: `undef`
+
+##### <a name="-bootstrap--install_infra--autosign"></a>`autosign`
 
 Data type: `Variant[Boolean, Array[String[1]]]`
 
 `true` to autosign every certificate request, or a list of certnames and
-domain name globs to write to `autosign.conf`.  `false` leaves autosigning
-alone.
+domain name globs to write to `autosign.conf` on the CAs.  `false` leaves
+autosigning alone.
 
 Default value: `false`
 
-##### <a name="-bootstrap--install_server--dns_alt_names"></a>`dns_alt_names`
+##### <a name="-bootstrap--install_infra--dns_alt_names"></a>`dns_alt_names`
 
 Data type: `Array[String[1]]`
 
-Alternate DNS names for the server's certificate.  These must be set before
-puppetserver first starts and creates its certificate.
+Alternate DNS names for the compile masters' certificates.  These only
+apply when a certificate is first issued.
+
+Default value: `[]`
+
+##### <a name="-bootstrap--install_infra--manage_firewall"></a>`manage_firewall`
+
+Data type: `Boolean`
+
+Open the needed ports in firewalld, if firewalld is running
+
+Default value: `false`
+
+##### <a name="-bootstrap--install_infra--manage_hosts"></a>`manage_hosts`
+
+Data type: `Boolean`
+
+Add every target to every target's hosts file, using the facts collected
+from them.  Useful when the targets can't resolve each other's names.
+
+Default value: `false`
+
+##### <a name="-bootstrap--install_infra--postgres_version"></a>`postgres_version`
+
+Data type: `String[1]`
+
+The PostgreSQL major version to install
+
+Default value: `'17'`
+
+### <a name="bootstrap--install_server"></a>`bootstrap::install_server`
+
+Installs openvox-server, configures the CA service (enabled only on CA
+hosts) and the connection to OpenVoxDB, and starts puppetserver.  Hosts
+without the CA service need signed certificates first (see
+`bootstrap::request_certs`); for the CA host itself, use
+`bootstrap::install_ca` first.
+
+#### Parameters
+
+The following parameters are available in the `bootstrap::install_server` plan:
+
+* [`targets`](#-bootstrap--install_server--targets)
+* [`ca_server`](#-bootstrap--install_server--ca_server)
+* [`server`](#-bootstrap--install_server--server)
+* [`ca_targets`](#-bootstrap--install_server--ca_targets)
+* [`openvox_collection`](#-bootstrap--install_server--openvox_collection)
+* [`puppetdb_urls`](#-bootstrap--install_server--puppetdb_urls)
+* [`manage_firewall`](#-bootstrap--install_server--manage_firewall)
+
+##### <a name="-bootstrap--install_server--targets"></a>`targets`
+
+Data type: `TargetSpec`
+
+The compile masters
+
+##### <a name="-bootstrap--install_server--ca_server"></a>`ca_server`
+
+Data type: `String[1]`
+
+The certname of the active CA
+
+##### <a name="-bootstrap--install_server--server"></a>`server`
+
+Data type: `Optional[String[1]]`
+
+The value of `server` in the compile masters' `puppet.conf`
+
+Default value: `undef`
+
+##### <a name="-bootstrap--install_server--ca_targets"></a>`ca_targets`
+
+Data type: `TargetSpec`
+
+Targets that run the CA service (the active CA and any standbys).  Other
+targets have the CA service disabled.
+
+Default value: `[]`
+
+##### <a name="-bootstrap--install_server--openvox_collection"></a>`openvox_collection`
+
+Data type: `Optional[String[1]]`
+
+The collection to install openvox-server from
+
+Default value: `undef`
+
+##### <a name="-bootstrap--install_server--puppetdb_urls"></a>`puppetdb_urls`
+
+Data type: `Array[String[1]]`
+
+OpenVoxDB URLs for `puppetdb.conf`.  The compile masters aren't connected
+to OpenVoxDB if this is empty.
 
 Default value: `[]`
 
@@ -323,6 +1078,121 @@ Default value: `[]`
 
 Data type: `Boolean`
 
-Open the `puppetmaster` service in firewalld, if firewalld is running
+Open 8140/tcp in firewalld, if firewalld is running
 
 Default value: `false`
+
+### <a name="bootstrap--open_ports"></a>`bootstrap::open_ports`
+
+Open TCP ports in firewalld, if firewalld is running
+
+#### Parameters
+
+The following parameters are available in the `bootstrap::open_ports` plan:
+
+* [`targets`](#-bootstrap--open_ports--targets)
+* [`ports`](#-bootstrap--open_ports--ports)
+
+##### <a name="-bootstrap--open_ports--targets"></a>`targets`
+
+Data type: `TargetSpec`
+
+The targets to open the ports on
+
+##### <a name="-bootstrap--open_ports--ports"></a>`ports`
+
+Data type: `Array[Integer[1], 1]`
+
+The TCP ports to open
+
+### <a name="bootstrap--request_certs"></a>`bootstrap::request_certs`
+
+Each target submits a certificate request, the CA signs it, and the target
+downloads its certificate.  Targets that already have certificates are
+skipped.  Set `server` and `ca_server` on the targets first (see
+`bootstrap::install_agents`).
+
+#### Parameters
+
+The following parameters are available in the `bootstrap::request_certs` plan:
+
+* [`targets`](#-bootstrap--request_certs--targets)
+* [`ca_target`](#-bootstrap--request_certs--ca_target)
+* [`dns_alt_names`](#-bootstrap--request_certs--dns_alt_names)
+
+##### <a name="-bootstrap--request_certs--targets"></a>`targets`
+
+Data type: `TargetSpec`
+
+The targets that need certificates
+
+##### <a name="-bootstrap--request_certs--ca_target"></a>`ca_target`
+
+Data type: `TargetSpec`
+
+The CA host
+
+##### <a name="-bootstrap--request_certs--dns_alt_names"></a>`dns_alt_names`
+
+Data type: `Array[String[1]]`
+
+Alternate DNS names to request for every target
+
+Default value: `[]`
+
+### <a name="bootstrap--smoke_test"></a>`bootstrap::smoke_test`
+
+Runs `puppet agent --test --noop` on every target against each compile
+master in turn, so a broken compile master shows up now rather than behind
+a load balancer later.  Runs that collide with a running puppet service are
+retried.
+
+#### Parameters
+
+The following parameters are available in the `bootstrap::smoke_test` plan:
+
+* [`targets`](#-bootstrap--smoke_test--targets)
+* [`servers`](#-bootstrap--smoke_test--servers)
+
+##### <a name="-bootstrap--smoke_test--targets"></a>`targets`
+
+Data type: `TargetSpec`
+
+The targets to run the agent on
+
+##### <a name="-bootstrap--smoke_test--servers"></a>`servers`
+
+Data type: `Array[String[1]]`
+
+The certnames of the compile masters to test
+
+### <a name="bootstrap--sync_ca"></a>`bootstrap::sync_ca`
+
+The copy passes through the Bolt host's `downloads` directory and is
+deleted afterward.  Run this again after the active CA signs, revokes, or
+cleans certificates to keep the standbys current; files removed on the
+active CA are removed from the standbys too.  Don't point agents at a
+standby until it is promoted, or its serial numbers will diverge.
+
+The active CA keeps running during the copy.  Its serial counter is
+archived last, so it is never older than the certificates in the copy and a
+promoted standby can't reuse a serial number (at worst it skips some).
+
+#### Parameters
+
+The following parameters are available in the `bootstrap::sync_ca` plan:
+
+* [`active`](#-bootstrap--sync_ca--active)
+* [`standbys`](#-bootstrap--sync_ca--standbys)
+
+##### <a name="-bootstrap--sync_ca--active"></a>`active`
+
+Data type: `TargetSpec`
+
+The active CA host
+
+##### <a name="-bootstrap--sync_ca--standbys"></a>`standbys`
+
+Data type: `TargetSpec`
+
+The standby CA hosts

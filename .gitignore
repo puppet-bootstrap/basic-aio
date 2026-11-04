@@ -58,3 +58,5 @@ Gemfile.lock
 ## Bolt-related files
 /Boltdir/*.log
 /Boltdir/.*
+# Used briefly by bootstrap::sync_ca
+/Boltdir/downloads/

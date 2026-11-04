@@ -30,3 +30,9 @@ modules:
 # renovate: datasource=puppet-forge
 - name: puppet/openvox_bootstrap
   version_requirement: 1.7.0
+# renovate: datasource=puppet-forge
+- name: puppet/openvoxdb
+  version_requirement: 9.3.0
+# renovate: datasource=puppet-forge
+- name: puppetlabs/postgresql
+  version_requirement: 10.8.0

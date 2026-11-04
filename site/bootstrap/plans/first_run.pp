@@ -3,15 +3,17 @@
 # Runs the agent on the server first (if it is one of the targets), then on
 # the remaining targets.  If an agent's first run fails, probably because its
 # certificate hasn't been signed, its certificate request is signed on the
-# server and the agent is run again.  Finally, the puppet service is started.
+# CA and the agent is run again.  Finally, the puppet service is started.
 #
 # @param targets The targets to run the agent on
-# @param server_target The OpenVox server target, which must also be the CA
+# @param server_target The OpenVox server target
+# @param ca_target The CA target.  Defaults to `server_target`.
 # @param sign_certs Sign certificate requests for agents whose first run fails
 # @param start_service Start and enable the puppet service after the first run
 plan bootstrap::first_run (
   TargetSpec $targets,
   TargetSpec $server_target,
+  TargetSpec $ca_target     = $server_target,
   Boolean    $sign_certs    = true,
   Boolean    $start_service = true,
 ) {
@@ -54,7 +56,7 @@ plan bootstrap::first_run (
 
       run_command(
         "puppetserver ca sign --certname ${certnames.join(',')}",
-        $server,
+        $ca_target,
         'Signing certificates',
         '_env_vars' => $env_vars,
       )

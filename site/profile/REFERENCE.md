@@ -8,11 +8,10 @@
 
 * [`profile::agent`](#profile--agent): Configures the `puppet` service
 * [`profile::base`](#profile--base): Base OS customization
-* [`profile::db`](#profile--db): Configure db
-* [`profile::server`](#profile--server): Configure server
-* [`profile::server::config`](#profile--server--config): Configures the puppet server
-* [`profile::server::install`](#profile--server--install): Install server package
-* [`profile::server::service`](#profile--server--service): Configure server service
+* [`profile::ca`](#profile--ca): Configure the certificate authority
+* [`profile::db`](#profile--db): Configure OpenVoxDB
+* [`profile::server`](#profile--server): Configure OpenVox Server on a compile master or CA host
+* [`profile::topology`](#profile--topology): The layout of the OpenVox infrastructure
 
 ## Classes
 
@@ -86,9 +85,39 @@ A list of packages to manage
 
 Default value: `[]`
 
+### <a name="profile--ca"></a>`profile::ca`
+
+Configure the certificate authority
+
+#### Examples
+
+#####
+
+```puppet
+include profile::ca
+```
+
+#### Parameters
+
+The following parameters are available in the `profile::ca` class:
+
+* [`autosign`](#-profile--ca--autosign)
+
+##### <a name="-profile--ca--autosign"></a>`autosign`
+
+Data type: `Variant[Boolean, Array[String[1]]]`
+
+`true` to autosign every certificate request, or a list of certnames and
+domain name globs to write to `autosign.conf`.  `false` leaves autosigning
+alone.
+
+Default value: `false`
+
 ### <a name="profile--db"></a>`profile::db`
 
-Configure db
+Declares `bootstrap::db` with the same parameters the `bootstrap` Bolt
+plans use.  The first host in `profile::topology::db_servers` also runs
+PostgreSQL for the others.
 
 #### Examples
 
@@ -98,9 +127,41 @@ Configure db
 include profile::db
 ```
 
+#### Parameters
+
+The following parameters are available in the `profile::db` class:
+
+* [`database_password`](#-profile--db--database_password)
+* [`postgres_version`](#-profile--db--postgres_version)
+* [`manage_firewall`](#-profile--db--manage_firewall)
+
+##### <a name="-profile--db--database_password"></a>`database_password`
+
+Data type: `Sensitive[String[1]]`
+
+Password for the OpenVoxDB PostgreSQL user
+
+##### <a name="-profile--db--postgres_version"></a>`postgres_version`
+
+Data type: `String[1]`
+
+The PostgreSQL major version
+
+Default value: `'17'`
+
+##### <a name="-profile--db--manage_firewall"></a>`manage_firewall`
+
+Data type: `Boolean`
+
+Open the OpenVoxDB (and, if needed, PostgreSQL) ports
+
+Default value: `true`
+
 ### <a name="profile--server"></a>`profile::server`
 
-Configure server
+Declares `bootstrap::server` (and `bootstrap::server::puppetdb` on compile
+masters) with the same parameters the `bootstrap` Bolt plans use, so Puppet
+keeps the configuration they set up.
 
 #### Examples
 
@@ -124,107 +185,56 @@ Manage the server firewall configuration
 
 Default value: `true`
 
-### <a name="profile--server--config"></a>`profile::server::config`
+### <a name="profile--topology"></a>`profile::topology`
 
-Configures the puppet server
-
-#### Examples
-
-#####
-
-```puppet
-include profile::server::config
-```
-
-#### Parameters
-
-The following parameters are available in the `profile::server::config` class:
-
-* [`autosign`](#-profile--server--config--autosign)
-
-##### <a name="-profile--server--config--autosign"></a>`autosign`
-
-Data type: `Array[String]`
-
-List of certnames or domain name globs
-
-Default value: `[]`
-
-### <a name="profile--server--install"></a>`profile::server::install`
-
-Install server package
+The `basic_aio` Bolt plan writes the real values into the global Hiera
+layer on the compile masters.  The environment's `data/common.yaml` has
+defaults for the all-in-one demo.
 
 #### Examples
 
 #####
 
 ```puppet
-include profile::server::install
+include profile::topology
 ```
 
 #### Parameters
 
-The following parameters are available in the `profile::server::install` class:
+The following parameters are available in the `profile::topology` class:
 
-* [`package`](#-profile--server--install--package)
-* [`package_ensure`](#-profile--server--install--package_ensure)
+* [`primary`](#-profile--topology--primary)
+* [`server`](#-profile--topology--server)
+* [`compilers`](#-profile--topology--compilers)
+* [`ca_servers`](#-profile--topology--ca_servers)
+* [`db_servers`](#-profile--topology--db_servers)
 
-##### <a name="-profile--server--install--package"></a>`package`
-
-Data type: `String[1]`
-
-The name of the package to install
-
-Default value: `'openvox-server'`
-
-##### <a name="-profile--server--install--package_ensure"></a>`package_ensure`
+##### <a name="-profile--topology--primary"></a>`primary`
 
 Data type: `String[1]`
 
-The ensure value for the package
+The certname of the primary compile master
 
-Default value: `'installed'`
-
-### <a name="profile--server--service"></a>`profile::server::service`
-
-Configure server service
-
-#### Examples
-
-#####
-
-```puppet
-include profile::server::service
-```
-
-#### Parameters
-
-The following parameters are available in the `profile::server::service` class:
-
-* [`service_name`](#-profile--server--service--service_name)
-* [`service_ensure`](#-profile--server--service--service_ensure)
-* [`service_enable`](#-profile--server--service--service_enable)
-
-##### <a name="-profile--server--service--service_name"></a>`service_name`
+##### <a name="-profile--topology--server"></a>`server`
 
 Data type: `String[1]`
 
-The name of the service to manage
+The `server` setting that agents use
 
-Default value: `'puppetserver'`
+##### <a name="-profile--topology--compilers"></a>`compilers`
 
-##### <a name="-profile--server--service--service_ensure"></a>`service_ensure`
+Data type: `Array[String[1], 1]`
 
-Data type: `String[1]`
+The certnames of every compile master, including the primary
 
-The ensure value for the service
+##### <a name="-profile--topology--ca_servers"></a>`ca_servers`
 
-Default value: `'running'`
+Data type: `Array[String[1], 1]`
 
-##### <a name="-profile--server--service--service_enable"></a>`service_enable`
+The certnames of the CA hosts.  The first is the active CA.
 
-Data type: `Boolean`
+##### <a name="-profile--topology--db_servers"></a>`db_servers`
 
-Whether to enable the service at boot
+Data type: `Array[String[1]]`
 
-Default value: `true`
+The certnames of the OpenVoxDB hosts.  The first one also runs PostgreSQL.

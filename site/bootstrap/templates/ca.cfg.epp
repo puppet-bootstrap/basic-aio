@@ -1,0 +1,11 @@
+<%- | Boolean $ca_enabled | -%>
+# Managed by Puppet (bootstrap::server).
+<% if $ca_enabled { -%>
+puppetlabs.services.ca.certificate-authority-service/certificate-authority-service
+#puppetlabs.services.ca.certificate-authority-disabled-service/certificate-authority-disabled-service
+<% } else { -%>
+# The CA runs on another host.
+#puppetlabs.services.ca.certificate-authority-service/certificate-authority-service
+puppetlabs.services.ca.certificate-authority-disabled-service/certificate-authority-disabled-service
+<% } -%>
+puppetlabs.trapperkeeper.services.watcher.filesystem-watch-service/filesystem-watch-service

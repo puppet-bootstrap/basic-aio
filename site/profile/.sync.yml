@@ -18,3 +18,6 @@ appveyor.yml:
     - /.gitlab-ci.yml
     - /.travis.yml
     - /update_report.txt
+
+spec/spec_helper.rb:
+  hiera_config: '../../hiera.yaml'
