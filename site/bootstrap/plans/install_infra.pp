@@ -60,10 +60,9 @@
 #   from them.  Useful when the targets can't resolve each other's names.
 # @param alias_server_names
 #   Add `openvox_server` and `dns_alt_names` to every target's hosts file as
-#   aliases of `server_target`, so agents can use those names before DNS (or
-#   a load balancer) is set up for them.  Without `manage_hosts`, only
-#   `server_target`'s entry is added.  Remove the entries by hand once DNS
-#   is in place; rerunning without this doesn't remove them.
+#   aliases of `server_target`, so those names resolve without DNS.  Without
+#   `manage_hosts`, only `server_target`'s entry is added.  Rerunning without
+#   this doesn't remove the entries.
 # @param postgres_version The PostgreSQL major version to install
 # @param manage_repos
 #   Set up the OpenVox package repository (and, for OpenVoxDB, the PostgreSQL

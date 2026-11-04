@@ -52,8 +52,7 @@
 #   from them.  Useful when the targets can't resolve each other's names.
 # @param alias_server_names
 #   Add `openvox_server` and `dns_alt_names` to every target's hosts file as
-#   aliases of `server_target`, so agents can use those names before DNS (or
-#   a load balancer) is set up for them.
+#   aliases of `server_target`, so those names resolve without DNS.
 # @param choria_user
 #   If set, request a Choria certificate for this user on the primary compile
 #   master after its first agent run.  The control repo must set up Choria.

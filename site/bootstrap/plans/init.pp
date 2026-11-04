@@ -44,8 +44,7 @@
 # @param manage_hosts Add every target to every target's hosts file
 # @param alias_server_names
 #   Add `openvox_server` and `dns_alt_names` to every target's hosts file as
-#   aliases of `server_target`, so agents can use those names before DNS (or
-#   a load balancer) is set up for them.
+#   aliases of `server_target`, so those names resolve without DNS.
 # @param sign_certs Sign certificate requests for agents whose first run fails
 # @param start_service Start and enable the puppet service after the first run
 # @param smoke_test
