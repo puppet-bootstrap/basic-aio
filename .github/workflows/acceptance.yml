@@ -1,0 +1,76 @@
+---
+name: 'Acceptance tests'
+
+'on':
+  - pull_request
+
+concurrency:
+  group: acceptance-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  vagrant:
+    # Pinned for the Ubuntu vagrant and vagrant-libvirt packages.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    env:
+      BOLT_DISABLE_ANALYTICS: 'true'
+      VAGRANT_DEFAULT_PROVIDER: libvirt
+      # r10k deploys the branches in /vagrant, and environment names can't
+      # contain the characters PR branch names usually have, so the PR is
+      # deployed from a local `ci` branch.
+      CONTROL_BRANCH: ci
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Create the ci branch
+        run: git checkout -B ci
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Install Vagrant and libvirt
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends \
+            vagrant vagrant-libvirt libvirt-daemon-system qemu-kvm qemu-utils \
+            dnsmasq-base ebtables rsync
+          sudo systemctl start libvirtd
+          sudo setfacl -m "user:$USER:rw" /var/run/libvirt/libvirt-sock
+          vagrant --version
+          vagrant plugin list
+      - name: Install OpenBolt
+        # OpenBolt is not yet in the openvox9 collection.
+        run: |
+          wget -q https://apt.voxpupuli.org/openvox8-release-ubuntu24.04.deb
+          sudo dpkg -i openvox8-release-ubuntu24.04.deb
+          sudo apt-get update -q
+          sudo apt-get install -y openbolt
+      - name: Cache Vagrant boxes
+        uses: actions/cache@v6
+        with:
+          path: ~/.vagrant.d/boxes
+          key: vagrant-boxes-libvirt-${{ hashFiles('Vagrantfile') }}
+          restore-keys: vagrant-boxes-libvirt-
+      - name: Build the environment
+        run: vagrant up --no-tty
+      # Set up Ruby after `vagrant up` so the Ubuntu vagrant package keeps
+      # using the system Ruby.
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+      - name: Run the acceptance tests
+        run: bundle exec rake spec
+      - name: Show the agent's last run
+        if: failure()
+        run: |
+          for host in puppet agent; do
+            vagrant ssh "$host" -c 'sudo cat /opt/puppetlabs/puppet/cache/state/last_run_report.yaml | head -100' || true
+          done
+      - name: Destroy the environment
+        if: always()
+        run: vagrant destroy -f || true
