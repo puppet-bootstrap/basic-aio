@@ -1,11 +1,11 @@
 # @summary Install an OpenVox package
 #
-# With `manage_repos` (the default), uses the `openvox_bootstrap::install`
-# task, which installs the release package for `collection` from
-# yum.voxpupuli.org or apt.voxpupuli.org.  Without it, installs the package
-# with the target's package manager from whatever repositories are already
-# configured, such as a Satellite or other local mirror.  That works on hosts
-# that can't reach the internet.
+# Uses the `openvox_bootstrap::install` task.  With `manage_repos` (the
+# default), the task installs the release package for `collection` from
+# yum.voxpupuli.org or apt.voxpupuli.org.  Without it, the task skips the
+# release package and installs from whatever repositories the target's package
+# manager already has, such as a Satellite or other local mirror.  That works
+# on hosts that can't reach the internet.
 #
 # @param targets The targets to install the package on
 # @param package The package to install
@@ -29,25 +29,21 @@ plan bootstrap::install_packages (
 ) {
   # Leave out unset parameters: tasks that read their input from the
   # environment would see the string `null`.
-  if $manage_repos {
-    $install_params = {
-      'package'               => $package,
-      'version'               => $version ? {
-        undef   => 'latest',
-        default => $version,
-      },
-      'collection'            => $collection,
-      'force_release_package' => $force_release_package,
-    }.filter |$key, $value| { $value =~ NotUndef }
+  $install_params = {
+    'package'                => $package,
+    'version'                => $version ? {
+      undef   => 'latest',
+      default => $version,
+    },
+    'collection'             => $collection,
+    'manage_release_package' => $manage_repos,
+    'force_release_package'  => $force_release_package,
+  }.filter |$key, $value| { $value =~ NotUndef }
 
-    run_task('openvox_bootstrap::install', $targets, "Installing ${package}", $install_params)
-  } else {
-    $package_params = {
-      'action'  => 'install',
-      'name'    => $package,
-      'version' => $version,
-    }.filter |$key, $value| { $value =~ NotUndef }
-
-    run_task('package', $targets, "Installing ${package} from the configured repositories", $package_params)
+  $description = $manage_repos ? {
+    true    => "Installing ${package}",
+    default => "Installing ${package} from the configured repositories",
   }
+
+  run_task('openvox_bootstrap::install', $targets, $description, $install_params)
 }
