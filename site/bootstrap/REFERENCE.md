@@ -1217,12 +1217,12 @@ Default value: `true`
 
 ### <a name="bootstrap--install_packages"></a>`bootstrap::install_packages`
 
-With `manage_repos` (the default), uses the `openvox_bootstrap::install`
-task, which installs the release package for `collection` from
-yum.voxpupuli.org or apt.voxpupuli.org.  Without it, installs the package
-with the target's package manager from whatever repositories are already
-configured, such as a Satellite or other local mirror.  That works on hosts
-that can't reach the internet.
+Uses the `openvox_bootstrap::install` task.  With `manage_repos` (the
+default), the task installs the release package for `collection` from
+yum.voxpupuli.org or apt.voxpupuli.org.  Without it, the task skips the
+release package and installs from whatever repositories the target's package
+manager already has, such as a Satellite or other local mirror.  That works
+on hosts that can't reach the internet.
 
 #### Parameters
 
