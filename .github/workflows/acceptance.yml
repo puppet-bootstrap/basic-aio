@@ -11,7 +11,7 @@ concurrency:
 jobs:
   vagrant:
     # Pinned because the openvox-release package is specific to the Ubuntu release.
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 75
     env:
       BOLT_DISABLE_ANALYTICS: 'true'
