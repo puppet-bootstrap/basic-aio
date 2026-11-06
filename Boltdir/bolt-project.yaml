@@ -29,7 +29,7 @@ modules:
   version_requirement: 11.0.0
 # renovate: datasource=puppet-forge
 - name: puppet/openvox_bootstrap
-  version_requirement: 1.7.0
+  version_requirement: 1.8.0
 # renovate: datasource=puppet-forge
 - name: puppet/openvoxdb
   version_requirement: 9.3.0
