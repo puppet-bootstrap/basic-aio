@@ -6,7 +6,7 @@ moduledir '.modules'
 
 mod 'puppet/systemd', '11.0.0'
 mod 'choria/mcollective', '0.15.0'
-mod 'puppetlabs/puppet_agent', '4.28.0'
+mod 'puppetlabs/puppet_agent', '4.29.0'
 mod 'puppet/openvox_bootstrap', '1.7.0'
 mod 'puppet/openvoxdb', '9.3.0'
 mod 'puppetlabs/postgresql', '10.8.0'
