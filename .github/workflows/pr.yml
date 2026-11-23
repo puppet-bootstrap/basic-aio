@@ -82,7 +82,7 @@ jobs:
 
   plans:
     # Pinned because the openvox-release package is specific to the Ubuntu release.
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     env:
       BOLT_DISABLE_ANALYTICS: 'true'
     steps:
