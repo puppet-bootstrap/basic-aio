@@ -8,7 +8,7 @@ mod 'puppet-openvoxdb', '9.3.0'
 
 # These modules are all dependencies for openvoxdb.
 mod 'puppetlabs-inifile', '6.6.0'
-mod 'puppetlabs-postgresql', '10.8.0'
+mod 'puppetlabs-postgresql', '10.9.0'
 mod 'puppetlabs-concat', '10.1.0'
 mod 'puppetlabs-firewall', '8.6.0'
 
