@@ -1,7 +1,7 @@
 forge "https://forge.puppet.com/"
 
 # stdlib is required by many other modules.
-mod 'puppetlabs-stdlib', '10.1.1'
+mod 'puppetlabs-stdlib', '10.2.0'
 
 # openvoxdb is needed in order to use exported resources.
 mod 'puppet-openvoxdb', '9.3.0'
