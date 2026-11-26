@@ -35,4 +35,4 @@ modules:
   version_requirement: 9.3.0
 # renovate: datasource=puppet-forge
 - name: puppetlabs/postgresql
-  version_requirement: 10.8.0
+  version_requirement: 10.9.0
